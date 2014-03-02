@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:wicket="http://wicket.sourceforge.net/">
+<body>
+
+	<wicket:extend>
+	
+		<form wicket:id="edit-form">
+			<div style="position:relative;">
+			
+			<div wicket:id="table-container">
+				<table class="edittable" cellpadding="0" cellspacing="0">
+					<thead>
+						<tr><td colspan="2"></td></tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="trow-title"><wicket:message key="useHeader.DisplayName">Use Header</wicket:message></td>
+							<td class="trow-body"><input type="checkbox" wicket:id="useHeader" />
+							<p><wicket:message key="useHeader.Description">useHeader.Description</wicket:message></p></td>
+						</tr>
+						<tr>
+							<td class="trow-title"><wicket:message key="sizeIncludesHeader.DisplayName">Size includes header</wicket:message></td>
+							<td class="trow-body"><input type="checkbox" wicket:id="sizeIncludesHeader" />
+							<p><wicket:message key="sizeIncludesHeader.Description">sizeIncludesHeader.Description</wicket:message></p></td>
+						</tr>
+						<tr>
+							<td class="trow-title"><wicket:message key="useHandshake.DisplayName">Use Handshake</wicket:message></td>
+							<td class="trow-body"><input type="checkbox" wicket:id="useHandshake" />
+							<p><wicket:message key="useHandshake.Description">useHandshake.Description</wicket:message></p></td>
+						</tr>
+						<tr>
+							<td class="trow-title">
+								<wicket:message	key="handshakeMsg.DisplayName">Handshake Message</wicket:message></td>
+							<td class="trow-body">
+								<input type="text" style="width:100%" wicket:id="handshakeMsg" />
+								<p>
+									<wicket:message key="handshakeMsg.Description">handshakeMsg.Description</wicket:message>
+								</p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+
+				<table class="actiontable" cellpadding="0" cellspacing="0">
+					<thead>
+						<tr>
+							<td class="offset">
+								<wicket:message key="offsetlabel">Offset</wicket:message>
+							</td>
+							<td>
+								<wicket:message key="datatypelabel">Data Type</wicket:message>
+							</td>				
+							<td class="last"><wicket:message key="valuelabel">Value</wicket:message></td>
+							<td class="last"><wicket:message key="sizelabel">Size</wicket:message></td>
+							<td colspan="4" class="links">&nbsp;</td>
+						</tr>
+					</thead>
+					<tbody>
+						<tr wicket:id="tags">
+							<td class="offset"><span wicket:id="offset">11</span></td>
+							<td><select wicket:id="dataType" /></td>
+							<td><input type="text" size="8" wicket:id="rawValue" /></td>
+							<td class="last"><input type="text" size="4" wicket:id="size" /></td>
+							<td class="links"><a class="insert-link" href="#" wicket:id="insert-link" wicket:message="title:insertlink.title" />
+							</td>
+							<td class="links"><a class="delete-link" href="#" wicket:id="delete-link" wicket:message="title:deletelink.title" />
+							</td>
+							<td class="links"><a class="move-up-link" href="#" wicket:id="move-up-link" wicket:message="title:moveuplink.title" />
+							</td>
+							<td class="links"><a class="move-down-link" href="#" wicket:id="move-down-link" wicket:message="title:movedownlink.title" />
+							</td>
+						</tr>
+
+						<tr>
+							<td colspan="4" style="border: 0px;"><span wicket:id="no-items-label" /></td>
+							<td class="links"><a class="insert-link" href="#" wicket:id="add-row-link" wicket:message="title:addrowlink.title" /></td>	
+							<td class="links">&nbsp;</td>
+							<td class="links">&nbsp;</td>
+							<td class="links">&nbsp;</td>
+						</tr>
+					</tbody>
+				</table>
+
+			</div>
+			</div>
+		
+			
+		</form>
+		
+	</wicket:extend>
+
+</body>
+</html>

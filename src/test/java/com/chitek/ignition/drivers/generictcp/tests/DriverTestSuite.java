@@ -1,0 +1,44 @@
+package com.chitek.ignition.drivers.generictcp.tests;
+
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+
+import com.chitek.ignition.drivers.generictcp.tests.config.TestConfigParser;
+import com.chitek.ignition.drivers.generictcp.tests.folders.TestDeviceStatusFolder;
+import com.chitek.ignition.drivers.generictcp.tests.folders.TestFolderManager;
+import com.chitek.ignition.drivers.generictcp.tests.folders.TestMessageFolder;
+import com.chitek.ignition.drivers.generictcp.tests.folders.TestSimpleWriteFolder;
+import com.chitek.ignition.drivers.generictcp.tests.folders.TestSubscription;
+import com.chitek.ignition.drivers.generictcp.tests.io.TestMessageState;
+import com.chitek.ignition.drivers.generictcp.tests.io.TestNioEventHandler;
+
+@RunWith(Suite.class)
+@Suite.SuiteClasses(
+		{ TestConfigParser.class,
+			TestMessageState.class,
+			TestNioEventHandler.class,
+			TestMessageFolder.class,
+			TestDeviceStatusFolder.class,
+			TestSimpleWriteFolder.class,
+			TestSubscription.class,
+			TestFolderManager.class})
+
+public class DriverTestSuite {
+
+	private static Logger log;
+
+	static {
+		PatternLayout layout = new PatternLayout("%r [%t] %-5p %c %x - %m%n");
+		ConsoleAppender consoleAppender = new ConsoleAppender(layout);
+		Logger.getRootLogger().addAppender(consoleAppender);
+		log = Logger.getRootLogger();
+	}
+
+
+	public static Logger getLogger() {
+		return log;
+	}
+}

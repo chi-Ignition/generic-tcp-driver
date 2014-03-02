@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<style>
+body
+{
+  font-family: Arial;
+}
+div.navheader {
+	font-family: Arial,Helvetica; font-weight: bold; font-size: 10pt;
+}
+span.sect1 a {
+	font-family: Arial,Helvetica; font-weight: bold; font-size: 10pt; color: #666666; text-decoration: none;
+}
+span.sect1 a:hover {
+	color: #005F89;
+}
+span.sect2 a {
+	font-family: Arial,Helvetica; font-weight: bold; font-size: 9pt; color: #666666; text-decoration: none;
+}
+span.sect2 a:hover {
+	color: #005F89;
+}
+
+h2 {
+	font-size: 16pt;
+	font-weight: bold;
+	color: #122231;
+}
+
+pre.programlisting {
+	background-color: #E0E0E0;
+	border: 1px solid black;
+}
+
+span.term
+{
+	font-weight: bold;
+}
+</style>

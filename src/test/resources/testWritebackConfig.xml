@@ -1,0 +1,11 @@
+<config type="WritebackConfig">
+	<setting name="Enabled">true</setting>
+	<setting name="MessageIdType">UByte</setting>
+	<setting name="SendOnValueChange">false</setting>
+	<setting name="SendInitialValue">true</setting>
+	<setting name="DataType">ByteString</setting>
+	<setting name="InitialValue">0x38,0x39</setting>
+	<setting name="InitialId">99</setting>
+	<setting name="UsePrefix">true</setting>
+	<setting name="Prefix">lenw,0xff,0xff, id</setting>
+</config>

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:wicket="http://wicket.sourceforge.net/">
+<body>
+ 
+	<wicket:extend>
+	
+		<form wicket:id="edit-form">
+		<div style="position:relative;">
+			<div wicket:id="table-container">
+				<div id="ajax-indicator" class="ajax-indicator" style="display:none;"></div>
+				<table class="edittable" cellpadding="0" cellspacing="0">
+					<thead>
+						<tr><td colspan="2"></td></tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="trow-title">
+								<wicket:message key="messageIdType.DisplayName">messageId</wicket:message></td>
+							<td class="trow-body">
+								<select class="headeritem" wicket:id="messageIdType" />
+								<p>
+									<wicket:message key="messageIdType.Description">messageId.Description</wicket:message>
+								</p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<table class="edittable" cellpadding="0" cellspacing="0">
+					<thead>
+						<tr><td colspan="2"></td></tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="trow-title">
+								<wicket:message key="selectMessageLabel">selectMessage</wicket:message>
+							</td>
+							<td class="trow-body">
+								<select style="width: 15em;" wicket:id="currentMessage" />
+								<input wicket:id="new" type="button" wicket:message="value:submit.new,title:submit.newTitle" />
+								<input wicket:id="copy" type="button" wicket:message="value:submit.copy,title:submit.copyTitle" />
+								<input wicket:id="delete" type="button" wicket:message="value:submit.delete,title:submit.deleteTitle" />
+							</td>
+						</tr>
+						<tr>
+							<td class="trow-title"><wicket:message key="queueMode.DisplayName">Queue Mode</wicket:message></td>
+							<td class="trow-body"><select class="headeritem" wicket:id="queueMode" />
+								<p><wicket:message key="queueMode.Description">queueMode.Description</wicket:message></p>
+							</td>
+						</tr>
+						<tr>
+							<td class="trow-title"><wicket:message key="usePersistance.DisplayName">Use Persistance</wicket:message></td>
+							<td class="trow-body"><input type="checkbox" wicket:id="usePersistance" />
+								<p><wicket:message key="usePersistance.Description">usePersistance.Description</wicket:message></p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+
+				<table wicket:id="list-editor" class="actiontable" cellpadding="0" cellspacing="0">
+					<thead>
+						<tr>
+							<td class="offset">
+								<wicket:message key="offsetlabel">Offset</wicket:message>
+							</td>
+							<td>
+								<wicket:message key="datatypelabel">Data Type</wicket:message>
+							</td>
+							<td><wicket:message key="idlabel">ID</wicket:message></td>						
+							<td><wicket:message key="aliaslabel">Alias</wicket:message></td>
+							<td class="last"><wicket:message key="sizelabel">Size</wicket:message></td>
+							<td colspan="4" class="links">&nbsp;</td>
+						</tr>
+					</thead>
+					<tbody>
+						<tr class="trow-message">
+							<td class="offset noedit">0</td>
+							<td class="noedit"><wicket:message key="messageLabel">messageId</wicket:message></td>
+							<td><input type="text" size="4" wicket:id="messageId" /></td>
+							<td><input type="text" style="width:90%" wicket:id="messageAlias" /></td>
+							<td class="last noedit"></td>
+							<td colspan="4" class="links">&nbsp;</td>
+						</tr>
+						<tr wicket:id="tags">
+							<td class="offset"><span wicket:id="offset">11</span></td>
+							<td><select wicket:id="dataType" /></td>
+							<td><input type="text" size="4" wicket:id="id" /></td>
+							<td><input type="text" style="width:90%" wicket:id="alias" /></td>
+							<td class="last"><input type="text" size="4" wicket:id="size" /></td>
+							<td class="links"><a class="insert-link" href="#" wicket:id="insert-link" wicket:message="title:insertlink.title" />
+							</td>
+							<td class="links"><a class="delete-link" href="#" wicket:id="delete-link" wicket:message="title:deletelink.title" />
+							</td>
+							<td class="links"><a class="move-up-link" href="#" wicket:id="move-up-link" wicket:message="title:moveuplink.title" />
+							</td>
+							<td class="links"><a class="move-down-link" href="#" wicket:id="move-down-link" wicket:message="title:movedownlink.title" />
+							</td>
+						</tr>
+
+						<tr>
+							<td colspan="5" style="border: 0px;"><span wicket:id="no-items-label" /></td>
+							<td class="links"><a class="insert-link" href="#" wicket:id="add-row-link" wicket:message="title:addrowlink.title" /></td>	
+							<td class="links">&nbsp;</td>
+							<td class="links">&nbsp;</td>
+							<td class="links">&nbsp;</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		
+			<div>
+			<br />
+			<span class="importlink">
+				<a href="#" wicket:id="export-link"><wicket:message key="export.linklabel">Export Message</wicket:message></a>
+			</span>
+			</div>
+		</div>
+		</form>
+		
+		<hr />
+		<form wicket:id="upload-form">
+		<div>
+			<input type="file" size="60" wicket:id="upload-field" /><br />
+			<span class="importlink">
+				<a href="#"	wicket:id="import-link"><wicket:message key="import.linklabel">Import Message</wicket:message></a>
+				<wicket:message key="import.hint" />
+			</span>
+		</div>
+		</form>
+	</wicket:extend>
+
+</body>
+</html>

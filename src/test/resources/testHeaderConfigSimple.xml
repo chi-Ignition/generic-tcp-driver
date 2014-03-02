@@ -1,0 +1,11 @@
+<config type="HeaderConfig">
+	<config type="HeaderTagConfig">
+		<setting name="DataType">PacketSize</setting>
+		<setting name="RawValue"></setting>
+		<setting name="Size">1</setting>
+	</config>
+	<setting name="UseHeader">true</setting>
+	<setting name="SizeIncludesHeader">false</setting>
+	<setting name="UseHandshake">false</setting>
+	<setting name="HandshakeMsg"></setting>
+</config>
