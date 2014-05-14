@@ -52,9 +52,9 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 	public static BlobField WritebackConfig = new BlobField(META, "WritebackConfig");
 
 	/* Categories */
-	public static final Category Connectivity = new Category("GenericTcpPassiveDriverSettings.Category.Connectivity", 1001)
+	public static final Category Connectivity = new Category("GenericTcpServerDriverSettings.Category.Connectivity", 1001)
 	.include(ServerHostname, ServerPort, Devices);
-	public static Category MessageHandling = new Category("GenericTcpPassiveDriverSettings.Category.MessageHandling", 1002)
+	public static Category MessageHandling = new Category("GenericTcpServerDriverSettings.Category.MessageHandling", 1002)
 	.include(ReverseByteOrder, TimestampFactor);
 
 	static {

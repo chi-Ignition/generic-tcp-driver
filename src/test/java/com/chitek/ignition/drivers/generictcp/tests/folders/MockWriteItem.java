@@ -29,7 +29,6 @@ public class MockWriteItem implements WriteItem {
 
 	@Override
 	public NodeId getNodeId() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

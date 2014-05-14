@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import com.chitek.ignition.drivers.generictcp.folder.BrowseTree;
@@ -76,8 +75,8 @@ public abstract class AbstractGenericTcpDriver
 		runtimeStateId = String.format(RUNTIME_STATE_ID, deviceName);
 
 		this.log = Logger.getLogger(getLoggerName());
+
 		// TODO remove in final version
-		log.setLevel(Level.DEBUG);
 		log.debug("Initalize");
 
 		folderManager = new FolderManager(log);

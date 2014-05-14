@@ -41,6 +41,7 @@ import org.apache.wicket.markup.html.form.SubmitLink;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
+import org.apache.wicket.markup.html.form.validation.AbstractFormValidator;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
@@ -81,8 +82,6 @@ import com.inductiveautomation.ignition.gateway.web.models.LenientResourceModel;
 public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements IAjaxIndicatorAware {
 
 	private final static String titleKey = "GenericTcpDriver.messageTab";
-
-	private OptionalDataType messageIdType = OptionalDataType.None;
 
 	/** Id of the message that is selected in the drop down */
 	private int currentMessageId;
@@ -132,9 +131,6 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 		currentMessage = getConfig().getMessageList().get(0);
 		currentMessageId = currentMessage.getMessageId();
 
-		// Get the MessageIdType from loaded config
-		messageIdType = getConfig().getMessageIdType();
-
 		// *******************************************************************************************
 		// *** Form for XML import
 		final FileUploadField uploadField = new FileUploadField("upload-field");
@@ -164,21 +160,16 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 		currentMessageModel = new PropertyModel<MessageConfig>(this, "currentMessage");
 		editForm = new Form<MessageConfig>("edit-form", new CompoundPropertyModel<MessageConfig>(currentMessageModel)) {
 			@Override
-			protected void onSubmit() {
-				// All buttons have their own onSubmit method, so it must have been javascript from the dropdown
-				handleOnSubmit("dropdown");
-			}
-
-			@Override
 			protected void onError() {
 				// Validation error - reset the message dropdown to the original value
 				// Clear input causes the component to reload the model
 				currentMessageIdDropdown.clearInput();
 				super.onError();
 			}
-
 		};
 
+		editForm.add(new MessageFormValidator());
+		
 		WebMarkupContainer tableContainer = new WebMarkupContainer("table-container");
 
 		messageIdTypeDropDown = getMessageIdTypeDropdown();
@@ -393,7 +384,6 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				messageIdType = messageIdTypeDropDown.getConvertedInput();
 				updateOffsets(target);
 
 				// Reset feedback messages
@@ -825,31 +815,10 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 	 */
 	private void doValidation() {
 
-		if (messageIdType == OptionalDataType.None) {
+		if (getConfig().getMessageIdType() == OptionalDataType.None) {
 			if (getConfig().getMessageConfig(0) == null)
 				warn(new StringResourceModel("warn.noMessageId0", this, null).getString());
-		} else if (messageIdType == OptionalDataType.UByte) {
-			boolean ok = true;
-			for (MessageConfig message : getConfig().getMessageList()) {
-				if (message.getMessageId() > 255) {
-					ok = false;
-					break;
-				}
-			}
-			if (!ok)
-				warn(new StringResourceModel("warn.MessageIdGT255", this, null).getString());
-		}
-	}
-
-	private void handleOnSubmit(String submitAction) {
-
-		editor.reloadModel(); // Editor items must be reloaded
-
-		// Show some warnings
-		if (messageIdType == OptionalDataType.None) {
-			if (getConfig().getMessageConfig(0) == null)
-				warn(new StringResourceModel("warn.noMessageId0", this, null).getString());
-		} else if (messageIdType == OptionalDataType.UByte) {
+		} else if (getConfig().getMessageIdType() == OptionalDataType.UByte) {
 			boolean ok = true;
 			for (MessageConfig message : getConfig().getMessageList()) {
 				if (message.getMessageId() > 255) {
@@ -884,7 +853,7 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 	 * Recalculate the offsets in the editor's internal list
 	 */
 	private void recalcOffsets() {
-		int offset = messageIdType.getByteSize();
+		int offset = getConfig().getMessageIdType().getByteSize();
 		for (TagConfig tc : editor.getList()) {
 			tc.setOffset(offset);
 			offset += tc.getDataType().getByteCount() * tc.getSize();
@@ -934,8 +903,6 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 
 		// Recalculate the offsets
 		recalcOffsets();
-
-		info("Size: " + com.chitek.ignition.drivers.generictcp.util.TestUtils.getObjectSize(this));
 	}
 
 	private class UniqueMessageIdValidator implements IValidator<Integer> {
@@ -983,4 +950,23 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 
 	}
 
+	private class MessageFormValidator extends AbstractFormValidator {
+
+		@Override
+		public FormComponent<?>[] getDependentFormComponents() {
+			return null;
+		}
+
+		@Override
+		public void validate(Form<?> paramForm) {
+			if (getConfig().getMessageIdType() == OptionalDataType.None) {
+				if (getConfig().getMessageConfig(0) == null) {
+					error(messageIdTextField, "warn.noMessageId0");
+					// error(new StringResourceModel("warn.noMessageId0", this, null).getString());
+				}
+			}
+		}
+		
+	}
+	
 }
