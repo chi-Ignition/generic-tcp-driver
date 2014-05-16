@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadFactory;
 
+import org.python.google.common.base.Strings;
+
 import com.chitek.ignition.drivers.generictcp.configuration.settings.GenericTcpClientDriverSettings;
 import com.chitek.ignition.drivers.generictcp.folder.IndexMessageFolder;
 import com.chitek.ignition.drivers.generictcp.folder.MessageHeader;
@@ -157,13 +159,13 @@ public class GenericTcpActiveDriver extends AbstractGenericTcpDriver implements 
 			} else if (getMessageFolder(0, message.getMessageId()) != null) {
 				log.warn(String.format("Configuration error. Duplicate message ID%s.", message.getMessageId()));
 			} else if (alias.contains(message.getMessageAlias())) {
-				log.warn(String.format("Configuration error. Duplicate message alias '%s'.",
-					message.getMessageAlias()));
+				log.warn(String.format("Configuration error. Duplicate message alias '%s'.", message.getMessageAlias()));
 			} else if (messageConfig.getMessageIdType() == OptionalDataType.None && message.getMessageId() > 0) {
-				log.warn(String.format("MessageIDType is 'None'. Message ID %d is ignored.",
-					message.getMessageId()));
+				log.warn(String.format("MessageIDType is 'None'. Message ID %d is ignored.", message.getMessageId()));
 			} else if (messageConfig.getMessageIdType() == OptionalDataType.UByte	&& message.getMessageId() > 255)  {
 				log.warn(String.format("MessageIDType is 'Byte'. Message ID %d is ignored.", message.getMessageId()));
+			} else if (Strings.isNullOrEmpty(message.getMessageAlias())) {
+				log.warn(String.format("Message Alias is Null or Empty. Message ID %d is ignored.", message.getMessageId()));
 			} else {
 				IndexMessageFolder messageFolder = 
 						new IndexMessageFolder(message,
