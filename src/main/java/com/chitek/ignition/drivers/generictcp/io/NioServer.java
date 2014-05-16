@@ -3,6 +3,7 @@ package com.chitek.ignition.drivers.generictcp.io;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -180,8 +181,10 @@ public class NioServer implements Runnable {
 						this.writeToSocket(key);
 					}
 				}
+			} catch (ClosedSelectorException e) {
+				log.debug("Selector closed");
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.error("Exception in NioServer run() method.", e);
 			}
 		}
 		log.debug("NioServer main loop ended.");
