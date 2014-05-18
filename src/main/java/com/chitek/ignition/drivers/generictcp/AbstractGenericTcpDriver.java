@@ -75,8 +75,6 @@ public abstract class AbstractGenericTcpDriver
 		runtimeStateId = String.format(RUNTIME_STATE_ID, deviceName);
 
 		this.log = Logger.getLogger(getLoggerName());
-
-		// TODO remove in final version
 		log.debug("Initalize");
 
 		folderManager = new FolderManager(log);

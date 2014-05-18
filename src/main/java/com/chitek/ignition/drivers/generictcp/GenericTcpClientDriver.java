@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -221,6 +222,7 @@ public class GenericTcpClientDriver extends AbstractGenericTcpDriver implements 
 		}
 
 		if (success) {
+			getDriverContext().setLastConnectError(null);
 			setDriverState(DriverState.Connected);
 			getFolderManager().updateConnectionState(0, true);
 		} else {
@@ -237,15 +239,25 @@ public class GenericTcpClientDriver extends AbstractGenericTcpDriver implements 
 		}
 
 		setDriverState(DriverState.Connecting);
-		log.debug(String.format("Opening TCP connection to %s at port %d ...",
-			driverSettings.getHostname(), driverSettings.getPort()));
+		log.debug(String.format("Opening TCP connection to %s at port %d ...", driverSettings.getHostname(), driverSettings.getPort()));
 
+		InetAddress hostAddress;
+		try {
+			hostAddress = InetAddress.getByName(getHostname());
+		} catch (UnknownHostException e) {
+			String error = String.format("Error resolving hostname \"%s\".", driverSettings.getHostname());
+			log.debug(error);
+			getDriverContext().setLastConnectError(new Exception(error, e));
+			notifyConnectDone(false);
+			return;
+		}
+		
 		try {
 			Socket socket = new Socket();
 			synchronized (connectingSocketLock) {
 				connectingSocket = socket;
 			}
-			socket.connect(new InetSocketAddress(InetAddress.getByName(driverSettings.getHostname()), driverSettings.getPort()));
+			socket.connect(new InetSocketAddress(hostAddress, driverSettings.getPort()));
 			synchronized (connectingSocketLock) {
 				connectingSocket = null;
 			}
@@ -272,7 +284,9 @@ public class GenericTcpClientDriver extends AbstractGenericTcpDriver implements 
 				}
 			}
 		} catch (Exception ex) {
-			log.error("Connect Error: " + ex.getMessage());
+			String error = String.format("Error connecting to %s:%d", driverSettings.getHostname(), driverSettings.getPort());
+			log.debug(error + " " + ex.getMessage());
+			getDriverContext().setLastConnectError(new Exception(error, ex));
 
 			if (ioSession != null) {
 				ioSession.stop();
@@ -280,7 +294,6 @@ public class GenericTcpClientDriver extends AbstractGenericTcpDriver implements 
 			}
 			notifyConnectDone(false);
 		}
-		log.debug("Connect finished");
 	}
 
 	protected void reconnect() {
