@@ -162,7 +162,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 
 		addDefaultTags(folderAddress);
 
-		log.info(String.format("Message initialized with %d tags. Queue size: %s", addressTagMap.size(), queue!=null?queue.size():"Not used"));
+		log.debug(String.format("Message initialized with %d tags. Queue size: %s", addressTagMap.size(), queue!=null?queue.size():"Not used"));
 	}
 
 	@Override

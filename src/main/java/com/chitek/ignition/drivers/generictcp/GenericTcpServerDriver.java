@@ -118,7 +118,7 @@ implements IMessageHandler {
 		if (isActiveNode() || getActivityLevel().isWarm()) {
 			connect();
 		} else {
-			log.info("Node Redundancy State is not active or warm. Starting with server disabled.");
+			log.info("Node Redundancy State is neither active nor warm. Starting with server disabled.");
 		}
 	}
 
@@ -401,6 +401,7 @@ implements IMessageHandler {
 	@Override
 	protected void activityLevelChanged(ActivityLevel currentLevel,	ActivityLevel newLevel) {
 		if (newLevel.isWarm()) {
+			log.info("ActivityLevel changed. Starting server.");
 			scheduleConnect();
 		}
 		

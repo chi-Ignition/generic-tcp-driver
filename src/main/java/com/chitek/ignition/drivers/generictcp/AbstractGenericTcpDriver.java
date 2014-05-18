@@ -167,7 +167,9 @@ public abstract class AbstractGenericTcpDriver
 				// See 'addTagToBrowseTree'
 				// TagTreeNode.Tag contains the real address of the tag
 				browseNodes.add(childNode.getTag());
-				System.out.println("BrowseNode: " + childNode.getAddress() + " Tag:" + childNode.getTag());
+				if (log.isTraceEnabled()) {
+					log.trace("BrowseNode: " + childNode.getAddress() + " Tag:" + childNode.getTag());
+				}
 			}
 		}
 
@@ -426,10 +428,9 @@ public abstract class AbstractGenericTcpDriver
 
 				ActivityLevel newLevel = newState.getActivityLevel();
 				log.info(String.format("Redundancy state changed from %s to %s", currentLevel, newLevel));
-
-				activityLevelChanged(currentLevel, newLevel);
-				
 				currentLevel = newLevel;
+				
+				activityLevelChanged(currentLevel, newLevel);
 			}
 		}
 	}
