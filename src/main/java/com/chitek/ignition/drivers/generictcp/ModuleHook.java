@@ -22,6 +22,8 @@ import java.net.URLConnection;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import org.apache.wicket.RuntimeConfigurationType;
+
 import com.chitek.ignition.drivers.generictcp.configuration.GenericTcpServerDriverType;
 import com.chitek.ignition.drivers.generictcp.configuration.GenericTcpClientDriverType;
 import com.chitek.ignition.drivers.generictcp.configuration.settings.GenericTcpServerDriverSettings;
@@ -53,8 +55,8 @@ public class ModuleHook extends AbstractDriverModuleHook {
 		// Not a big problem, as the temp jar files won't be deleted until the JVM shuts down,
 		// but with this option the files can be deleted manually, if all classes are properly
 		// unloaded. This allows a quick test for memory leaks.
-		context.getWebApplication().getResourceSettings().getLocalizer().clearCache();
-		if (context.getLicenseManager().getLicense().isDeveloperLicense()) {
+		if (context.getWebApplication().getConfigurationType() == RuntimeConfigurationType.DEVELOPMENT) {
+			context.getWebApplication().getResourceSettings().getLocalizer().clearCache();
 			URLConnection con;
 			try {
 				con = new URLConnection(new URL("file://null")) {
