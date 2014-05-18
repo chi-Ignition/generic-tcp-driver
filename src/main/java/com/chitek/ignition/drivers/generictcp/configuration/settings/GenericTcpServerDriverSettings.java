@@ -13,7 +13,7 @@ import com.chitek.ignition.drivers.generictcp.meta.config.DriverSettingsPassive;
 import com.chitek.ignition.drivers.generictcp.meta.config.HeaderConfig;
 import com.chitek.ignition.drivers.generictcp.meta.config.WritebackConfig;
 import com.chitek.ignition.drivers.generictcp.types.OptionalDataType;
-import com.chitek.ignition.drivers.generictcp.types.PassiveModeDevice;
+import com.chitek.ignition.drivers.generictcp.types.RemoteDevice;
 import com.inductiveautomation.ignition.common.BundleUtil;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.BlobField;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.BooleanField;
@@ -31,7 +31,7 @@ import com.inductiveautomation.xopc.driver.api.configuration.DeviceSettingsRecor
 public class GenericTcpServerDriverSettings extends PersistentRecord implements IGenericTcpDriverSettings{
 
 	public static final RecordMeta<GenericTcpServerDriverSettings> META = new RecordMeta<GenericTcpServerDriverSettings>(
-		GenericTcpServerDriverSettings.class, "GenTcpPassiveDriverSettings");
+		GenericTcpServerDriverSettings.class, "GenTcpServerDriverSettings");
 
 	public static final LongField DeviceSettingsId = new LongField(META, "DeviceSettingsId", SFieldFlags.SPRIMARY_KEY);
 	public static final ReferenceField<DeviceSettingsRecord> DeviceSettings = new ReferenceField<DeviceSettingsRecord>(
@@ -115,20 +115,20 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 		return getInt(TimestampFactor);
 	}
 
-	public List<PassiveModeDevice> getDevices() {
+	public List<RemoteDevice> getDevices() {
 		String rawValue = getString(Devices);
 		if (rawValue == null) {
-			return new ArrayList<PassiveModeDevice>(0);
+			return new ArrayList<RemoteDevice>(0);
 		}
 		StringTokenizer st = new StringTokenizer(rawValue,"\n\r");
-		List<PassiveModeDevice>deviceList = new ArrayList<PassiveModeDevice>(st.countTokens());
+		List<RemoteDevice>deviceList = new ArrayList<RemoteDevice>(st.countTokens());
 		while (st.hasMoreTokens()) {
 			String entry = st.nextToken();
 			int comma = entry.indexOf(",");
 			String hostname = entry.substring(0, comma).toLowerCase().trim();
 			String alias = entry.substring(comma+1, entry.length()).trim();
 			alias.replaceAll("\\s+",""); // Remove whitespace from alias
-			deviceList.add(new PassiveModeDevice(hostname, alias));
+			deviceList.add(new RemoteDevice(hostname, alias));
 		}
 		return deviceList;
 	}

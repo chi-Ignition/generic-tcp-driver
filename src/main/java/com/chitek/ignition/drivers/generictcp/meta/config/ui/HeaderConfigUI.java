@@ -78,7 +78,7 @@ public class HeaderConfigUI extends AbstractConfigUI<HeaderConfig> {
 	}
 	
 	private void addComponents() {
-
+		
 		editForm = new Form<Object>("edit-form");
 
 		add(editForm);
@@ -97,6 +97,7 @@ public class HeaderConfigUI extends AbstractConfigUI<HeaderConfig> {
 		tableContainer.add(handshakeMsgTextField);
 
 		// Create the list editor
+		recalcTagOffsets(getConfig().getTags());
 		editor = new ListEditor<HeaderTagConfig>("tags", new PropertyModel<List<HeaderTagConfig>>(
 			getDefaultModel(), "tags")) {
 			@Override
@@ -333,14 +334,21 @@ public class HeaderConfigUI extends AbstractConfigUI<HeaderConfig> {
 	}
 
 	/**
+	 * Recalculate the offsets in the given tag list
+	 */
+	private void recalcTagOffsets(List<HeaderTagConfig> tags) {
+		int offset = 0;
+		for (HeaderTagConfig tc : tags) {
+			tc.setOffset(offset);
+			offset += tc.getDataType().getByteCount() * tc.getSize();
+		}		
+	}
+	
+	/**
 	 * Recalculate the offsets in the editor's internal list
 	 */
 	private void recalcOffsets() {
-		int offset = 0;
-		for (HeaderTagConfig tc : editor.getList()) {
-			tc.setOffset(offset);
-			offset += tc.getDataType().getByteCount() * tc.getSize();
-		}
+		recalcTagOffsets(editor.getList());
 	}
 
 	/**

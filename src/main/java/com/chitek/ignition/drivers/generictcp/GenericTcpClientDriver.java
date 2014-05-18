@@ -53,7 +53,7 @@ import com.inductiveautomation.iosession.socket.AsyncSocketIOSession;
 import com.inductiveautomation.xopc.driver.api.DriverContext;
 import com.inductiveautomation.xopc.driver.util.ByteUtilities;
 
-public class GenericTcpActiveDriver extends AbstractGenericTcpDriver implements IMessageHandler {
+public class GenericTcpClientDriver extends AbstractGenericTcpDriver implements IMessageHandler {
 
 	public static final String LOGGER_NAME = "TcpClientDriver";
 
@@ -76,7 +76,7 @@ public class GenericTcpActiveDriver extends AbstractGenericTcpDriver implements 
 	private WritebackConfig writebackConfig;
 	private HeaderConfig headerConfig;
 
-	public GenericTcpActiveDriver(DriverContext driverContext, GenericTcpClientDriverSettings deviceSettings) {
+	public GenericTcpClientDriver(DriverContext driverContext, GenericTcpClientDriverSettings deviceSettings) {
 		super(driverContext);
 
 		connectingSocket = null;

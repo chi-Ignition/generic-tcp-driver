@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-import com.chitek.ignition.drivers.generictcp.GenericTcpActiveDriver;
+import com.chitek.ignition.drivers.generictcp.GenericTcpClientDriver;
 import com.chitek.ignition.drivers.generictcp.configuration.settings.GenericTcpClientDriverSettings;
 import com.chitek.ignition.drivers.generictcp.meta.config.ui.ConfigUiTabs;
 import com.inductiveautomation.ignition.common.BundleUtil;
@@ -21,19 +21,19 @@ import com.inductiveautomation.xopc.driver.api.configuration.links.Configuration
 import com.inductiveautomation.xopc.driver.api.configuration.links.LinkEntry;
 
 @SuppressWarnings("serial")
-public class TcpBinaryDriverType extends DriverType {
+public class GenericTcpClientDriverType extends DriverType {
 
-	public static final String TYPE_ID = "TcpBinary";
+	public static final String TYPE_ID = "GenericTcpClient";
 
-	public TcpBinaryDriverType() {
-		super(TYPE_ID, "GenericTcpDriver.TcpBinaryDriverType.Name", "GenericTcpDriver.TcpBinaryDriverType.Description");
+	public GenericTcpClientDriverType() {
+		super(TYPE_ID, "GenericTcpDriver.GenericTcpClientDriverType.Name", "GenericTcpDriver.TcpBinaryDriverType.Description");
 	}
 
 	@Override
 	public Driver createDriver(DriverContext driverContext, DeviceSettingsRecord deviceSettings) {
 		GenericTcpClientDriverSettings settings = findProfileSettingsRecord(driverContext.getGatewayContext(), deviceSettings);
 
-		return new GenericTcpActiveDriver(driverContext, settings);
+		return new GenericTcpClientDriver(driverContext, settings);
 	}
 
 	@Override

@@ -4,7 +4,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
-public class PassiveModeDevice {
+public class RemoteDevice {
 
 	private final String hostname;
 	private final String alias;
@@ -12,7 +12,7 @@ public class PassiveModeDevice {
 	private InetSocketAddress remoteSocketAddress;
 	private int deviceId;
 
-	public PassiveModeDevice(String hostname, String alias) {
+	public RemoteDevice(String hostname, String alias) {
 		this.hostname = hostname;
 		this.alias = alias;
 	}

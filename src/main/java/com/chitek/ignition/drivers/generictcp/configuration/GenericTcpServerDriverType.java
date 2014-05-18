@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-import com.chitek.ignition.drivers.generictcp.GenericTcpPassiveDriver;
+import com.chitek.ignition.drivers.generictcp.GenericTcpServerDriver;
 import com.chitek.ignition.drivers.generictcp.configuration.settings.GenericTcpServerDriverSettings;
 import com.chitek.ignition.drivers.generictcp.meta.config.ui.ConfigUiTabs;
 import com.inductiveautomation.ignition.common.BundleUtil;
@@ -21,19 +21,19 @@ import com.inductiveautomation.xopc.driver.api.configuration.links.Configuration
 import com.inductiveautomation.xopc.driver.api.configuration.links.LinkEntry;
 
 @SuppressWarnings("serial")
-public class GenericTcpPassiveDriverType extends DriverType {
+public class GenericTcpServerDriverType extends DriverType {
 
-	public static final String TYPE_ID = "GenericTcpPassive";
+	public static final String TYPE_ID = "GenericTcpServer";
 
-	public GenericTcpPassiveDriverType() {
-		super(TYPE_ID, "GenericTcpDriver.GenericTcpPassiveDriverType.Name", "GenericTcpDriver.GenericTcpPassiveDriverType.Description");
+	public GenericTcpServerDriverType() {
+		super(TYPE_ID, "GenericTcpDriver.GenericTcpServerDriverType.Name", "GenericTcpDriver.GenericTcpServerDriverType.Description");
 	}
 
 	@Override
 	public Driver createDriver(DriverContext driverContext, DeviceSettingsRecord deviceSettings) {
 		GenericTcpServerDriverSettings settings = findProfileSettingsRecord(driverContext.getGatewayContext(), deviceSettings);
 
-		return new GenericTcpPassiveDriver(driverContext, settings);
+		return new GenericTcpServerDriver(driverContext, settings);
 	}
 
 	@Override

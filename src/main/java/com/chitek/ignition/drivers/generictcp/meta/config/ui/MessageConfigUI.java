@@ -129,6 +129,7 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 		}
 
 		currentMessage = getConfig().getMessageList().get(0);
+		currentMessage.calcOffsets(getConfig().getMessageIdType().getByteSize());
 		currentMessageId = currentMessage.getMessageId();
 
 		// *******************************************************************************************

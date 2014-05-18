@@ -28,14 +28,14 @@ import com.chitek.ignition.drivers.generictcp.meta.config.WritebackConfig;
 import com.chitek.ignition.drivers.generictcp.redundancy.StatusUpdateMessage;
 import com.chitek.ignition.drivers.generictcp.types.DriverState;
 import com.chitek.ignition.drivers.generictcp.types.OptionalDataType;
-import com.chitek.ignition.drivers.generictcp.types.PassiveModeDevice;
+import com.chitek.ignition.drivers.generictcp.types.RemoteDevice;
 import com.chitek.ignition.drivers.generictcp.types.QueueMode;
 import com.inductiveautomation.ignition.common.BundleUtil;
 import com.inductiveautomation.ignition.gateway.redundancy.types.ActivityLevel;
 import com.inductiveautomation.xopc.driver.api.DriverContext;
 import com.inductiveautomation.xopc.driver.util.ByteUtilities;
 
-public class GenericTcpPassiveDriver extends AbstractGenericTcpDriver
+public class GenericTcpServerDriver extends AbstractGenericTcpDriver
 implements IMessageHandler {
 
 	public static final String LOGGER_NAME = "TcpServerDriver";
@@ -51,9 +51,9 @@ implements IMessageHandler {
 	private NioServer nioServer;
 
 	private final Map<InetAddress, Integer>deviceAddressIdMap = new HashMap<InetAddress, Integer>();
-	private final Map<Integer, PassiveModeDevice>deviceMap = new HashMap<Integer, PassiveModeDevice>();
+	private final Map<Integer, RemoteDevice>deviceMap = new HashMap<Integer, RemoteDevice>();
 
-	public GenericTcpPassiveDriver(DriverContext driverContext, GenericTcpServerDriverSettings deviceSettings) {
+	public GenericTcpServerDriver(DriverContext driverContext, GenericTcpServerDriverSettings deviceSettings) {
 		super(driverContext);
 
 		initSettings(deviceSettings);
@@ -103,7 +103,7 @@ implements IMessageHandler {
 		}
 
 		// Check remote devices
-		List<PassiveModeDevice> remoteDevices = driverSettings.getDevices();
+		List<RemoteDevice> remoteDevices = driverSettings.getDevices();
 		if (remoteDevices.isEmpty()) {
 			setDriverState(DriverState.ConfigError);
 			log.error("Driver could not be initialized - No remote devices configured in driver settings.");
@@ -122,12 +122,12 @@ implements IMessageHandler {
 		}
 	}
 
-	private List<Integer> initializeMessageFolders(List<PassiveModeDevice> devices) {
+	private List<Integer> initializeMessageFolders(List<RemoteDevice> devices) {
 		// Keep track of folders with handshake to cleanup unused queues
 		final List<Integer>idWithHandshake = new ArrayList<Integer>(messageConfig.messages.size());
 
 		int deviceId = 0;
-		for (PassiveModeDevice device : devices) {
+		for (RemoteDevice device : devices) {
 			log.debug(String.format("Adding folders for device %s - %s", device.getHostname(), device.getAlias()));
 
 			// Assign an id to the device
@@ -276,7 +276,7 @@ implements IMessageHandler {
 		// Synchronize, to prevent a disconnect while writing
 		synchronized (getIoSessionLock()) {
 			if (getDriverStateInternal() == DriverState.Listening) {
-				PassiveModeDevice remoteDevice = deviceMap.get(deviceId);
+				RemoteDevice remoteDevice = deviceMap.get(deviceId);
 				if (remoteDevice == null) {
 					log.error(String.format("writeMessage called with unknown deviceId %d", deviceId));
 					return;
@@ -348,7 +348,7 @@ implements IMessageHandler {
 		}
 
 		// Try to find the connecting device in our configuration
-		for (PassiveModeDevice device : driverSettings.getDevices()) {
+		for (RemoteDevice device : driverSettings.getDevices()) {
 			if (device.getHostname().equals(remoteSocket.getAddress().getHostAddress())
 				|| device.getHostname().equalsIgnoreCase(remoteSocket.getHostName())) {
 
@@ -385,7 +385,7 @@ implements IMessageHandler {
 		// Only used for client sockets, so simply ignored here
 	}
 
-	private void processClientConnected(final PassiveModeDevice remoteDevice, final InetSocketAddress remoteSocket) {
+	private void processClientConnected(final RemoteDevice remoteDevice, final InetSocketAddress remoteSocket) {
 		remoteDevice.setRemoteSocketAddress(remoteSocket);
 		deviceAddressIdMap.put(remoteSocket.getAddress(), remoteDevice.getDeviceId());
 		getFolderManager().updateConnectionState(remoteDevice.getDeviceId(), true);

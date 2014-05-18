@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.chitek.ignition.drivers.generictcp.folder;
 
-import com.chitek.ignition.drivers.generictcp.GenericTcpActiveDriver;
+import com.chitek.ignition.drivers.generictcp.GenericTcpClientDriver;
 import com.chitek.ignition.drivers.generictcp.tags.WritableTag;
 import com.inductiveautomation.ignition.common.TypeUtilities;
 import com.inductiveautomation.opcua.types.DataType;
@@ -33,7 +33,7 @@ public class StatusFolder extends MessageFolder {
 
 	public static final String FOLDER_NAME = "[Status]";
 
-	private final GenericTcpActiveDriver driver;
+	private final GenericTcpClientDriver driver;
 	private final DataValue deviceNameValue;
 	private DataValue connectedHostValue;
 	private DataValue hostnameValue;
@@ -43,7 +43,7 @@ public class StatusFolder extends MessageFolder {
 
 	private boolean isConnected = false;
 
-	public StatusFolder(GenericTcpActiveDriver driver) {
+	public StatusFolder(GenericTcpClientDriver driver) {
 		super(driver, FolderManager.STATUS_ID, FOLDER_NAME);
 
 		this.driver = driver;

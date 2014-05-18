@@ -26,7 +26,7 @@ import com.inductiveautomation.xopc.driver.api.configuration.DeviceSettingsRecor
 public class GenericTcpClientDriverSettings extends PersistentRecord implements IGenericTcpDriverSettings {
 
 	public static final RecordMeta<GenericTcpClientDriverSettings> META = new RecordMeta<GenericTcpClientDriverSettings>(
-		GenericTcpClientDriverSettings.class, "TcpBinaryDriverSettings");
+		GenericTcpClientDriverSettings.class, "GenTcpClientDriverSettings");
 
 	public static final LongField DeviceSettingsId = new LongField(META, "DeviceSettingsId", SFieldFlags.SPRIMARY_KEY);
 	public static final ReferenceField<DeviceSettingsRecord> DeviceSettings = new ReferenceField<DeviceSettingsRecord>(

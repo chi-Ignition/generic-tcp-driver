@@ -4,7 +4,7 @@ import java.nio.ByteOrder;
 import java.util.List;
 
 import com.chitek.ignition.drivers.generictcp.types.OptionalDataType;
-import com.chitek.ignition.drivers.generictcp.types.PassiveModeDevice;
+import com.chitek.ignition.drivers.generictcp.types.RemoteDevice;
 
 /**
  * This class wraps general driver settings. In addition, the messageIdType is also availabe from this class though it is not a
@@ -14,7 +14,7 @@ import com.chitek.ignition.drivers.generictcp.types.PassiveModeDevice;
 public class DriverSettingsPassive implements IDriverSettings {
 	private final String serverHostname;
 	private final int serverPort;
-	private final List<PassiveModeDevice> devices;
+	private final List<RemoteDevice> devices;
 	private final int messageTimeout = 1000;
 	private final ByteOrder byteOrder;
 	private final int timestampFactor;
@@ -23,7 +23,7 @@ public class DriverSettingsPassive implements IDriverSettings {
 	public DriverSettingsPassive(
 		String serverHostname,
 		int serverPort,
-		List<PassiveModeDevice> devices,
+		List<RemoteDevice> devices,
 		boolean reverseByteOrder,
 		int timestampFactor,
 		OptionalDataType messageIdType)
@@ -44,7 +44,7 @@ public class DriverSettingsPassive implements IDriverSettings {
 		return serverPort;
 	}
 
-	public List<PassiveModeDevice> getDevices() {
+	public List<RemoteDevice> getDevices() {
 		return devices;
 	}
 

@@ -13,7 +13,6 @@
 		<requiredframeworkversion>5</requiredframeworkversion>
 		<depends scope="G">xopc</depends>
 		<jar scope="G">${project.artifactId}-${project.version}.jar</jar>
-		<jar scope="G">wicket-devutils-6.1.1.jar</jar>
 		<hook scope="G">com.chitek.ignition.drivers.generictcp.ModuleHook</hook>
 		</module>
 </modules>

@@ -22,8 +22,8 @@ import java.net.URLConnection;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import com.chitek.ignition.drivers.generictcp.configuration.GenericTcpPassiveDriverType;
-import com.chitek.ignition.drivers.generictcp.configuration.TcpBinaryDriverType;
+import com.chitek.ignition.drivers.generictcp.configuration.GenericTcpServerDriverType;
+import com.chitek.ignition.drivers.generictcp.configuration.GenericTcpClientDriverType;
 import com.chitek.ignition.drivers.generictcp.configuration.settings.GenericTcpServerDriverSettings;
 import com.chitek.ignition.drivers.generictcp.configuration.settings.GenericTcpClientDriverSettings;
 import com.google.common.collect.Lists;
@@ -39,8 +39,8 @@ public class ModuleHook extends AbstractDriverModuleHook {
 
 	private static final List<DriverType> DRIVER_TYPES = Lists.newArrayList();
 	static {
-		DRIVER_TYPES.add(new TcpBinaryDriverType());
-		DRIVER_TYPES.add(new GenericTcpPassiveDriverType());
+		DRIVER_TYPES.add(new GenericTcpClientDriverType());
+		DRIVER_TYPES.add(new GenericTcpServerDriverType());
 	}
 
 	@Override
