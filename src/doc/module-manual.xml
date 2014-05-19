@@ -41,7 +41,7 @@
 		<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 		Overview</title>
 		<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-		The genric tcp driver connects network devices that use a custom 
+		The generic tcp driver connects network devices that use a custom 
 		protocol to the Ignition 
 		<superscript xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 		TM</superscript> OPC-UA server. The communication protocol is 
@@ -67,6 +67,8 @@
 					the server machine and waits for remote devices to establish a 
 					connection. Each driver instance allows multiple remote devices to 
 					connect.</simpara>
+					<simpara>This mode is useful for devices like barcode scanners or 
+					network cameras.</simpara>
 				</listitem>
 			</itemizedlist>
 		</para>
