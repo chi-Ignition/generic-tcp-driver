@@ -115,7 +115,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 
 		this.driverSettings = driverSettings;
 		this.deviceId = deviceId;
-		this.messageLength = driverSettings.getMessageIdType().getByteSize();
+		this.messageLength = 0;
 		this.messageCount = 0;
 
 		this.pendingEvaluations = new AtomicInteger();
@@ -471,9 +471,6 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 					// Restore buffer start position
 					buffer.position(pos);
 				}
-
-				// Buffer contains the message id - just skip
-				buffer.position(buffer.position() + driverSettings.getMessageIdType().getByteSize());
 
 				for (ReadableTcpDriverTag driverTag : varTags) {
 					switch (driverTag.getDriverDataType()) {
