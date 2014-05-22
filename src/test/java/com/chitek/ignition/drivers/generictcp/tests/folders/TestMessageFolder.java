@@ -93,6 +93,104 @@ public class TestMessageFolder {
 	}
 
 	@Test
+	public void testMessageFolderWithId() throws Exception {
+
+		// Create settings with message id type = UInt16
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, OptionalDataType.UInt16);
+		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigSimple.xml");
+
+		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
+		assertEquals(folder.getDriverContext().getDeviceName(), DEVICE_NAME);
+
+		// Check the browse tree
+		assertNotNull(driverContext.getBrowseTree().findTag("Alias1/Data1"));
+		assertNotNull(driverContext.getBrowseTree().findTag("Alias1/_MessageCount"));
+		assertNotNull(driverContext.getBrowseTree().findTag("Alias1/_Timestamp"));
+
+		// Check the nodes
+		VariableNode nodeData1 = (VariableNode) driverContext.getNode(buildNodeId("Alias1/Data1"));
+		assertNotNull(nodeData1);
+		assertEquals(new LocalizedText("Data1"), nodeData1.getDisplayName());
+		assertEquals(DataType.String.getNodeId(), nodeData1.getDataTypeId());
+		assertEquals(ValueRank.Scalar, nodeData1.getValueRank());
+
+		// Test read
+		MockReadItem itemData1 = new MockReadItem("Alias1/Data1");
+		List<ReadItem> items = new ArrayList<ReadItem>();
+		items.add(itemData1);
+		folder.readItems(items);
+		assertNotNull(itemData1.getValue());
+
+		folder.messageArrived(new byte[]{0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,65,66}, null); // 65,66 == 'AB'
+
+		// The folder should have added a schedule to evaluate the message
+		assertEquals(1, driverContext.getExecutor().getScheduledCount());
+		driverContext.getExecutor().runCommand();
+
+		// Test read after message is evaluated
+		folder.readItems(items);
+		DataValue data1Value = itemData1.getValue();
+		assertNotNull(data1Value);
+		assertEquals("AB", data1Value.getValue().getValue());
+	}
+	
+	@Test
+	public void testMessageFolderWithMessageAge() throws Exception {
+
+		// Create settings with message id type = UInt16
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, OptionalDataType.UInt16);
+		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigWithAge.xml");
+
+		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
+		assertEquals(folder.getDriverContext().getDeviceName(), DEVICE_NAME);
+
+		// Check the browse tree
+		assertNotNull(driverContext.getBrowseTree().findTag("Alias1/Data1"));
+		assertNotNull(driverContext.getBrowseTree().findTag("Alias1/_MessageCount"));
+		assertNotNull(driverContext.getBrowseTree().findTag("Alias1/_Timestamp"));
+		assertNotNull(driverContext.getBrowseTree().findTag("Alias1/_MessageAge"));
+
+		// Check the nodes
+		VariableNode nodeData1 = (VariableNode) driverContext.getNode(buildNodeId("Alias1/Data1"));
+		assertNotNull(nodeData1);
+		assertEquals(new LocalizedText("Data1"), nodeData1.getDisplayName());
+		assertEquals(DataType.Int16.getNodeId(), nodeData1.getDataTypeId());
+		assertEquals(ValueRank.Scalar, nodeData1.getValueRank());
+		
+		VariableNode nodeAge = (VariableNode) driverContext.getNode(buildNodeId("Alias1/_MessageAge"));
+		assertNotNull(nodeAge);
+		assertEquals(new LocalizedText("_MessageAge"), nodeAge.getDisplayName());
+		assertEquals(DataType.UInt32.getNodeId(), nodeAge.getDataTypeId());
+		assertEquals(ValueRank.Scalar, nodeAge.getValueRank());
+
+		// Test read
+		MockReadItem itemData1 = new MockReadItem("Alias1/Data1");
+		MockReadItem itemAge = new MockReadItem("Alias1/_MessageAge");
+		List<ReadItem> items = new ArrayList<ReadItem>();
+		items.add(itemData1);
+		items.add(itemAge);
+		folder.readItems(items);
+		assertNotNull(itemData1.getValue());
+
+		folder.messageArrived(new byte[]{0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,20, 0,1,0,2,0,0,0,10}, null); // Data1=1, Data2=2, Age=10ms
+
+		// The folder should have added a schedule to evaluate the message
+		assertEquals(1, driverContext.getExecutor().getScheduledCount());
+		driverContext.getExecutor().runCommand();
+
+		// Test read after message is evaluated
+		folder.readItems(items);
+		DataValue data1Value = itemData1.getValue();
+		assertNotNull(data1Value);
+		assertEquals((short)1, data1Value.getValue().getValue());
+		
+		folder.readItems(items);
+		DataValue ageValue = itemAge.getValue();
+		assertNotNull(ageValue);
+		assertEquals("Message Age", new UInt32(10), ageValue.getValue().getValue());
+	}
+	
+	@Test
 	public void testFolderWithHandshake() throws Exception {
 
 		// Create settings with message id type = None

@@ -193,7 +193,7 @@ public class TestMessageState {
 	}
 
 
-	@Test(timeout=1000)
+	@Test(timeout=100000)
 	public void testSimpleMessage() throws Exception {
 		messageHeader = new MessageHeader(new HeaderConfig(), ByteOrder.BIG_ENDIAN);
 
@@ -323,6 +323,47 @@ public class TestMessageState {
 	}
 
 	@Test (timeout=1000)
+	public void testHeaderWithMessages_sizeWithoutHeader() throws Exception {
+		driverConfig.addMessageConfig(TestUtils.readMessageConfig("/testMessageConfig.xml"));
+
+		HeaderConfig headerConfig = TestUtils.readHeaderConfig("/testHeaderConfig.xml");
+		headerConfig.setSizeIncludesHeader(false);
+		messageHeader = new MessageHeader(headerConfig, ByteOrder.BIG_ENDIAN);
+		
+		MessageState state = new MessageState(remoteSocket, messageHeader, driverConfig, driverSettings);
+		state.setMessageHandler(messageHandler);
+		messageId = -1;
+		// testMessageConfig defines ID 1 with two UInt16 tags
+		ByteBuffer data = ByteBuffer.allocate(20).order(driverSettings.getByteOrder());
+		data.putShort((short) 12);	 // The packet size (2 messages)
+		data.putShort((short) 0xff); // The fixed word
+
+		byte[] msg = new byte[]{0, 1, 0, 2, 0, 3};	// Message ID1
+		data.put(msg);
+		data.flip();
+
+		state.addData(data);
+		assertEquals("MessageId", 1, messageId);
+		assertEquals("Message length including timestamps", 4+2*8, messageDataRaw.length);
+		log.info("MessageData: " + ByteUtilities.toString(messageData));
+		assertArrayEquals("Message data", new byte[]{0,2,0,3}, messageData);
+		assertEquals("One message is pending", 6, state.getPendingBytes());
+
+		// The next message should evaluate ok
+		messageId = -1;	// Reset id for next check
+		msg = new byte[]{0, 1, 1, 1, 3, 3};	// Message ID1
+		data.clear();
+		data.put(msg);
+		data.flip();
+		state.addData(data);
+
+		assertEquals("MessageId", 1, messageId);
+		assertEquals("Message length including timestamps", 4+2*8, messageDataRaw.length);
+		assertArrayEquals("Message data", new byte[]{1,1,3,3}, messageData);
+		assertEquals("Packet should be complete", 0, state.getPendingBytes());
+	}
+	
+	@Test (timeout=1000)
 	public void testValidHeaderWithInvalidMessage() throws Exception {
 		driverConfig.addMessageConfig(TestUtils.readMessageConfig("/testMessageConfig.xml"));
 		MessageState state = new MessageState(remoteSocket, messageHeader, driverConfig, driverSettings);
@@ -394,6 +435,27 @@ public class TestMessageState {
 		assertFalse("No pending message", state.isMessagePending());
 	}
 
+	@Test (timeout=1000)
+	public void testMessagesWithMessageAge() throws Exception {
+		driverConfig.addMessageConfig(TestUtils.readMessageConfig("/testMessageConfigWithAge.xml"));
+		MessageState state = new MessageState(remoteSocket, null, driverConfig, driverSettings);
+		state.setMessageHandler(messageHandler);
+		messageId = -1;
+		// testMessageConfig defines ID 1 with two UInt16 tags
+		ByteBuffer data = ByteBuffer.allocate(20).order(driverSettings.getByteOrder());
+
+		byte[] msg = new byte[]{0, 1, 0, 2, 0, 3, 0, 0, 0, 10};	// Message ID1, Age 10ms
+		data.put(msg);
+		data.flip();
+
+		state.addData(data);
+		assertEquals("MessageId", 1, messageId);
+		assertEquals("Message length including timestamps", 8+2*8, messageDataRaw.length);
+		assertArrayEquals("Message data", new byte[]{0,2,0,3,0,0,0,10}, messageData);
+		assertEquals("Message should be complete", 0, state.getPendingBytes());
+		assertFalse("No pending message", state.isMessagePending());
+	}
+	
 	@Test(timeout=1000)
 	public void testHandshake() throws Exception {
 		messageHeader = new MessageHeader(TestUtils.readHeaderConfig("/testHeaderConfigHandshake.xml"), ByteOrder.BIG_ENDIAN);
