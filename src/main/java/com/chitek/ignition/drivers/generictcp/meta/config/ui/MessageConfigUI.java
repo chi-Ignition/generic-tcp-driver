@@ -653,6 +653,7 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 				int idx = getItem().getIndex();
 				editor.swapItems(idx - 1, idx);
 
+				updateListEditor(editor);
 			}
 		};
 
