@@ -183,14 +183,16 @@ public abstract class MessageFolder implements ISubscriptionChangeListener{
 	public void changeSubscription(List<SubscriptionItem> toAdd, List<SubscriptionItem> toRemove) {
 
 		// Set the address object in the given subscription item
+		List<SubscriptionItem> toAddValid = null;
 		if (toAdd != null) {
+			toAddValid = new ArrayList<SubscriptionItem>(toAdd.size());
 			for (SubscriptionItem item : toAdd) {
 				DynamicDriverTag tag = addressTagMap.get(item.getAddress());
 				if (tag != null) {
 					item.setAddressObject(tag);
+					toAddValid.add(item);
 				} else {
 					log.error("Unknown subscription item:" + item.getAddress());
-					item.setAddressObject(null);
 				}
 			}
 		}
@@ -200,7 +202,7 @@ public abstract class MessageFolder implements ISubscriptionChangeListener{
 			driverContext.registerSelfSchedulingRunnable(getFolderAddress(), UPDATER_COMMAND_NAME, subscriptionUpdater);
 		}
 		
-		subscriptionUpdater.changeSubscription(toAdd, toRemove);
+		subscriptionUpdater.changeSubscription(toAddValid, toRemove);
 	}
 
 	@Override
