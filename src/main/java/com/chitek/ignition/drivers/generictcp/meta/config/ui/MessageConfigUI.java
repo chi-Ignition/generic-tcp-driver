@@ -351,8 +351,7 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 				currentMessage = getConfig().getMessageConfig(currentMessageId);
 
 				// Refresh the form
-				MarkupContainer listEditorContainer = (MarkupContainer) target.getPage().get("config-contents:tabs:panel:edit-form:table-container:list-editor");
-				target.add(listEditorContainer);
+				updateForm(target);
 			}
 
 			@Override
@@ -873,7 +872,6 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 		editor.reloadModel();
 		MarkupContainer listEditorContainer = (MarkupContainer) target.getPage().get("config-contents:tabs:panel:edit-form:table-container:list-editor");
 		target.add(listEditorContainer);
-		//target.addChildren(form, TextField.class);
 	}
 
 	/**
