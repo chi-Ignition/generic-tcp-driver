@@ -111,6 +111,7 @@ public class TestFolderManager {
 		assertEquals(StatusCode.BAD_NOT_CONNECTED, value.getStatusCode());
 		value = FolderTestUtils.readValue(statusFolder, "device1/[Status]/Is Connected");
 		assertEquals(StatusCode.GOOD, value.getStatusCode());
+		assertEquals(false, value.getValue().getValue());
 		
 		// Now update the connection state
 		fm.updateConnectionState(1, true);
@@ -120,6 +121,8 @@ public class TestFolderManager {
 		value = FolderTestUtils.readValue(writeFolder, "device1/[Writeback]/Value");
 		assertEquals(StatusCode.GOOD, value.getStatusCode());	
 		value = FolderTestUtils.readValue(statusFolder, "device1/[Status]/Is Connected");
-		assertEquals(StatusCode.GOOD, value.getStatusCode());		
+		assertEquals(StatusCode.GOOD, value.getStatusCode());
+		assertEquals(true, value.getValue().getValue());
 	}
+	
 }

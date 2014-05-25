@@ -44,7 +44,7 @@ public class StatusFolder extends MessageFolder {
 	private boolean isConnected = false;
 
 	public StatusFolder(GenericTcpClientDriver driver) {
-		super(driver, FolderManager.STATUS_ID, FOLDER_NAME);
+		super(driver, FolderManager.getFolderId(0, FolderManager.STATUS_ID), FOLDER_NAME);
 
 		this.driver = driver;
 		deviceNameValue = new DataValue(new Variant(getDeviceName()));
