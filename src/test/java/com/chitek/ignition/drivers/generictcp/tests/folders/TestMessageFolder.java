@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.lang.reflect.Field;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -16,6 +17,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.chitek.ignition.drivers.generictcp.folder.IndexMessageFolder;
+import com.chitek.ignition.drivers.generictcp.folder.MessageDataWrapper;
 import com.chitek.ignition.drivers.generictcp.meta.config.DriverSettings;
 import com.chitek.ignition.drivers.generictcp.meta.config.MessageConfig;
 import com.chitek.ignition.drivers.generictcp.redundancy.StateUpdate;
@@ -23,6 +25,7 @@ import com.chitek.ignition.drivers.generictcp.tests.MockDriverContext;
 import com.chitek.ignition.drivers.generictcp.tests.TestUtils;
 import com.chitek.ignition.drivers.generictcp.types.OptionalDataType;
 import com.chitek.ignition.drivers.generictcp.types.QueueMode;
+import com.chitek.ignition.drivers.generictcp.util.VariantByteBuffer;
 import com.inductiveautomation.opcua.nodes.VariableNode;
 import com.inductiveautomation.opcua.types.DataType;
 import com.inductiveautomation.opcua.types.DataValue;
@@ -50,6 +53,17 @@ public class TestMessageFolder {
 		driverContext.setDiskPath(testFolder.newFolder().getAbsolutePath());
 	}
 
+	@Test
+	public void testMessageDataWrapper() throws Exception {
+		MessageDataWrapper wrapper = new MessageDataWrapper();
+		byte[] data = MessageDataWrapper.wrapMessage(1000, 2499, (short)2, new byte[]{1,2,3,4},ByteOrder.BIG_ENDIAN);
+		int payloadLength = wrapper.evaluateData(new VariantByteBuffer(data));
+		assertEquals(4, payloadLength);
+		assertEquals(1000, wrapper.getTimeReceived());
+		assertEquals(2, wrapper.getSequenceId());
+		assertEquals(2499, wrapper.getHeaderTimestamp());
+	}
+	
 	@Test
 	public void testMessageFolder() throws Exception {
 

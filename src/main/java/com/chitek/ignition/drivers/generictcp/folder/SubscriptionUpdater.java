@@ -42,7 +42,7 @@ public class SubscriptionUpdater implements SelfSchedulingRunnable {
 	private final Map<String, AggregateSubscriptionItem> items = new HashMap<String, AggregateSubscriptionItem>();
 
 	public SubscriptionUpdater(Lock tagLock, Logger log, ISubscriptionChangeListener listener) {
-		this.log = log;
+		this.log = Logger.getLogger(String.format("%s.Subscription", log.getName()));
 		this.tagLock = tagLock;
 		this.subscriptionChangeListener = listener;
 	}

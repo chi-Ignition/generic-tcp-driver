@@ -15,7 +15,7 @@ public class MessageDataWrapper {
 
 		// Copy the timestamp to the first 8 byte of the message
 		// The timestamp is shifted left by 2 Bytes, the message number is then added
-		byte[] timestamp = ByteUtilities.get(byteOrder).fromLong(receiveTimestamp << 16 + sequenceId);
+		byte[] timestamp = ByteUtilities.get(byteOrder).fromLong( (receiveTimestamp << 16) + sequenceId);
 		System.arraycopy(timestamp, 0, messageData, 0, 8);
 
 		// Copy the header timestamp to the second 8 byte of the message
@@ -45,7 +45,7 @@ public class MessageDataWrapper {
 		// Read the timestamps from the message
 		long id = messageData.getLong();
 		sequenceId = (int) (id & (0xffff));
-		long timestamp = id / 65536; // Remove the sequence number
+		long timestamp = id >> 16; // Remove the sequence number
 		timeReceived = timestamp;
 
 		headerTimestamp = messageData.getLong();
