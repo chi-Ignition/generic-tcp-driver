@@ -448,6 +448,9 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 					buffer.position(pos + messageAgeOffset);
 					long messageAge = (buffer.getInt() & 0xffffffff) * (long)driverSettings.getTimestampFactor();
 					long calculatedAge = headerTimestamp - messageAge;
+					if (calculatedAge < 0) {
+						calculatedAge += driverSettings.getMaxTimestamp() + 1;
+					}
 					if (calculatedAge >= 0) {
 						timestamp -= calculatedAge;
 						timestampUtc = UtcTime.fromJavaTime(timestamp);

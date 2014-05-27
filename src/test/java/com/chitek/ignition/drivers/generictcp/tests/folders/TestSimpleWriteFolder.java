@@ -38,7 +38,7 @@ public class TestSimpleWriteFolder {
 	
 	@Test
 	public void testBrowseTree() throws Exception {
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		WritebackConfig writebackConfig = TestUtils.readWritebackConfig("/testWritebackConfig.xml");
 		new SimpleWriteFolder(driverContext, driverSettings, 1, "device1", writebackConfig);
 	
@@ -60,7 +60,7 @@ public class TestSimpleWriteFolder {
 	
 	@Test
 	public void testRead() throws Exception {
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		WritebackConfig writebackConfig = TestUtils.readWritebackConfig("/testWritebackConfig.xml");
 		SimpleWriteFolder folder = new SimpleWriteFolder(driverContext, driverSettings, 1, "device1", writebackConfig);
 		
@@ -80,7 +80,7 @@ public class TestSimpleWriteFolder {
 	
 	@Test
 	public void testTriggeredWrite() throws Exception {
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		WritebackConfig writebackConfig = TestUtils.readWritebackConfig("/testWritebackConfig.xml");
 		SimpleWriteFolder folder = new SimpleWriteFolder(driverContext, driverSettings, 1, "device1", writebackConfig);
 		
@@ -114,7 +114,7 @@ public class TestSimpleWriteFolder {
 	
 	@Test
 	public void testWriteOnChange() throws Exception {
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		WritebackConfig writebackConfig = TestUtils.readWritebackConfig("/testWritebackConfig.xml");
 		writebackConfig.setSendOnValueChange(true);
 		SimpleWriteFolder folder = new SimpleWriteFolder(driverContext, driverSettings, 1, "device1", writebackConfig);
@@ -151,7 +151,7 @@ public class TestSimpleWriteFolder {
 	
 	@Test
 	public void testNumericIntValue() throws Exception {
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		WritebackConfig writebackConfig = TestUtils.readWritebackConfig("/testWritebackConfig.xml");
 		writebackConfig.setDataType(WritebackDataType.Int32);
 		writebackConfig.setSendOnValueChange(true);
@@ -179,7 +179,7 @@ public class TestSimpleWriteFolder {
 	
 	@Test
 	public void testNumericUIntValue() throws Exception {
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		WritebackConfig writebackConfig = TestUtils.readWritebackConfig("/testWritebackConfig.xml");
 		writebackConfig.setDataType(WritebackDataType.UInt32);
 		writebackConfig.setSendOnValueChange(true);
@@ -200,7 +200,7 @@ public class TestSimpleWriteFolder {
 	@Test
 	public void testReverseByteOrder() throws Exception {
 		// DriverSettings with ReverseByteOrder = true
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, true, 1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, true, 1, (2^32)-1, OptionalDataType.None);
 		
 		WritebackConfig writebackConfig = TestUtils.readWritebackConfig("/testWritebackConfig.xml");
 		writebackConfig.setDataType(WritebackDataType.Int32);
@@ -221,7 +221,7 @@ public class TestSimpleWriteFolder {
 	
 	@Test
 	public void testRedundancy() throws Exception {
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		WritebackConfig writebackConfig = TestUtils.readWritebackConfig("/testWritebackConfig.xml");
 		List<StateUpdate> stateUpdates = new LinkedList<StateUpdate>();
 		
@@ -256,7 +256,7 @@ public class TestSimpleWriteFolder {
 	@Test
 	public void testFullStateTransfer() throws Exception {
 		
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		WritebackConfig writebackConfig = TestUtils.readWritebackConfig("/testWritebackConfig.xml");
 		
 		SimpleWriteFolder folder = new SimpleWriteFolder(driverContext, driverSettings, 1, "device1", writebackConfig);
@@ -276,7 +276,7 @@ public class TestSimpleWriteFolder {
 	
 	@Test
 	public void testActivityLevel() throws Exception {
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		WritebackConfig writebackConfig = TestUtils.readWritebackConfig("/testWritebackConfig.xml");
 		
 		SimpleWriteFolder folder = new SimpleWriteFolder(driverContext, driverSettings, 1, "device1", writebackConfig);
@@ -305,7 +305,7 @@ public class TestSimpleWriteFolder {
 	}
 	
 	/**
-	 * FolderUpdateState is a private class, we have to acces the fields using refelction.
+	 * FolderUpdateState is a private class, we have to acces the fields using reflection.
 	 *
 	 * @param stateUpdate
 	 * @param fieldName

@@ -17,6 +17,7 @@ public class DriverSettings implements IDriverSettings {
 	private final int messageTimeout = 1000;
 	private final ByteOrder byteOrder;
 	private final int timestampFactor;
+	private final long maxTimestamp;
 	private final OptionalDataType messageIdType;
 
 	public DriverSettings(
@@ -26,6 +27,7 @@ public class DriverSettings implements IDriverSettings {
 		int timeout,
 		boolean reverseByteOrder,
 		int timestampFactor,
+		long maxTimestamp,
 		OptionalDataType messageIdType)
 	{
 		this.hostname = hostname;
@@ -34,6 +36,7 @@ public class DriverSettings implements IDriverSettings {
 		this.timeout = timeout;
 		this.byteOrder = reverseByteOrder ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN;
 		this.timestampFactor = timestampFactor;
+		this.maxTimestamp = maxTimestamp;
 		this.messageIdType = messageIdType;
 	}
 
@@ -82,6 +85,11 @@ public class DriverSettings implements IDriverSettings {
 		return timestampFactor;
 	}
 
+	@Override
+	public long getMaxTimestamp() {
+		return maxTimestamp;
+	}
+	
 	/**
 	 * @return
 	 * 		The message id type from the message config. This is no general setting, but

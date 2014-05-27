@@ -18,6 +18,7 @@ public class DriverSettingsPassive implements IDriverSettings {
 	private final int messageTimeout = 1000;
 	private final ByteOrder byteOrder;
 	private final int timestampFactor;
+	private final long maxTimestamp;
 	private final OptionalDataType messageIdType;
 
 	public DriverSettingsPassive(
@@ -26,6 +27,7 @@ public class DriverSettingsPassive implements IDriverSettings {
 		List<RemoteDevice> devices,
 		boolean reverseByteOrder,
 		int timestampFactor,
+		long maxTimestamp,
 		OptionalDataType messageIdType)
 	{
 		this.serverHostname = serverHostname;
@@ -33,6 +35,7 @@ public class DriverSettingsPassive implements IDriverSettings {
 		this.devices = devices;
 		this.byteOrder = reverseByteOrder ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN;
 		this.timestampFactor = timestampFactor;
+		this.maxTimestamp = maxTimestamp;
 		this.messageIdType = messageIdType;
 	}
 
@@ -69,6 +72,11 @@ public class DriverSettingsPassive implements IDriverSettings {
 		return timestampFactor;
 	}
 
+	@Override
+	public long getMaxTimestamp() {
+		return maxTimestamp;
+	}
+	
 	/**
 	 * @return
 	 * 		The message id type from the message config. This is no general setting, but

@@ -67,8 +67,9 @@
 					the server machine and waits for remote devices to establish a 
 					connection. Each driver instance allows multiple remote devices to 
 					connect.</simpara>
-					<simpara>This mode is useful for devices like barcode scanners or 
-					network cameras.</simpara>
+					<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+					This mode is useful for devices like barcode scanners or network 
+					cameras.</simpara>
 				</listitem>
 			</itemizedlist>
 		</para>
@@ -224,6 +225,19 @@ barcodescanner1.company.com,Device3</programlisting>
 						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 						If the device, for example, provides the message age in seconds, 
 						use a factor of 1,000 to convert this to milliseconds.</simpara>
+					</listitem>
+				</varlistentry>
+				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+					Max. Timestamp</term>
+					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+						The maximum possible timestamp that is used by the connected 
+						device. This value is used to detect an overflow in the device 
+						and calculate the age accordingly when the MessageAge tag is 
+						smaller than the 
+						<link xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#packet_timestamp">
+						Packet Timestamp</link> in the message header.</simpara>
 					</listitem>
 				</varlistentry>
 			</variablelist>
@@ -614,7 +628,7 @@ barcodescanner1.company.com,Device3</programlisting>
 						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 						Packet Timestamp</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="packet_timestamp">
 							A 32bit timestamp. Used in combination with a MessageAge tag to 
 							calculate the age of individual messages in the packet.</simpara>
 							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">

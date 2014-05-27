@@ -42,7 +42,7 @@ public class TestNioEventHandler {
 	public void setup() throws Exception {
 		log = DriverTestSuite.getLogger();
 
-		driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, OptionalDataType.UInt16);
+		driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.UInt16);
 		driverConfig = new DriverConfig();
 		driverConfig.setMessageIdType(driverSettings.getMessageIdType());
 

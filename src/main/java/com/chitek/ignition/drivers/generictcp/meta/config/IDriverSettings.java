@@ -8,6 +8,8 @@ public interface IDriverSettings {
 	public ByteOrder getByteOrder();
 
 	public int getTimestampFactor();
+	
+	public long getMaxTimestamp();
 
 	/**
 	 * The maximum time between two parts of a data package. If a package is not completed in

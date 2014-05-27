@@ -49,7 +49,7 @@ public class TestMessageState {
 	public void setup() throws Exception {
 		log = DriverTestSuite.getLogger();
 
-		driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, OptionalDataType.UInt16);
+		driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.UInt16);
 		driverConfig = new DriverConfig();
 		driverConfig.setMessageIdType(driverSettings.getMessageIdType());
 
@@ -215,7 +215,7 @@ public class TestMessageState {
 	public void testSimpleStringMessage() throws Exception {
 
 		// Create settings with message id type = None
-		driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, OptionalDataType.None);
+		driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		driverConfig = new DriverConfig();
 		driverConfig.setMessageIdType(driverSettings.getMessageIdType());
 

@@ -68,7 +68,7 @@ public class TestMessageFolder {
 	public void testMessageFolder() throws Exception {
 
 		// Create settings with message id type = None
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigSimple.xml");
 
 		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
@@ -110,7 +110,7 @@ public class TestMessageFolder {
 	public void testMessageFolderWithId() throws Exception {
 
 		// Create settings with message id type = UInt16
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, OptionalDataType.UInt16);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.UInt16);
 		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigSimple.xml");
 
 		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
@@ -152,7 +152,7 @@ public class TestMessageFolder {
 	public void testMessageFolderWithMessageAge() throws Exception {
 
 		// Create settings with message id type = UInt16
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, OptionalDataType.UInt16);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.UInt16);
 		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigWithAge.xml");
 
 		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
@@ -203,12 +203,112 @@ public class TestMessageFolder {
 		assertNotNull(ageValue);
 		assertEquals("Message Age", new UInt32(10), ageValue.getValue().getValue());
 	}
+
+	@Test
+	public void testMessageFolderWithMessageAgeOverflow() throws Exception {
+
+		// Create settings with message id type = None
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
+		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigWithAge.xml");
+
+		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
+		assertEquals(folder.getDriverContext().getDeviceName(), DEVICE_NAME);
+		
+		// Test read
+		MockReadItem itemData1 = new MockReadItem("Alias1/Data1");
+		MockReadItem itemAge = new MockReadItem("Alias1/_MessageAge");
+		List<ReadItem> items = new ArrayList<ReadItem>();
+		items.add(itemData1);
+		items.add(itemAge);
+		folder.readItems(items);
+		assertNotNull(itemData1.getValue());
+
+		folder.messageArrived(new byte[]{0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,10, 0,1,0,2, (byte) 0xff,(byte) 0xff,(byte) 0xff,(byte) 0xf6}, null); // Data1=1, Data2=2, Age=20ms
+
+		// The folder should have added a schedule to evaluate the message
+		assertEquals(1, driverContext.getExecutor().getScheduledCount());
+		driverContext.getExecutor().runCommand();
+
+		// Test read after message is evaluated	
+		folder.readItems(items);
+		DataValue ageValue = itemAge.getValue();
+		assertNotNull(ageValue);
+		assertEquals("Message Age", new UInt32(20), ageValue.getValue().getValue());
+	}
+	
+	@Test
+	public void testMessageFolderWithMessageAgeOverflow2() throws Exception {
+
+		// Create settings with message id type = None
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, 2147483647, OptionalDataType.None);
+		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigWithAge.xml");
+
+		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
+		assertEquals(folder.getDriverContext().getDeviceName(), DEVICE_NAME);
+		
+		// Test read
+		MockReadItem itemData1 = new MockReadItem("Alias1/Data1");
+		MockReadItem itemAge = new MockReadItem("Alias1/_MessageAge");
+		List<ReadItem> items = new ArrayList<ReadItem>();
+		items.add(itemData1);
+		items.add(itemAge);
+		folder.readItems(items);
+		assertNotNull(itemData1.getValue());
+
+		folder.messageArrived(new byte[]{0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,10, 0,1,0,2, (byte) 0x7f,(byte) 0xff,(byte) 0xff,(byte) 0xff}, null); // Data1=1, Data2=2, Age=20ms
+
+		// The folder should have added a schedule to evaluate the message
+		assertEquals(1, driverContext.getExecutor().getScheduledCount());
+		driverContext.getExecutor().runCommand();
+
+		// Test read after message is evaluated	
+		folder.readItems(items);
+		DataValue ageValue = itemAge.getValue();
+		assertNotNull(ageValue);
+		assertEquals("Message Age", new UInt32(11), ageValue.getValue().getValue());
+		
+		folder.messageArrived(new byte[]{0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,10, 0,1,0,2, 0,0,0,0}, null); // Data1=1, Data2=2, Age=20ms
+
+		// The folder should have added a schedule to evaluate the message
+		assertEquals(1, driverContext.getExecutor().getScheduledCount());
+		driverContext.getExecutor().runCommand();
+
+		// Test read after message is evaluated	
+		folder.readItems(items);
+		ageValue = itemAge.getValue();
+		assertNotNull(ageValue);
+		assertEquals("Message Age", new UInt32(10), ageValue.getValue().getValue());
+		
+		folder.messageArrived(new byte[]{0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,1,0,2, (byte) 0x7f,(byte) 0xff,(byte) 0xff,(byte) 0xff}, null); // Data1=1, Data2=2, Age=20ms
+
+		// The folder should have added a schedule to evaluate the message
+		assertEquals(1, driverContext.getExecutor().getScheduledCount());
+		driverContext.getExecutor().runCommand();
+
+		// Test read after message is evaluated	
+		folder.readItems(items);
+		ageValue = itemAge.getValue();
+		assertNotNull(ageValue);
+		assertEquals("Message Age", new UInt32(1), ageValue.getValue().getValue());
+		
+		folder.messageArrived(new byte[]{0,0,0,0,0,0,0,0, 0,0,0,0,(byte) 0x7f,(byte) 0xff,(byte) 0xff,(byte) 0xf0, 0,1,0,2, (byte) 0x7f,(byte) 0xff,(byte) 0xff,(byte) 0xe0}, null); // Data1=1, Data2=2, Age=20ms
+
+		// The folder should have added a schedule to evaluate the message
+		assertEquals(1, driverContext.getExecutor().getScheduledCount());
+		driverContext.getExecutor().runCommand();
+
+		// Test read after message is evaluated	
+		folder.readItems(items);
+		ageValue = itemAge.getValue();
+		assertNotNull(ageValue);
+		assertEquals("Message Age", new UInt32(16), ageValue.getValue().getValue());
+	}
 	
 	@Test
 	public void testFolderWithHandshake() throws Exception {
 
 		// Create settings with message id type = None
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigSimple.xml");
 		messageConfig.setQueueMode(QueueMode.HANDSHAKE);
 
@@ -224,7 +324,7 @@ public class TestMessageFolder {
 	@Test
 	public void testQueueMode() throws Exception {
 		// Create settings with message id type = None
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigQueue.xml");
 
 		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
@@ -301,7 +401,7 @@ public class TestMessageFolder {
 	@Test
 	public void testRedundancy() throws Exception {
 		// Create settings with message id type = None
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigQueue.xml");
 		List<StateUpdate> stateUpdates = new LinkedList<StateUpdate>();
 
@@ -361,7 +461,7 @@ public class TestMessageFolder {
 	
 	@Test
 	public void testFullStateTransfer() throws Exception {
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigQueue.xml");
 
 		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
@@ -390,7 +490,7 @@ public class TestMessageFolder {
 	
 	@Test
 	public void testBrowseTree() throws Exception {
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigSimple.xml");
 		messageConfig.setQueueMode(QueueMode.HANDSHAKE);
 		new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
@@ -414,7 +514,7 @@ public class TestMessageFolder {
 	@Test
 	public void testInvalidMessage() throws Exception {
 		// Here we simply test that no Exception is thrown
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigSimple.xml");
 		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
 		

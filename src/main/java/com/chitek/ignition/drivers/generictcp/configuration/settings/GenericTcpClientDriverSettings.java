@@ -19,6 +19,7 @@ import com.inductiveautomation.ignition.gateway.localdb.persistence.PersistentRe
 import com.inductiveautomation.ignition.gateway.localdb.persistence.RecordMeta;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.ReferenceField;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.StringField;
+import com.inductiveautomation.opcua.types.UInt32;
 import com.inductiveautomation.opcua.util.Base64;
 import com.inductiveautomation.xopc.driver.api.configuration.DeviceSettingsRecord;
 
@@ -41,6 +42,7 @@ public class GenericTcpClientDriverSettings extends PersistentRecord implements 
 	/* Message Handling */
 	public static BooleanField ReverseByteOrder = new BooleanField(META, "ReverseByteOrder");
 	public static IntField TimestampFactor = new IntField(META, "TimestampFactor");
+	public static LongField MaxTimestamp = new LongField(META, "MaxTimestamp");
 
 	/* Config */
 	public static BlobField MessageConfig = new BlobField(META, "MessageConfig");
@@ -51,7 +53,7 @@ public class GenericTcpClientDriverSettings extends PersistentRecord implements 
 	public static final Category Connectivity = new Category("GenericTcpClientDriverSettings.Category.Connectivity", 1001)
 	.include(Hostname, Port, ConnectOnStartup, Timeout);
 	public static Category MessageHandling = new Category("GenericTcpClientDriverSettings.Category.MessageHandling", 1002)
-	.include(ReverseByteOrder, TimestampFactor);
+	.include(ReverseByteOrder, TimestampFactor, MaxTimestamp);
 
 	static {
 		DeviceSettings.getFormMeta().setVisible(false);
@@ -64,10 +66,11 @@ public class GenericTcpClientDriverSettings extends PersistentRecord implements 
 		Port.addValidator(new RangeValidator<Integer>(1, 65535));
 		ConnectOnStartup.setDefault(true);
 		Timeout.setDefault(0);
-		TimestampFactor.addValidator(new RangeValidator<Integer>(0, 3600000));
 		ReverseByteOrder.setDefault(false);
 		TimestampFactor.setDefault(1);
 		TimestampFactor.addValidator(new RangeValidator<Integer>(1, 1000));
+		MaxTimestamp.setDefault(UInt32.MAX_VALUE);
+		MaxTimestamp.getFormMeta().addValidator(new RangeValidator<Long>((long)128, UInt32.MAX_VALUE));
 
 		MessageConfig.setDefault(new byte[0]);
 		HeaderConfig.setDefault(new byte[0]);
@@ -95,6 +98,7 @@ public class GenericTcpClientDriverSettings extends PersistentRecord implements 
 			getTimeout(),
 			getReverseByteOrder(),
 			getTimestampFactor(),
+			getMaxTimestamp(),
 			messageIdType);
 	}
 
@@ -122,6 +126,10 @@ public class GenericTcpClientDriverSettings extends PersistentRecord implements 
 		return getInt(TimestampFactor);
 	}
 
+	public long getMaxTimestamp() {
+		return getLong(MaxTimestamp);
+	}
+	
 	@Override
 	public byte[] getMessageConfig() {
 		return getBytes(MessageConfig);
@@ -225,6 +233,10 @@ public class GenericTcpClientDriverSettings extends PersistentRecord implements 
 
 	public void setTimestampFactor(int timestampFactor) {
 		setInt(TimestampFactor, timestampFactor);
+	}
+	
+	public void setMaxTimestamp(long maxTimestamp) {
+		setLong(MaxTimestamp, maxTimestamp);
 	}
 
 	@Override
