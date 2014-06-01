@@ -262,6 +262,9 @@ public class GenericTcpClientDriver extends AbstractGenericTcpDriver implements 
 				connectingSocket = null;
 			}
 			socket.setSoTimeout(driverSettings.getTimeout());
+			if (log.isDebugEnabled()) {
+				log.debug(String.format("Socket connected, timeout set to %d ms", driverSettings.getTimeout()));
+			}
 
 			synchronized (getIoSessionLock()) {
 				// Make sure that the connection has not been disabled
@@ -272,7 +275,9 @@ public class GenericTcpClientDriver extends AbstractGenericTcpDriver implements 
 							return new Thread(r, String.format("AsyncSocketIOSession[%s]", getDeviceName()));
 						}
 					});
-					ioSession.setEventHandler(new ClientEventHandler(log, messageConfig, driverSettings, messageHeader, this));
+					ClientEventHandler eventHandler = new ClientEventHandler(log, messageConfig, driverSettings, messageHeader, this);
+					ioSession.setEventHandler(eventHandler);
+					ioSession.setTimeoutHandler(eventHandler);
 					ioSession.start();
 					String ip = socket.getInetAddress().getHostAddress();
 					connectedHost = ip;
