@@ -218,7 +218,7 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 
 		tableContainer.add(getQueueModeDropdown());
 
-		tableContainer.add(new CheckBox("usePersistance"));
+		tableContainer.add(new CheckBox("usePersistance").setOutputMarkupId(true));
 
 		WebMarkupContainer listEditorContainer = new WebMarkupContainer("list-editor");
 		
@@ -371,7 +371,7 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 
 	private DropDownChoice<QueueMode> getQueueModeDropdown() {
 		DropDownChoice<QueueMode> dropDown = new DropDownChoice<QueueMode>("queueMode", QueueMode.getOptions(), new EnumChoiceRenderer<QueueMode>(this));
-
+		dropDown.setOutputMarkupId(true);
 		return dropDown;
 	}
 
@@ -869,6 +869,8 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 	private void updateForm(AjaxRequestTarget target) {
 		// Refresh the drop down choice
 		target.add(currentMessageIdDropdown);
+		target.add(target.getPage().get("config-contents:tabs:panel:edit-form:table-container:usePersistance"));
+		target.add(target.getPage().get("config-contents:tabs:panel:edit-form:table-container:queueMode"));
 
 		// Refresh the form
 		editor.reloadModel();
