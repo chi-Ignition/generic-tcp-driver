@@ -29,13 +29,13 @@ public class FolderManager {
 	 * 	The unique folder id for the given device and folder id.
 	 */
 	public static int getFolderId(int deviceId, int folderId) {
-		int id =  (deviceId << 16) | (folderId & 0xffff);
+		int id =  (deviceId << 24) | (folderId & 0xffffff);
 		return id;
 	}
 
 	public static String folderIdAsString(int folderId) {
-		int deviceId = folderId >> 16;
-		int messageId = folderId & 0xffff;
+		int deviceId = folderId >> 24;
+		int messageId = folderId & 0xffffff;
 		return String.format("device %d-msg %d", deviceId, messageId);
 	}
 	
@@ -47,7 +47,7 @@ public class FolderManager {
 	 * 	<code>true</code> if the given folder id matches the device id
 	 */
 	public static boolean deviceIdEquals(int deviceId, int folderId) {
-		boolean result = (folderId >> 16) == deviceId;
+		boolean result = (folderId >> 24) == deviceId;
 		return result;
 	}
 	
@@ -55,7 +55,7 @@ public class FolderManager {
 	
 	/**
 	 * Map of message folders<br>
-	 * Key is (device id << 16) | (message id & 0xffff) (device id is the index in the device list)<br>
+	 * Key is (device id << 24) | (message id & 0xffffff) (device id is the index in the device list)<br>
 	 * device id is 0 in active mode
 	 */
 	private final Map<Integer, MessageFolder> folderMap = new HashMap<Integer, MessageFolder>();
@@ -76,6 +76,9 @@ public class FolderManager {
 	 * 	The MessageFolder to add to the map.
 	 */
 	public void addFolder(MessageFolder folder) {
+		if (log.isDebugEnabled()) {
+			log.debug(String.format("Adding folder %s with ID %s", folder.getClass().getSimpleName(), folder.getFolderId()));
+		}
 		folderMap.put(folder.getFolderId(), folder);
 		addressMap.put(folder.getFolderAddress(), folder);
 	}
