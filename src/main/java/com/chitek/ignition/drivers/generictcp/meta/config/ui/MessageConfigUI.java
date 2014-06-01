@@ -842,10 +842,12 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 
 		int newId = id + 1;
 		for (MessageConfig message : getConfig().getMessageList()) {
-			if (message.getMessageId() == newId)
-				newId++;
-			else
-				break;
+			if (message.getMessageId() > id) {
+				if (message.getMessageId() == newId)
+					newId++;
+				else
+					break;
+			}
 		}
 		return newId;
 	}
