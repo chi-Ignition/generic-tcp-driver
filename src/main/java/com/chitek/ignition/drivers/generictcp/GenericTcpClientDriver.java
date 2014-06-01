@@ -275,11 +275,7 @@ public class GenericTcpClientDriver extends AbstractGenericTcpDriver implements 
 					ioSession.setEventHandler(new ClientEventHandler(log, messageConfig, driverSettings, messageHeader, this));
 					ioSession.start();
 					String ip = socket.getInetAddress().getHostAddress();
-					String hostname = socket.getInetAddress().getHostName();
-					if (ip.equalsIgnoreCase(hostname))
-						connectedHost = ip;
-					else
-						connectedHost = String.format("%s (%s)", ip, hostname);
+					connectedHost = ip;
 					notifyConnectDone(true);
 				}
 			}
