@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.chitek.ignition</groupId>
 	<artifactId>generic-tcp-driver</artifactId>
-	<version>2.6.0</version>
+	<version>2.6.1</version>
 	<name>generic-tcp-driver</name>
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>
@@ -287,6 +287,6 @@
 	</dependencies>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<local-gateway-url>http://10.224.1.104:8088/main/system/DeveloperModuleLoadingServlet</local-gateway-url>
+		<local-gateway-url>http://10.224.10.104:8088/main/system/DeveloperModuleLoadingServlet</local-gateway-url>
 	</properties>
 </project>
