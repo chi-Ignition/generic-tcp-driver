@@ -68,6 +68,7 @@ import com.chitek.ignition.drivers.generictcp.meta.config.DriverConfig;
 import com.chitek.ignition.drivers.generictcp.meta.config.MessageConfig;
 import com.chitek.ignition.drivers.generictcp.meta.config.TagConfig;
 import com.chitek.ignition.drivers.generictcp.types.BinaryDataType;
+import com.chitek.ignition.drivers.generictcp.types.MessageType;
 import com.chitek.ignition.drivers.generictcp.types.OptionalDataType;
 import com.chitek.ignition.drivers.generictcp.types.QueueMode;
 import com.chitek.wicket.FeedbackTextField;
@@ -215,6 +216,8 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 			}
 		});
 		tableContainer.add(deleteButton);
+		
+		tableContainer.add(getMessageTypeDropdown());
 
 		tableContainer.add(getQueueModeDropdown());
 
@@ -349,6 +352,7 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 
 				// Change the current message
 				currentMessage = getConfig().getMessageConfig(currentMessageId);
+				currentMessage.calcOffsets(getConfig().getMessageIdType().getByteSize());
 
 				// Refresh the form
 				updateForm(target);
@@ -371,6 +375,12 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 
 	private DropDownChoice<QueueMode> getQueueModeDropdown() {
 		DropDownChoice<QueueMode> dropDown = new DropDownChoice<QueueMode>("queueMode", QueueMode.getOptions(), new EnumChoiceRenderer<QueueMode>(this));
+		dropDown.setOutputMarkupId(true);
+		return dropDown;
+	}
+	
+	private DropDownChoice<MessageType> getMessageTypeDropdown() {
+		DropDownChoice<MessageType> dropDown = new DropDownChoice<MessageType>("messageType", MessageType.getOptions(), new EnumChoiceRenderer<MessageType>(this));
 		dropDown.setOutputMarkupId(true);
 		return dropDown;
 	}

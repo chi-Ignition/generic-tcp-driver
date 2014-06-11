@@ -36,18 +36,14 @@ public class DriverConfig implements Serializable {
 	public Map<Integer, MessageConfig> messages = new HashMap<Integer, MessageConfig>();
 	
 	/**
-	 * Returns the message with the given ID. The byte offsets are recalculated
-	 * in the returned message.
+	 * Returns the message with the given ID.
 	 * 
 	 * @param messageId
 	 * @return
 	 * 		The message configuration with the given Id, or null if message is not defined
 	 */
 	public MessageConfig getMessageConfig(int messageId) {
-		MessageConfig messageConfig=messages.get(messageId);
-		if (messageConfig != null)
-			messages.get(messageId).calcOffsets(getMessageIdType().getByteSize());
-		return messageConfig;
+		return messages.get(messageId);;
 	}
 	
 	/**
