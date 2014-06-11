@@ -2,6 +2,7 @@ package com.chitek.ignition.drivers.generictcp.io;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,7 +48,7 @@ public class MessageState {
 	private int currentMsgLength = 0;
 	private int currentMsgPos = 0;
 	/** Buffer for current message **/
-	byte[] currentMsgData;
+	private byte[] currentMsgData;
 
 	public MessageState(InetSocketAddress remoteSocket, MessageHeader messageHeader, DriverConfig driverConfig, IDriverSettings settings) {
 		this(remoteSocket, messageHeader, driverConfig, settings, Logger.getLogger(MessageState.class.getSimpleName()));
@@ -73,15 +74,18 @@ public class MessageState {
 		this.messageHeader = messageHeader;
 
 		// Message lengths are stored in a map, to get fast access when evaluating incoming data
+		int maxLength = 0;
 		this.messageLengthMap = new HashMap<Integer, Integer>(driverConfig.messages.size());
 		for (Map.Entry<Integer, MessageConfig> configEntry : driverConfig.messages.entrySet()) {
 			MessageConfig messageConfig = configEntry.getValue();
 			messageLengthMap.put(messageConfig.getMessageId(), messageConfig.getMessageLength());
+			maxLength = Math.max(maxLength, messageConfig.getMessageLength());
 		}
 		this.headerLength = messageHeader != null ? messageHeader.getHeaderLength() : 0;
 		this.settings = settings;
 		messageIdBytes = new byte[settings.getMessageIdType().getByteSize()];
 
+		currentMsgData = new byte[maxLength];
 		headerData = ByteBuffer.allocate(headerLength);
 	}
 
@@ -171,8 +175,6 @@ public class MessageState {
 							messagePending = true;
 							currentMsgLength = msgLength;
 							currentMsgPos = 0;
-							// The data array will be passed to the handler, so we have to create a new one for every message
-							currentMsgData = new byte[currentMsgLength];
 							// Use message length for pending bytes when no header is used
 							if (!headerReceived) {
 								pendingBytes = msgLength;
@@ -196,6 +198,12 @@ public class MessageState {
 			} else if (messagePending) {
 				// valid message ID has been received
 				int bytesToRead = Math.min(data.remaining(), currentMsgLength-currentMsgPos);
+
+				// Resize the current message buffer if necessary			
+				if (currentMsgData.length < currentMsgPos + bytesToRead) {
+					currentMsgData = Arrays.copyOf(currentMsgData, currentMsgPos + bytesToRead);
+				}
+								
 				data.get(currentMsgData, currentMsgPos, bytesToRead);
 				currentMsgPos += bytesToRead;
 				pendingBytes -= bytesToRead;
@@ -318,12 +326,14 @@ public class MessageState {
 			log.error("deliverMessage failed. No message handler set.");
 		} else {
 
+			// The byte array is stored by the receiver, so we have to create a new one every time
+			byte[] messageData = Arrays.copyOfRange(currentMsgData, 0, currentMsgPos);
 			if (log.isDebugEnabled()) {
-				log.debug(String.format("Delivering message ID %d with %d bytes of payload data.", currentMessageId, currentMsgData.length));
+				log.debug(String.format("Delivering message ID %d with %d bytes of payload data.", currentMessageId, currentMsgPos));
 			}
 			
 			// Wrap the message with timestamps
-			byte[] wrappedMessage = MessageDataWrapper.wrapMessage(packetStartDate, headerTimestamp, msgNumber, currentMsgData, settings.getByteOrder());
+			byte[] wrappedMessage = MessageDataWrapper.wrapMessage(packetStartDate, headerTimestamp, msgNumber, messageData, settings.getByteOrder());
 
 			if (headerReceived && pendingBytes == 0)
 				// Last message in packet - send handshake to device
