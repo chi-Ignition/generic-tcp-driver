@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -75,7 +74,6 @@ public abstract class MessageFolder implements ISubscriptionChangeListener{
 	private final int folderId;
 	private final String folderAddress;
 	protected final Logger log;
-	private ScheduledFuture<?> updaterSchedule;
 
 	/**
 	 * This Lock synchronizes all access to tag values. This makes sure, that a incoming message will always be
@@ -232,9 +230,9 @@ public abstract class MessageFolder implements ISubscriptionChangeListener{
 		// Stop subscriptions before removing the Nodes
 		tagLock.lock();
 		try {
-			if (updaterSchedule != null) {
-				updaterSchedule.cancel(false);
-				updaterSchedule = null;
+			if (subscriptionUpdater != null) {
+				driverContext.unregisterScheduledRunnable(getFolderAddress(), UPDATER_COMMAND_NAME);
+				subscriptionUpdater = null;
 			}
 		} finally {
 			tagLock.unlock();
