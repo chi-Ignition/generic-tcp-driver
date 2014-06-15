@@ -3,7 +3,6 @@ package com.chitek.ignition.drivers.generictcp.meta.config.ui;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.extensions.markup.html.tabs.TabbedPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -54,12 +53,6 @@ public class ConfigUiTabs extends ConfigPanel {
 		this.configPage = configPage;
 		this.returnPanel = returnPanel;
 		this.callback = callback;
-		
-		// Clear caches in development mode
-		if (this.getApplication().getConfigurationType() == RuntimeConfigurationType.DEVELOPMENT) {
-			this.getApplication().getResourceSettings().getPropertiesFactory().clearCache();
-			this.getApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().clear();
-		}
 		
 		settingsRecordModel = new RecordModel<PersistentRecord>(settingsRecord);
 		try {

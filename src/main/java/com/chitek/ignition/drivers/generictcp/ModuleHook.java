@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2013 C. Hiesserich
+ * Copyright 2012-2014 C. Hiesserich
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,15 @@ public class ModuleHook extends AbstractDriverModuleHook {
 				e.printStackTrace();
 			}
 		}
-
+		
+		// Clear Wicket's markup cache. Actually this is only necessary when the module is upgraded to a new version, but there's
+		// no way to detect this situation.
+		if (context.getWebApplication().getMarkupSettings().getMarkupFactory().hasMarkupCache()) {
+			// When the gateway service is started, the is no markup cache yet.
+			context.getWebApplication().getResourceSettings().getPropertiesFactory().clearCache();
+			context.getWebApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().clear();
+		}
+		
 		super.setup(context);
 	}
 
