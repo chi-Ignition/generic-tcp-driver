@@ -26,12 +26,14 @@ import org.apache.log4j.Logger;
 import com.chitek.ignition.drivers.generictcp.folder.MessageHeader;
 import com.chitek.ignition.drivers.generictcp.meta.config.DriverConfig;
 import com.chitek.ignition.drivers.generictcp.meta.config.IDriverSettings;
+import com.inductiveautomation.ignition.common.execution.ExecutionManager;
 import com.inductiveautomation.xopc.driver.util.ByteUtilities;
 
 public class NioEventHandler implements IIoEventHandler {
 
 	private final Logger log;
 
+	private final ExecutionManager executionManager;
 	private final DriverConfig driverConfig;
 	private final IDriverSettings driverSettings;
 	private final MessageHeader messageHeader;
@@ -39,8 +41,9 @@ public class NioEventHandler implements IIoEventHandler {
 
 	private final Map<InetSocketAddress,MessageState> clientMap=new HashMap<InetSocketAddress,MessageState>();
 
-	public NioEventHandler(Logger log, DriverConfig driverConfig, IDriverSettings driverSettings, MessageHeader messageHeader, IMessageHandler messageHandler) {
+	public NioEventHandler(Logger log, ExecutionManager executionManager, DriverConfig driverConfig, IDriverSettings driverSettings, MessageHeader messageHeader, IMessageHandler messageHandler) {
 		this.log = log;
+		this.executionManager = executionManager;
 		this.driverConfig = driverConfig;
 		this.driverSettings = driverSettings;
 		this.messageHeader = messageHeader;
@@ -77,7 +80,7 @@ public class NioEventHandler implements IIoEventHandler {
 	private MessageState getMessageState(InetSocketAddress remoteSocket) {
 		MessageState state = clientMap.get(remoteSocket);
 		if (state == null) {
-			state = new MessageState(remoteSocket, messageHeader, driverConfig, driverSettings, log);
+			state = new MessageState(remoteSocket, executionManager, messageHeader, driverConfig, driverSettings, log);
 			state.setMessageHandler(messageHandler);
 			clientMap.put(remoteSocket, state);
 		}

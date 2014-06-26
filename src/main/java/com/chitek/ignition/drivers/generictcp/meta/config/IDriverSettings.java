@@ -13,7 +13,7 @@ public interface IDriverSettings {
 
 	/**
 	 * The maximum time between two parts of a data package. If a package is not completed in
-	 * the time given here, incoming data will be discarded.
+	 * the time given here, incoming data will be discarded (or forwarded in packet based mode).
 	 *
 	 * @return
 	 */

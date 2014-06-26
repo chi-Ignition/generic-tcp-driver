@@ -40,6 +40,7 @@ public class GenericTcpClientDriverSettings extends PersistentRecord implements 
 	public static IntField Timeout = new IntField(META, "Timeout");
 
 	/* Message Handling */
+	public static IntField PacketTimeout = new IntField(META, "PacketTimeout");
 	public static BooleanField ReverseByteOrder = new BooleanField(META, "ReverseByteOrder");
 	public static IntField TimestampFactor = new IntField(META, "TimestampFactor");
 	public static LongField MaxTimestamp = new LongField(META, "MaxTimestamp");
@@ -53,7 +54,7 @@ public class GenericTcpClientDriverSettings extends PersistentRecord implements 
 	public static final Category Connectivity = new Category("GenericTcpClientDriverSettings.Category.Connectivity", 1001)
 	.include(Hostname, Port, ConnectOnStartup, Timeout);
 	public static Category MessageHandling = new Category("GenericTcpClientDriverSettings.Category.MessageHandling", 1002)
-	.include(ReverseByteOrder, TimestampFactor, MaxTimestamp);
+	.include(PacketTimeout, ReverseByteOrder, TimestampFactor, MaxTimestamp);
 
 	static {
 		DeviceSettings.getFormMeta().setVisible(false);
@@ -66,6 +67,8 @@ public class GenericTcpClientDriverSettings extends PersistentRecord implements 
 		Port.addValidator(new RangeValidator<Integer>(1, 65535));
 		ConnectOnStartup.setDefault(true);
 		Timeout.setDefault(0);
+		PacketTimeout.setDefault(1000);
+		PacketTimeout.addValidator(new RangeValidator<Integer>(50, 10000));
 		ReverseByteOrder.setDefault(false);
 		TimestampFactor.setDefault(1);
 		TimestampFactor.addValidator(new RangeValidator<Integer>(1, 1000));
@@ -96,6 +99,7 @@ public class GenericTcpClientDriverSettings extends PersistentRecord implements 
 			getPort(),
 			getConnectOnStartup(),
 			getTimeout(),
+			getPacketTimeout(),
 			getReverseByteOrder(),
 			getTimestampFactor(),
 			getMaxTimestamp(),
@@ -118,6 +122,10 @@ public class GenericTcpClientDriverSettings extends PersistentRecord implements 
 		return getInt(Timeout);
 	}
 
+	public int getPacketTimeout() {
+		return getInt(PacketTimeout);
+	}
+	
 	public boolean getReverseByteOrder() {
 		return getBoolean(ReverseByteOrder);
 	}
@@ -227,6 +235,10 @@ public class GenericTcpClientDriverSettings extends PersistentRecord implements 
 		setInt(Timeout, timeout);
 	}
 
+	public void setPacketTimeout(int timeout) {
+		setInt(PacketTimeout, timeout);
+	}
+	
 	public void setReverseByteOrder(boolean reverseByteOrder) {
 		setBoolean(ReverseByteOrder, reverseByteOrder);
 	}

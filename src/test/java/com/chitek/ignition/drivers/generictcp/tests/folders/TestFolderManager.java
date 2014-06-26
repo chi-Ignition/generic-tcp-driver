@@ -91,7 +91,7 @@ public class TestFolderManager {
 		FolderManager fm = new FolderManager(DriverTestSuite.getLogger());
 		
 		// Setup a typical passive mode configuration
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		WritebackConfig writebackConfig = TestUtils.readWritebackConfig("/testWritebackConfig.xml");
 		SimpleWriteFolder writeFolder = new SimpleWriteFolder(driverContext, driverSettings, 1, "device1", writebackConfig);
 		fm.addFolder(writeFolder);

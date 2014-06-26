@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import com.chitek.ignition.drivers.generictcp.folder.MessageHeader;
 import com.chitek.ignition.drivers.generictcp.meta.config.DriverConfig;
 import com.chitek.ignition.drivers.generictcp.meta.config.IDriverSettings;
+import com.inductiveautomation.ignition.common.execution.ExecutionManager;
 import com.inductiveautomation.iosession.async.IOEventHandler;
 import com.inductiveautomation.iosession.socket.IOTimeoutHandler;
 
@@ -17,10 +18,10 @@ public class ClientEventHandler implements IOEventHandler, IOTimeoutHandler {
 	private final IMessageHandler messageHandler;
 	private final MessageState state;
 	
-	public ClientEventHandler(Logger log, DriverConfig driverConfig, IDriverSettings driverSettings, MessageHeader messageHeader, IMessageHandler messageHandler) {
+	public ClientEventHandler(Logger log, ExecutionManager executionManager, DriverConfig driverConfig, IDriverSettings driverSettings, MessageHeader messageHeader, IMessageHandler messageHandler) {
 			this.messageHandler = messageHandler;
 			
-			state = new MessageState(null, messageHeader, driverConfig, driverSettings, log);
+			state = new MessageState(null, executionManager, messageHeader, driverConfig, driverSettings, log);
 			state.setMessageHandler(messageHandler);
 		}
 	

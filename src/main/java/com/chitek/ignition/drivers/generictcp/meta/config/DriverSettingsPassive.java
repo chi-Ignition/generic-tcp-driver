@@ -15,7 +15,7 @@ public class DriverSettingsPassive implements IDriverSettings {
 	private final String serverHostname;
 	private final int serverPort;
 	private final List<RemoteDevice> devices;
-	private final int messageTimeout = 1000;
+	private final int messageTimeout;
 	private final ByteOrder byteOrder;
 	private final int timestampFactor;
 	private final long maxTimestamp;
@@ -25,6 +25,7 @@ public class DriverSettingsPassive implements IDriverSettings {
 		String serverHostname,
 		int serverPort,
 		List<RemoteDevice> devices,
+		int packetTimeout,
 		boolean reverseByteOrder,
 		int timestampFactor,
 		long maxTimestamp,
@@ -33,6 +34,7 @@ public class DriverSettingsPassive implements IDriverSettings {
 		this.serverHostname = serverHostname;
 		this.serverPort = serverPort;
 		this.devices = devices;
+		this.messageTimeout = packetTimeout;
 		this.byteOrder = reverseByteOrder ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN;
 		this.timestampFactor = timestampFactor;
 		this.maxTimestamp = maxTimestamp;

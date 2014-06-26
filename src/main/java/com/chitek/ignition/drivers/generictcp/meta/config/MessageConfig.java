@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.chitek.ignition.drivers.generictcp.types.MessageType;
 import com.chitek.ignition.drivers.generictcp.types.QueueMode;
 import com.chitek.util.XMLConfigParser;
 
@@ -32,6 +33,7 @@ public class MessageConfig implements Comparable<MessageConfig>, Serializable {
 	public int messageId;
 	private QueueMode queueMode = QueueMode.NONE;
 	private boolean usePersistance = false;
+	private MessageType messageType = MessageType.FIXED_LENGTH;
 	private int messageLength = 0;
 	private int configHash = 0;
 
@@ -54,6 +56,10 @@ public class MessageConfig implements Comparable<MessageConfig>, Serializable {
 		this.messageAlias = messageAlias;
 	}
 
+	public MessageType getMessageType() {
+		return messageType;
+	}
+	
 	public int getMessageId() {
 		return messageId;
 	}
@@ -68,16 +74,28 @@ public class MessageConfig implements Comparable<MessageConfig>, Serializable {
 
 	/**
 	 * Method used by XML-Parser
-	 * @param queueModeName
+	 * @param enumName
 	 */
-	public void setQueueMode(String messageLengthTypeName) {
-		this.queueMode = QueueMode.valueOf(messageLengthTypeName.trim().toUpperCase());
+	public void setQueueMode(String enumName) {
+		this.queueMode = QueueMode.valueOf(enumName.trim().toUpperCase());
 	}
 	
 	public QueueMode getQueueMode() {
 		return queueMode;
 	}
 
+	public void setMessageType(MessageType messageType) {
+		this.messageType = messageType;
+	}
+	
+	/**
+	 * Method used by XML-Parser
+	 * @param enumName
+	 */
+	public void setMessageType(String enumName) {
+		this.messageType = MessageType.valueOf(enumName.trim().toUpperCase());
+	}
+	
 	public boolean isUsePersistance() {
 		return usePersistance;
 	}
@@ -96,6 +114,10 @@ public class MessageConfig implements Comparable<MessageConfig>, Serializable {
 		messageLength += tagConfig.getSize()*tagConfig.getDataType().getByteCount();
 	}
 
+	public List<TagConfig> getTags() {
+		return tags;
+	}
+	
 	/**
 	 * Returns this configuration as XML.
 	 * 
@@ -108,6 +130,7 @@ public class MessageConfig implements Comparable<MessageConfig>, Serializable {
 		sb.append(String.format("<config type=\"%s\">%n", XML_CONFIG_NAME));
 		sb.append(String.format("\t<setting name=\"%s\">%s</setting>%n", "MessageAlias", messageAlias ));
 		sb.append(String.format("\t<setting name=\"%s\">%s</setting>%n", "MessageId", messageId ));
+		sb.append(String.format("\t<setting name=\"%s\">%s</setting>%n", "MessageType", messageType ));
 		sb.append(String.format("\t<setting name=\"%s\">%s</setting>%n", "UsePersistance", usePersistance ));
 		sb.append(String.format("\t<setting name=\"%s\">%s</setting>%n", "QueueMode", queueMode.name() ));
 		for (TagConfig tag : tags) {
@@ -167,12 +190,16 @@ public class MessageConfig implements Comparable<MessageConfig>, Serializable {
 	}
 
 	/**
-	 * Returns the length of the complete message
+	 * Returns the length of the complete message or the minimum length for variable length messages.
 	 * 
 	 * @return The message length in bytes.
 	 */
 	public int getMessageLength() {
 		return messageLength;
+	}
+	
+	public boolean isVariableLength() {
+		return getMessageType() != MessageType.FIXED_LENGTH;
 	}
 	
 	/**

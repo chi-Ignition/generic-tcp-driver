@@ -18,6 +18,7 @@ package com.chitek.ignition.drivers.generictcp.meta.config;
 import java.io.Serializable;
 
 import com.chitek.ignition.drivers.generictcp.types.BinaryDataType;
+import com.chitek.ignition.drivers.generictcp.types.TagLengthType;
 
 @SuppressWarnings("serial")
 public class TagConfig implements Serializable {
@@ -28,6 +29,7 @@ public class TagConfig implements Serializable {
 	private BinaryDataType dataType;
 	private String alias;
 	private int size; // Array size of this tag
+	private TagLengthType lengthType = TagLengthType.FIXED_LENGTH;
 
 	private int offset; // Byte offest in message - just informational in config ui
 
@@ -74,6 +76,23 @@ public class TagConfig implements Serializable {
 		this.dataType = BinaryDataType.valueOf(dataTypeName);
 	}
 
+	public TagLengthType getTagLengthType() {
+		return lengthType;
+	}
+	
+	public void setTagLengthType(TagLengthType tagLengthType) {
+		this.lengthType = tagLengthType;
+	}
+	
+	/**
+	 * Method used by XML-Parser
+	 * *
+	 * @param dataTypeName
+	 */
+	public void setTagLengthType(String tagLengthTypeName) {
+		this.lengthType = TagLengthType.valueOf(tagLengthTypeName);
+	}
+
 	public String getAlias() {
 		if (!dataType.isSpecial())
 			return alias;
@@ -115,6 +134,7 @@ public class TagConfig implements Serializable {
 		sb.append(String.format("\t<setting name=\"%s\">%s</setting>%n", "Id", id ));
 		sb.append(String.format("\t<setting name=\"%s\">%s</setting>%n", "DataType", dataType.name() ));
 		sb.append(String.format("\t<setting name=\"%s\">%s</setting>%n", "Size", size ));
+		sb.append(String.format("\t<setting name=\"%s\">%s</setting>%n", "TagLengthType", lengthType ));
 		sb.append("</config>");
 		
 		return sb.toString();

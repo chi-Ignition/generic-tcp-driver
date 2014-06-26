@@ -71,6 +71,7 @@ import com.chitek.ignition.drivers.generictcp.types.BinaryDataType;
 import com.chitek.ignition.drivers.generictcp.types.MessageType;
 import com.chitek.ignition.drivers.generictcp.types.OptionalDataType;
 import com.chitek.ignition.drivers.generictcp.types.QueueMode;
+import com.chitek.ignition.drivers.generictcp.types.TagLengthType;
 import com.chitek.wicket.FeedbackTextField;
 import com.chitek.wicket.NonMatchStringValidator;
 import com.chitek.wicket.listeditor.EditorListItem;
@@ -95,6 +96,7 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 	Form<?> editForm;
 	private DropDownChoice<OptionalDataType> messageIdTypeDropDown;
 	private DropDownChoice<Integer> currentMessageIdDropdown;
+	private DropDownChoice<MessageType> messageTypeDropdown;
 	private TextField<Integer> messageIdTextField;
 	private TextField<String> messageAliasTextField;
 	private ListEditor<TagConfig> editor;
@@ -217,7 +219,8 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 		});
 		tableContainer.add(deleteButton);
 		
-		tableContainer.add(getMessageTypeDropdown());
+		messageTypeDropdown = getMessageTypeDropdown(); 
+		tableContainer.add(messageTypeDropdown);
 
 		tableContainer.add(getQueueModeDropdown());
 
@@ -254,6 +257,8 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 				item.add(getAliasTextField().setVisible(enable));
 
 				item.add(getSizeTextField().setEnabled(dataType.isArrayAllowed()));
+				
+				item.add(getTagLengthTypeDropDown().setEnabled(dataType.supportsVariableLength()));
 
 				item.add(getDataTypeDropdown());
 
@@ -382,6 +387,19 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 	private DropDownChoice<MessageType> getMessageTypeDropdown() {
 		DropDownChoice<MessageType> dropDown = new DropDownChoice<MessageType>("messageType", MessageType.getOptions(), new EnumChoiceRenderer<MessageType>(this));
 		dropDown.setOutputMarkupId(true);
+		
+		// When the MessageType is changed, the tag length type dropdowns are updated
+		dropDown.add(new AjaxFormComponentUpdatingBehavior("onchange") {
+
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				updateTagLength(target);
+
+				// Reset feedback messages
+				target.addChildren(getPage(), FeedbackPanel.class);
+			}
+		});
+		
 		return dropDown;
 	}
 
@@ -529,6 +547,42 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 		return textField;
 	}
 
+	private DropDownChoice<TagLengthType> getTagLengthTypeDropDown() {
+		DropDownChoice<TagLengthType> dropDown = new DropDownChoice<TagLengthType>("tagLengthType", TagLengthType.getOptions(), new EnumChoiceRenderer<TagLengthType>(this)) {
+			@Override
+			public boolean isVisible() {
+				return currentMessage.isVariableLength();
+			}
+		};
+		
+		dropDown.add(new AjaxFormComponentUpdatingBehavior("onchange") {
+			
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				target.add(feedback);
+			}
+			
+			@Override
+			protected void onError(AjaxRequestTarget target, RuntimeException e) {
+				target.add(feedback);
+			}
+		});
+		
+		dropDown.setOutputMarkupId(true);
+		dropDown.setOutputMarkupPlaceholderTag(true);
+		
+		dropDown.add(new UniqueListItemValidator<TagLengthType>(dropDown) {
+			@Override
+			public String getValue(IValidatable<TagLengthType> validatable) {
+				return String.valueOf(validatable.getValue().name());
+			}
+		}
+		.setMessageKey("tagLengthType.OnlyOnePackedBasedValidator")
+		.setFilterList(new String[] { TagLengthType.PACKET_BASED.name() }));
+		
+		return dropDown;		
+	}
+	
 	private TextField<String> getAliasTextField() {
 		TextField<String> textField = new FeedbackTextField<String>("alias");
 
@@ -596,6 +650,7 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 					target.add(parent.get("alias").setVisible(true));
 				}
 				target.add(parent.get("size").setEnabled(dataType.isArrayAllowed()));
+				target.add(parent.get("tagLengthType").setEnabled(dataType.supportsVariableLength()));
 			}
 		});
 
@@ -822,7 +877,7 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 	}
 
 	/**
-	 * Some common checks that can be done in validators
+	 * Some common checks that can not be done in validators
 	 */
 	private void doValidation() {
 
@@ -881,6 +936,7 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 		target.add(currentMessageIdDropdown);
 		target.add(target.getPage().get("config-contents:tabs:panel:edit-form:table-container:usePersistance"));
 		target.add(target.getPage().get("config-contents:tabs:panel:edit-form:table-container:queueMode"));
+		target.add(target.getPage().get("config-contents:tabs:panel:edit-form:table-container:messageType"));
 
 		// Refresh the form
 		editor.reloadModel();
@@ -888,6 +944,18 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 		target.add(listEditorContainer);
 	}
 
+	/**
+	 * Update the tag length input in the list editor
+	 * @param target
+	 */
+	private void updateTagLength(AjaxRequestTarget target) {
+		@SuppressWarnings("rawtypes")
+		List<DropDownChoice> choices = editor.getComponentsById("tagLengthType", DropDownChoice.class);
+		for (DropDownChoice<?> choice : choices) {
+			target.add(choice);
+		}
+	}
+	
 	/**
 	 * Update the offsets displayed in the list editor
 	 */
@@ -977,6 +1045,20 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 				if (getConfig().getMessageConfig(0) == null) {
 					error(messageIdTextField, "warn.noMessageId0");
 					// error(new StringResourceModel("warn.noMessageId0", this, null).getString());
+				}
+			}
+			
+			if (currentMessage.getMessageType() == MessageType.PACKET_BASED) {
+				// Make sure the is an variable length tag
+				boolean ok = false;
+				for (TagConfig tagConfig : currentMessage.getTags()) {
+					if (tagConfig.getTagLengthType() == TagLengthType.PACKET_BASED) {
+						ok = true;
+						break;
+					}
+				}
+				if (!ok) {
+					error(messageTypeDropdown, "error.noPacketBasedLengthTag");
 				}
 			}
 		}

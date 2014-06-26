@@ -68,7 +68,7 @@ public class TestMessageFolder {
 	public void testMessageFolder() throws Exception {
 
 		// Create settings with message id type = None
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigSimple.xml");
 
 		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
@@ -110,7 +110,7 @@ public class TestMessageFolder {
 	public void testMessageFolderWithId() throws Exception {
 
 		// Create settings with message id type = UInt16
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.UInt16);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.UInt16);
 		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigSimple.xml");
 
 		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
@@ -152,7 +152,7 @@ public class TestMessageFolder {
 	public void testMessageFolderWithMessageAge() throws Exception {
 
 		// Create settings with message id type = UInt16
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.UInt16);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.UInt16);
 		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigWithAge.xml");
 
 		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
@@ -208,7 +208,7 @@ public class TestMessageFolder {
 	public void testMessageFolderWithMessageAgeOverflow() throws Exception {
 
 		// Create settings with message id type = None
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigWithAge.xml");
 
 		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
@@ -240,7 +240,7 @@ public class TestMessageFolder {
 	public void testMessageFolderWithMessageAgeOverflow2() throws Exception {
 
 		// Create settings with message id type = None
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, 2147483647, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, 2147483647, OptionalDataType.None);
 		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigWithAge.xml");
 
 		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
@@ -308,7 +308,7 @@ public class TestMessageFolder {
 	public void testFolderWithHandshake() throws Exception {
 
 		// Create settings with message id type = None
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigSimple.xml");
 		messageConfig.setQueueMode(QueueMode.HANDSHAKE);
 
@@ -324,7 +324,7 @@ public class TestMessageFolder {
 	@Test
 	public void testQueueMode() throws Exception {
 		// Create settings with message id type = None
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigQueue.xml");
 
 		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
@@ -401,7 +401,7 @@ public class TestMessageFolder {
 	@Test
 	public void testRedundancy() throws Exception {
 		// Create settings with message id type = None
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigQueue.xml");
 		List<StateUpdate> stateUpdates = new LinkedList<StateUpdate>();
 
@@ -461,7 +461,7 @@ public class TestMessageFolder {
 	
 	@Test
 	public void testFullStateTransfer() throws Exception {
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigQueue.xml");
 
 		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
@@ -490,7 +490,7 @@ public class TestMessageFolder {
 	
 	@Test
 	public void testBrowseTree() throws Exception {
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigSimple.xml");
 		messageConfig.setQueueMode(QueueMode.HANDSHAKE);
 		new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
@@ -514,7 +514,7 @@ public class TestMessageFolder {
 	@Test
 	public void testInvalidMessage() throws Exception {
 		// Here we simply test that no Exception is thrown
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigSimple.xml");
 		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
 		
@@ -523,6 +523,48 @@ public class TestMessageFolder {
 		// The folder should have added a schedule to evaluate the message
 		assertEquals(1, driverContext.getExecutor().getScheduledCount());
 		driverContext.getExecutor().runCommand();
+	}
+	
+	@Test
+	public void testPackeBasedMessageMinLength() throws Exception {
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);
+		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigPacketBased.xml");
+		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
+		
+		assertEquals(5, messageConfig.getMessageLength());
+		
+		// Message config defined one Int16 tag and then a variable length String with minimal length 3
+		folder.messageArrived(new byte[]{0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 1,1, 'a','b','c'}, null); // Message is 1 byte too short
+
+		// The folder should have added a schedule to evaluate the message
+		assertEquals(1, driverContext.getExecutor().getScheduledCount());
+		driverContext.getExecutor().runCommand();
+		
+		DataValue value = FolderTestUtils.readValue(folder,"Alias1/Data1");
+		assertEquals((short)257, value.getValue().getValue());
+		DataValue value2 = FolderTestUtils.readValue(folder,"Alias1/Data2");
+		assertEquals("abc", value2.getValue().getValue());
+	}	
+	
+	@Test
+	public void testPackeBasedMessage() throws Exception {
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);
+		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigPacketBased.xml");
+		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
+		
+		assertEquals(5, messageConfig.getMessageLength());
+		
+		// Message config defined one Int16 tag and then a variable length String with minimal length 3
+		folder.messageArrived(new byte[]{0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 1,1, 'a','b','c','d','e'}, null); // Message is 1 byte too short
+
+		// The folder should have added a schedule to evaluate the message
+		assertEquals(1, driverContext.getExecutor().getScheduledCount());
+		driverContext.getExecutor().runCommand();
+		
+		DataValue value = FolderTestUtils.readValue(folder,"Alias1/Data1");
+		assertEquals((short)257, value.getValue().getValue());
+		DataValue value2 = FolderTestUtils.readValue(folder,"Alias1/Data2");
+		assertEquals("abcde", value2.getValue().getValue());
 	}	
 	
 	private NodeId buildNodeId(String address) {

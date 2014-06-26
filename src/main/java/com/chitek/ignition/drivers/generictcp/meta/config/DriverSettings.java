@@ -14,7 +14,7 @@ public class DriverSettings implements IDriverSettings {
 	private int port;
 	private final boolean connectOnStartup;
 	private final int timeout;
-	private final int messageTimeout = 1000;
+	private final int messageTimeout;
 	private final ByteOrder byteOrder;
 	private final int timestampFactor;
 	private final long maxTimestamp;
@@ -25,6 +25,7 @@ public class DriverSettings implements IDriverSettings {
 		int port,
 		boolean connectOnStartup,
 		int timeout,
+		int packetTimeout,
 		boolean reverseByteOrder,
 		int timestampFactor,
 		long maxTimestamp,
@@ -34,6 +35,7 @@ public class DriverSettings implements IDriverSettings {
 		this.port = port;
 		this.connectOnStartup = connectOnStartup;
 		this.timeout = timeout;
+		this.messageTimeout = packetTimeout;
 		this.byteOrder = reverseByteOrder ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN;
 		this.timestampFactor = timestampFactor;
 		this.maxTimestamp = maxTimestamp;

@@ -20,6 +20,7 @@ import com.chitek.ignition.drivers.generictcp.meta.config.DriverConfig;
 import com.chitek.ignition.drivers.generictcp.meta.config.DriverSettings;
 import com.chitek.ignition.drivers.generictcp.meta.config.HeaderConfig;
 import com.chitek.ignition.drivers.generictcp.tests.DriverTestSuite;
+import com.chitek.ignition.drivers.generictcp.tests.MockExecutionManager;
 import com.chitek.ignition.drivers.generictcp.tests.TestUtils;
 import com.chitek.ignition.drivers.generictcp.types.OptionalDataType;
 
@@ -42,7 +43,7 @@ public class TestNioEventHandler {
 	public void setup() throws Exception {
 		log = DriverTestSuite.getLogger();
 
-		driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.UInt16);
+		driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.UInt16);
 		driverConfig = new DriverConfig();
 		driverConfig.setMessageIdType(driverSettings.getMessageIdType());
 
@@ -80,7 +81,7 @@ public class TestNioEventHandler {
 
 		driverConfig.addMessageConfig(TestUtils.readMessageConfig("/testMessageConfig.xml"));
 
-		NioEventHandler handler = new NioEventHandler(log, driverConfig, driverSettings, messageHeader, messageHandler);
+		NioEventHandler handler = new NioEventHandler(log, null, driverConfig, driverSettings, messageHeader, messageHandler);
 		ByteBuffer data = ByteBuffer.allocate(20);
 		data.putShort((short) 10);	 // The packet size (Header + 1 message)
 		data.putShort((short) 0xff); // The fixed word
@@ -95,11 +96,34 @@ public class TestNioEventHandler {
 	}
 
 	@Test
+	public void testPacketBasedMessage() throws Exception {
+
+		driverConfig.addMessageConfig(TestUtils.readMessageConfig("/testMessageConfigPacketBased.xml"));
+
+		MockExecutionManager executor = new MockExecutionManager();
+		NioEventHandler handler = new NioEventHandler(log, executor, driverConfig, driverSettings, null, messageHandler);
+		ByteBuffer data = ByteBuffer.allocate(20);
+		data.put(new byte[] { 0, 1, 0, 1, 'a', 'b', 'c', 'd' });	// Message ID 1
+		data.flip();
+		InetSocketAddress remoteSocket = new InetSocketAddress(InetAddress.getByAddress(new byte[]{127,0,0,1}), 1999);
+		handler.dataArrived(remoteSocket, data, 0);
+		
+		assertEquals("Timeout handler should be started", 1, executor.getScheduledCount());	
+		// execute the timeout handler
+		executor.runCommand();
+		
+		assertEquals("MessageId", 1, messageId);
+		assertEquals("Message length including timestamps", 2*8 + 6, messageData.length);
+		assertArrayEquals("Message data", new byte[]{0, 1, 'a', 'b', 'c', 'd'}, Arrays.copyOfRange(messageData, 16, 22));
+		assertEquals(remoteSocket, receivedRemoteSocket);
+	}
+	
+	@Test
 	public void testMultipleClients() throws Exception {
 
 		driverConfig.addMessageConfig(TestUtils.readMessageConfig("/testMessageConfig.xml"));
 
-		NioEventHandler handler = new NioEventHandler(log, driverConfig, driverSettings, messageHeader, messageHandler);
+		NioEventHandler handler = new NioEventHandler(log, null, driverConfig, driverSettings, messageHeader, messageHandler);
 		ByteBuffer data1 = ByteBuffer.allocate(20);
 		data1.putShort((short) 10);	 // The packet size (Header + 1 message)
 		data1.putShort((short) 0xff); // The fixed word

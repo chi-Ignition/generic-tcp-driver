@@ -24,6 +24,7 @@ import com.chitek.ignition.drivers.generictcp.meta.config.DriverConfig;
 import com.chitek.ignition.drivers.generictcp.meta.config.DriverSettings;
 import com.chitek.ignition.drivers.generictcp.meta.config.HeaderConfig;
 import com.chitek.ignition.drivers.generictcp.tests.DriverTestSuite;
+import com.chitek.ignition.drivers.generictcp.tests.MockExecutionManager;
 import com.chitek.ignition.drivers.generictcp.tests.TestUtils;
 import com.chitek.ignition.drivers.generictcp.types.OptionalDataType;
 import com.chitek.ignition.drivers.generictcp.util.VariantByteBuffer;
@@ -49,7 +50,7 @@ public class TestMessageState {
 	public void setup() throws Exception {
 		log = DriverTestSuite.getLogger();
 
-		driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.UInt16);
+		driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.UInt16);
 		driverConfig = new DriverConfig();
 		driverConfig.setMessageIdType(driverSettings.getMessageIdType());
 
@@ -89,7 +90,7 @@ public class TestMessageState {
 
 	@Test(timeout=1000)
 	public void testInvalidHeaderShouldReportPacketSize() throws Exception {
-		MessageState state = new MessageState(remoteSocket, messageHeader, driverConfig, driverSettings);
+		MessageState state = new MessageState(remoteSocket, null, messageHeader, driverConfig, driverSettings);
 		ByteBuffer data = ByteBuffer.wrap(new byte[] { 0, 6, 0, 2 });
 		state.addData(data);
 		assertFalse("Header should be invalid (fixed value mismatch)", state.isHeaderValid());
@@ -98,7 +99,7 @@ public class TestMessageState {
 	
 	@Test
 	public void testPacketSizeUnsigned() throws Exception {
-		MessageState state = new MessageState(remoteSocket, messageHeader, driverConfig, driverSettings);
+		MessageState state = new MessageState(remoteSocket, null, messageHeader, driverConfig, driverSettings);
 		ByteBuffer data = ByteBuffer.wrap(new byte[] { (byte) 255, (byte) 255, 0, 2 });
 		state.addData(data);
 		assertFalse("Header should be invalid (fixed value mismatch)", state.isHeaderValid());
@@ -111,7 +112,7 @@ public class TestMessageState {
 		headerConfig.getTags().get(1).setRawValue("65530");
 		messageHeader = new MessageHeader(headerConfig, ByteOrder.BIG_ENDIAN);
 		
-		MessageState state = new MessageState(remoteSocket, messageHeader, driverConfig, driverSettings);
+		MessageState state = new MessageState(remoteSocket, null, messageHeader, driverConfig, driverSettings);
 		ByteBuffer data = ByteBuffer.wrap(new byte[] { 0, 8, (byte) 0xff, (byte) 0xfa });
 		state.addData(data);
 		assertTrue("Header should be valid", state.isHeaderValid());
@@ -123,7 +124,7 @@ public class TestMessageState {
 		HeaderConfig headerConfig = TestUtils.readHeaderConfig("/testHeaderConfigByte.xml");
 		messageHeader = new MessageHeader(headerConfig, ByteOrder.BIG_ENDIAN);
 		
-		MessageState state = new MessageState(remoteSocket, messageHeader, driverConfig, driverSettings);
+		MessageState state = new MessageState(remoteSocket, null, messageHeader, driverConfig, driverSettings);
 		ByteBuffer data = ByteBuffer.wrap(new byte[] { 0, 6, (byte) 160 });
 		state.addData(data);
 		assertTrue("Header should be valid", state.isHeaderValid());
@@ -132,7 +133,7 @@ public class TestMessageState {
 	
 	@Test(timeout=1000)
 	public void testHeaderWithoutData() throws Exception {
-		MessageState state = new MessageState(remoteSocket, messageHeader, driverConfig, driverSettings);
+		MessageState state = new MessageState(remoteSocket, null, messageHeader, driverConfig, driverSettings);
 		ByteBuffer data = ByteBuffer.wrap(new byte[] { 0, 4 });
 		state.addData(data);
 		assertFalse("Header without data should be invalid", state.isHeaderValid());
@@ -140,7 +141,7 @@ public class TestMessageState {
 
 	@Test(timeout=1000)
 	public void testValidHeader() throws Exception {
-		MessageState state = new MessageState(remoteSocket, messageHeader, driverConfig, driverSettings);
+		MessageState state = new MessageState(remoteSocket, null, messageHeader, driverConfig, driverSettings);
 		ByteBuffer data = ByteBuffer.wrap(new byte[] { 0, 8, 0, (byte) 0xff });
 		state.addData(data);
 		assertTrue("Header without data should be valid", state.isHeaderValid());
@@ -149,7 +150,7 @@ public class TestMessageState {
 
 	@Test(timeout=1000)
 	public void testInvalidHeaderShouldDiscardPacket() throws Exception {
-		MessageState state = new MessageState(remoteSocket, messageHeader, driverConfig, driverSettings);
+		MessageState state = new MessageState(remoteSocket, null, messageHeader, driverConfig, driverSettings);
 		ByteBuffer data = ByteBuffer.wrap(new byte[] { 0, 6, 0, 2 });
 		state.addData(data);
 		assertFalse("Header should be invalid", state.isHeaderValid());
@@ -163,7 +164,7 @@ public class TestMessageState {
 	
 	@Test(timeout=1000)
 	public void testPacketWithTwoHeaders() throws Exception {
-		MessageState state = new MessageState(remoteSocket, messageHeader, driverConfig, driverSettings);
+		MessageState state = new MessageState(remoteSocket, null, messageHeader, driverConfig, driverSettings);
 		ByteBuffer data = ByteBuffer.wrap(new byte[] { 0, 6, 0, 2, 0, 0, 0, 6 });
 		state.addData(data);
 
@@ -174,7 +175,7 @@ public class TestMessageState {
 
 	@Test(timeout=1000)
 	public void testSplittedHeader() throws Exception {
-		MessageState state = new MessageState(remoteSocket, messageHeader, driverConfig, driverSettings);
+		MessageState state = new MessageState(remoteSocket, null, messageHeader, driverConfig, driverSettings);
 		ByteBuffer data = ByteBuffer.wrap(new byte[] { 0, 8 });
 		state.addData(data);
 
@@ -198,7 +199,7 @@ public class TestMessageState {
 		messageHeader = new MessageHeader(new HeaderConfig(), ByteOrder.BIG_ENDIAN);
 
 		driverConfig.addMessageConfig(TestUtils.readMessageConfig("/testMessageConfig.xml"));
-		MessageState state = new MessageState(remoteSocket, messageHeader, driverConfig, driverSettings);
+		MessageState state = new MessageState(remoteSocket, null, messageHeader, driverConfig, driverSettings);
 		state.setMessageHandler(messageHandler);
 
 		// testMessageConfig defines ID 1 with two UInt16 tags
@@ -215,12 +216,12 @@ public class TestMessageState {
 	public void testSimpleStringMessage() throws Exception {
 
 		// Create settings with message id type = None
-		driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
+		driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		driverConfig = new DriverConfig();
 		driverConfig.setMessageIdType(driverSettings.getMessageIdType());
 
 		driverConfig.addMessageConfig(TestUtils.readMessageConfig("/testMessageConfigSimple.xml"));
-		MessageState state = new MessageState(remoteSocket, null, driverConfig, driverSettings);
+		MessageState state = new MessageState(remoteSocket, null, null, driverConfig, driverSettings);
 		state.setMessageHandler(messageHandler);
 		messageId = -1;
 		// testMessageConfigSimple defines ID 0 with one String tag
@@ -243,7 +244,7 @@ public class TestMessageState {
 		messageHeader = new MessageHeader(new HeaderConfig(), ByteOrder.BIG_ENDIAN);
 
 		driverConfig.addMessageConfig(TestUtils.readMessageConfig("/testMessageConfig.xml"));
-		MessageState state = new MessageState(remoteSocket, messageHeader, driverConfig, driverSettings);
+		MessageState state = new MessageState(remoteSocket, null, messageHeader, driverConfig, driverSettings);
 		state.setMessageHandler(messageHandler);
 
 		// testMessageConfig defines ID 1 with two UInt16 tags
@@ -266,7 +267,7 @@ public class TestMessageState {
 		messageHeader = new MessageHeader(new HeaderConfig(), ByteOrder.BIG_ENDIAN);
 
 		driverConfig.addMessageConfig(TestUtils.readMessageConfig("/testMessageConfig.xml"));
-		MessageState state = new MessageState(remoteSocket, messageHeader, driverConfig, driverSettings);
+		MessageState state = new MessageState(remoteSocket, null, messageHeader, driverConfig, driverSettings);
 		state.setMessageHandler(messageHandler);
 		messageId = -1;
 		// testMessageConfig defines ID 1 with two UInt16 tags - ID 4 is invalid
@@ -289,7 +290,7 @@ public class TestMessageState {
 	@Test (timeout=1000)
 	public void testHeaderWithMessages() throws Exception {
 		driverConfig.addMessageConfig(TestUtils.readMessageConfig("/testMessageConfig.xml"));
-		MessageState state = new MessageState(remoteSocket, messageHeader, driverConfig, driverSettings);
+		MessageState state = new MessageState(remoteSocket, null, messageHeader, driverConfig, driverSettings);
 		state.setMessageHandler(messageHandler);
 		messageId = -1;
 		// testMessageConfig defines ID 1 with two UInt16 tags
@@ -330,7 +331,7 @@ public class TestMessageState {
 		headerConfig.setSizeIncludesHeader(false);
 		messageHeader = new MessageHeader(headerConfig, ByteOrder.BIG_ENDIAN);
 		
-		MessageState state = new MessageState(remoteSocket, messageHeader, driverConfig, driverSettings);
+		MessageState state = new MessageState(remoteSocket, null, messageHeader, driverConfig, driverSettings);
 		state.setMessageHandler(messageHandler);
 		messageId = -1;
 		// testMessageConfig defines ID 1 with two UInt16 tags
@@ -366,7 +367,7 @@ public class TestMessageState {
 	@Test (timeout=1000)
 	public void testValidHeaderWithInvalidMessage() throws Exception {
 		driverConfig.addMessageConfig(TestUtils.readMessageConfig("/testMessageConfig.xml"));
-		MessageState state = new MessageState(remoteSocket, messageHeader, driverConfig, driverSettings);
+		MessageState state = new MessageState(remoteSocket, null, messageHeader, driverConfig, driverSettings);
 		state.setMessageHandler(messageHandler);
 		messageId = -1;
 		
@@ -388,7 +389,7 @@ public class TestMessageState {
 		HeaderConfig headerConfig = TestUtils.readHeaderConfig("/testHeaderConfigSimple.xml");
 		messageHeader = new MessageHeader(headerConfig, ByteOrder.BIG_ENDIAN);
 		
-		MessageState state = new MessageState(remoteSocket, messageHeader, driverConfig, driverSettings);
+		MessageState state = new MessageState(remoteSocket, null, messageHeader, driverConfig, driverSettings);
 		state.setMessageHandler(messageHandler);
 		messageId = -1;
 		
@@ -403,7 +404,7 @@ public class TestMessageState {
 	@Test (timeout=1000)
 	public void testMessagesWithoutHeader() throws Exception {
 		driverConfig.addMessageConfig(TestUtils.readMessageConfig("/testMessageConfig.xml"));
-		MessageState state = new MessageState(remoteSocket, null, driverConfig, driverSettings);
+		MessageState state = new MessageState(remoteSocket, null, null, driverConfig, driverSettings);
 		state.setMessageHandler(messageHandler);
 		messageId = -1;
 		// testMessageConfig defines ID 1 with two UInt16 tags
@@ -438,7 +439,7 @@ public class TestMessageState {
 	@Test (timeout=1000)
 	public void testMessagesWithMessageAge() throws Exception {
 		driverConfig.addMessageConfig(TestUtils.readMessageConfig("/testMessageConfigWithAge.xml"));
-		MessageState state = new MessageState(remoteSocket, null, driverConfig, driverSettings);
+		MessageState state = new MessageState(remoteSocket, null, null, driverConfig, driverSettings);
 		state.setMessageHandler(messageHandler);
 		messageId = -1;
 		// testMessageConfig defines ID 1 with two UInt16 tags
@@ -460,7 +461,7 @@ public class TestMessageState {
 	public void testHandshake() throws Exception {
 		messageHeader = new MessageHeader(TestUtils.readHeaderConfig("/testHeaderConfigHandshake.xml"), ByteOrder.BIG_ENDIAN);
 		driverConfig.addMessageConfig(TestUtils.readMessageConfig("/testMessageConfig.xml"));
-		MessageState state = new MessageState(remoteSocket, messageHeader, driverConfig, driverSettings);
+		MessageState state = new MessageState(remoteSocket, null, messageHeader, driverConfig, driverSettings);
 		state.setMessageHandler(messageHandler);
 
 		// testMessageConfig defines ID 1 with two UInt16 tags
@@ -487,5 +488,58 @@ public class TestMessageState {
 		assertNotNull("Handshake message should be there", handshakeData);
 		assertArrayEquals("Handshake message", new byte[]{0, 4, (byte) 0xff, (byte) 0xfe}, handshakeData);
 	}
+	
+	@Test(timeout=1000)
+	public void testTimeout() throws Exception {
+		// The timeout handler should not be started for a fixed length message
+		driverConfig.addMessageConfig(TestUtils.readMessageConfig("/testMessageConfig.xml"));
+		
+		MockExecutionManager executor = new MockExecutionManager();
+		
+		MessageState state = new MessageState(remoteSocket, executor, null, driverConfig, driverSettings);
+		state.setMessageHandler(messageHandler);
+		
+		// testMessageConfig defines ID 1 with two UInt16 tags
+		ByteBuffer data = ByteBuffer.wrap(new byte[] { 0, 1, 0, 1, 0, 2 });
+		state.addData(data);
 
+		assertEquals("Timeout handler should not be started", 0, executor.getScheduledCount());
+		assertFalse("Message should be complete", state.isMessagePending());
+		assertEquals("MessageId", 1, messageId);
+		assertEquals("Message length including timestamps", 2*8 + 4, messageDataRaw.length);
+		assertArrayEquals("Message data", new byte[]{0, 1, 0, 2}, messageData);
+		
+		// send an incomplete message
+		data = ByteBuffer.wrap(new byte[] { 0, 1, 0, 1 });
+		state.addData(data);
+		
+		assertEquals("Timeout handler should not be started", 0, executor.getScheduledCount());
+		assertTrue("Message should be pending", state.isMessagePending());
+	}
+
+	@Test
+	public void testTimeoutPacketBased() throws Exception {
+		driverConfig.addMessageConfig(TestUtils.readMessageConfig("/testMessageConfigPacketBased.xml"));
+		
+		MockExecutionManager executor = new MockExecutionManager();
+		
+		MessageState state = new MessageState(remoteSocket, executor, null, driverConfig, driverSettings);
+		state.setMessageHandler(messageHandler);
+		
+		// testMessageConfigPacketBased defines one Int16 tag and then a variable length String with minimal length 3
+		ByteBuffer data = ByteBuffer.wrap(new byte[] { 0, 1, 0, 1, 'a', 'b', 'c', 'd' });
+		state.addData(data);
+
+		assertEquals("Timeout handler should be started", 1, executor.getScheduledCount());
+		assertTrue("Message should be pending", state.isMessagePending());
+		
+		// execute the timeout handler
+		executor.runCommand();
+		
+		// Message should be delivered now
+		assertEquals("MessageId", 1, messageId);
+		assertEquals("Message length including timestamps", 2*8 + 6, messageDataRaw.length);
+		assertArrayEquals("Message data", new byte[]{0, 1, 'a', 'b', 'c', 'd'}, messageData);
+	}
+	
 }

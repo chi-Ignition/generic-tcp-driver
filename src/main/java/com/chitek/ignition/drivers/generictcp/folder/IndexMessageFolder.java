@@ -41,6 +41,7 @@ import com.chitek.ignition.drivers.generictcp.tags.ReadableTcpDriverTag;
 import com.chitek.ignition.drivers.generictcp.tags.WritableTag;
 import com.chitek.ignition.drivers.generictcp.types.BinaryDataType;
 import com.chitek.ignition.drivers.generictcp.types.QueueMode;
+import com.chitek.ignition.drivers.generictcp.types.TagLengthType;
 import com.chitek.ignition.drivers.generictcp.util.VariantByteBuffer;
 import com.chitek.util.PersistentQueue;
 import com.inductiveautomation.ignition.common.TypeUtilities;
@@ -69,12 +70,14 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 
 	protected final List<ReadableTcpDriverTag> varTags; // List of all configured tags
 	protected ReadableTcpDriverTag messageAgeTag = null;
-
+	protected ReadableTcpDriverTag varLengthTag = null;
+	
 	private final int deviceId;	// The device id is used for passive mode
 	protected final IDriverSettings driverSettings;
 	private final int configHash;	// HashCode of the message configuration
 
 	private int messageLength;			// Length of this message
+	private int messageBytesAfterVarTag;	// The message length after the variable length tag
 	private int messageAgeOffset=-1;	// Byte offset of the messageAge (if configured)
 	private final MessageDataWrapper dataWrapper = new MessageDataWrapper();
 
@@ -478,7 +481,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 				for (ReadableTcpDriverTag driverTag : varTags) {
 					switch (driverTag.getDriverDataType()) {
 					case Dummy: // Dummy: Ignore value
-						buffer.position(buffer.position() + driverTag.getReadSize());
+						buffer.position(buffer.position() + getTagReadSize(buffer.remaining(), driverTag));
 						break;
 					case Bool8:
 						driverTag.setValue(buffer.readBool8(driverTag.getReadSize()), timestampUtc);
@@ -508,7 +511,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 						driverTag.setValue(buffer.readFloat(driverTag.getReadSize()), timestampUtc);
 						break;
 					case String:
-						driverTag.setValue(buffer.readString(driverTag.getReadSize()), timestampUtc);
+						driverTag.setValue(buffer.readString(getTagReadSize(buffer.remaining(), driverTag)), timestampUtc);
 						break;
 					case MessageAge:
 						buffer.getInt(); // Has already been read - just skip
@@ -550,6 +553,22 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 		}
 	}
 
+	/**
+	 * @param remainingBytes
+	 * 	Remaining bytes message buffer
+	 * @param tag
+	 * 	The tag for which to get the read length.
+	 * @return
+	 * 	The tag size in bytes
+	 */
+	private int getTagReadSize(int remainingBytes, ReadableTcpDriverTag tag) {
+		if (tag == varLengthTag) {
+			return remainingBytes - messageBytesAfterVarTag;
+		} else {
+			return tag.getReadSize();
+		}
+	}
+	
 	/**
 	 * Returns the message length in bytes. Valid only after all var nodes have been added.
 	 * 
@@ -662,6 +681,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 	 */
 	private void addTagsFromConfig(MessageConfig messageConfig, String folderName) {
 
+		short bytesAfterVarTag = 0;
 		for (TagConfig config : messageConfig.tags) {
 			ReadableTcpDriverTag tag = createTag(folderName, config);
 			varTags.add(tag);
@@ -669,9 +689,25 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 				messageAgeOffset = messageLength;
 				messageAgeTag = tag;
 			}
+			if (varLengthTag != null) {
+				bytesAfterVarTag += config.getSize() * config.getDataType().getByteCount();
+			}
+			if (config.getTagLengthType() != TagLengthType.FIXED_LENGTH) {
+				if (varLengthTag == null) {
+					if (config.getDataType().supportsVariableLength()) {
+						varLengthTag = tag;
+					} else {
+						log.warn(String.format("The tag '%s' is configured with variable length but data type %s does not support variable length. Tag uses fixed length instead.", 
+								config.getAlias(), config.getDataType()));
+					}
+				} else {
+					log.warn(String.format("More than one tag is configured with variable length. Tag '%s' uses fixed length instead.", config.getAlias()));
+				}
+			}
 			messageLength += config.getSize() * config.getDataType().getByteCount();
-
 		}
+		
+		messageBytesAfterVarTag = bytesAfterVarTag;
 	}
 
 	/**

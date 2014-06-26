@@ -240,7 +240,7 @@ implements IMessageHandler {
 					isa = new InetSocketAddress(driverSettings.getServerAddress(), driverSettings.getServerPort());
 				nioServer = new NioServer(isa, Logger.getLogger(log.getName() + "." + "NioServer"));
 
-				nioServer.setEventHandler(new NioEventHandler(log, messageConfig, driverSettings, messageHeader, this));
+				nioServer.setEventHandler(new NioEventHandler(log, getExecutionManager(), messageConfig, driverSettings, messageHeader, this));
 				nioServer.start();
 				notifyConnectDone(true);
 			}

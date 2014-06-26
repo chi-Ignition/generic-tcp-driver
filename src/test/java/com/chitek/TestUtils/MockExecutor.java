@@ -16,6 +16,10 @@ public class MockExecutor {
 		ScheduledCommand<?> scheduled = new ScheduledCommand<Void>(command, 0, TimeUnit.NANOSECONDS);
 		scheduledCommands.add(scheduled);
 	}
+	
+	public void executeOnce(Runnable command, long delay) {
+		executeOnce(command, delay, TimeUnit.MILLISECONDS);
+	}
 
 	public ScheduledFuture<?> executeOnce(Runnable command, long delay, TimeUnit timeUnit) {
 		ScheduledCommand<?> scheduled = new ScheduledCommand<Void>(command, delay, timeUnit);
@@ -38,7 +42,11 @@ public class MockExecutor {
 		scheduledCommands.clear();
 	}
 	
-	public void runCommand() {
+	/**
+	 * Run the pending command that was registered first.
+	 * @throws Exception 
+	 */
+	public void runCommand() throws Exception {
 		ScheduledCommand<?> scheduled = scheduledCommands.get(0);
 		scheduled.execute();
 		scheduledCommands.remove(scheduled);

@@ -44,6 +44,12 @@
 							</td>
 						</tr>
 						<tr>
+							<td class="trow-title"><wicket:message key="messageType.DisplayName">Message Type</wicket:message></td>
+							<td class="trow-body"><select class="headeritem" wicket:id="messageType" />
+								<p><wicket:message key="messageType.Description">messageType.Description</wicket:message></p>
+							</td>
+						</tr>
+						<tr>
 							<td class="trow-title"><wicket:message key="queueMode.DisplayName">Queue Mode</wicket:message></td>
 							<td class="trow-body"><select class="headeritem" wicket:id="queueMode" />
 								<p><wicket:message key="queueMode.Description">queueMode.Description</wicket:message></p>
@@ -69,7 +75,7 @@
 							</td>
 							<td><wicket:message key="idlabel">ID</wicket:message></td>						
 							<td><wicket:message key="aliaslabel">Alias</wicket:message></td>
-							<td class="last"><wicket:message key="sizelabel">Size</wicket:message></td>
+							<td colspan="2" class="last"><wicket:message key="sizelabel">Size</wicket:message></td>
 							<td colspan="4" class="links">&nbsp;</td>
 						</tr>
 					</thead>
@@ -79,7 +85,7 @@
 							<td class="noedit"><wicket:message key="messageLabel">messageId</wicket:message></td>
 							<td><input type="text" size="4" wicket:id="messageId" /></td>
 							<td><input type="text" style="width:90%" wicket:id="messageAlias" /></td>
-							<td class="last noedit"></td>
+							<td colspan="2" class="last noedit"></td>
 							<td colspan="4" class="links">&nbsp;</td>
 						</tr>
 						<tr wicket:id="tags">
@@ -87,7 +93,8 @@
 							<td><select wicket:id="dataType" /></td>
 							<td><input type="text" size="4" wicket:id="id" /></td>
 							<td><input type="text" style="width:90%" wicket:id="alias" /></td>
-							<td class="last"><input type="text" size="4" wicket:id="size" /></td>
+							<td><input type="text" size="4" wicket:id="size" /></td>
+							<td class="last"><select wicket:id="tagLengthType" /></td>
 							<td class="links"><a class="insert-link" href="#" wicket:id="insert-link" wicket:message="title:insertlink.title" />
 							</td>
 							<td class="links"><a class="delete-link" href="#" wicket:id="delete-link" wicket:message="title:deletelink.title" />
@@ -99,7 +106,7 @@
 						</tr>
 
 						<tr>
-							<td colspan="5" style="border: 0px;"><span wicket:id="no-items-label" /></td>
+							<td colspan="6" style="border: 0px;"><span wicket:id="no-items-label" /></td>
 							<td class="links"><a class="insert-link" href="#" wicket:id="add-row-link" wicket:message="title:addrowlink.title" /></td>	
 							<td class="links">&nbsp;</td>
 							<td class="links">&nbsp;</td>

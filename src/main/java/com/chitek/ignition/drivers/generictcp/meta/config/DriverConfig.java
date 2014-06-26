@@ -43,7 +43,7 @@ public class DriverConfig implements Serializable {
 	 * 		The message configuration with the given Id, or null if message is not defined
 	 */
 	public MessageConfig getMessageConfig(int messageId) {
-		return messages.get(messageId);;
+		return messages.get(messageId);
 	}
 	
 	/**

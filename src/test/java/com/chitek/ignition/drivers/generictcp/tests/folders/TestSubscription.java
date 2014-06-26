@@ -38,7 +38,7 @@ public class TestSubscription {
 		driverContext.setDiskPath(testFolder.newFolder().getAbsolutePath());
 		
 		// Create settings with message id type = None
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, false, 1, (2^32)-1, OptionalDataType.None);
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigSimple.xml");
 		
 

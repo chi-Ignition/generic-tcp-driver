@@ -275,7 +275,7 @@ public class GenericTcpClientDriver extends AbstractGenericTcpDriver implements 
 							return new Thread(r, String.format("AsyncSocketIOSession[%s]", getDeviceName()));
 						}
 					});
-					ClientEventHandler eventHandler = new ClientEventHandler(log, messageConfig, driverSettings, messageHeader, this);
+					ClientEventHandler eventHandler = new ClientEventHandler(log, getExecutionManager(), messageConfig, driverSettings, messageHeader, this);
 					ioSession.setEventHandler(eventHandler);
 					ioSession.setTimeoutHandler(eventHandler);
 					ioSession.start();

@@ -113,6 +113,13 @@ public enum BinaryDataType implements Serializable {
 		return dataType;
 	}
 	
+	/**
+	 * Returns <code>true</code> if the given BinaryDataType supports variable length.
+	 */
+	public boolean supportsVariableLength() {
+		return this == BinaryDataType.Dummy || this == BinaryDataType.String;
+	}
+	
 	public static List<BinaryDataType> getOptions() {
 		return Arrays.asList(BinaryDataType.values());
 	}

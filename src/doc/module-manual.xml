@@ -207,6 +207,29 @@ barcodescanner1.company.com,Device3</programlisting>
                  termlength="15">
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+					Packet Timeout</term>
+					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+						The maximum time (in milliseconds) between incoming data 
+						packages.</simpara>
+						<itemizedlist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+							<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+								<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+								In Fixed Length mode, the reveived data will be discarded if a 
+								packet is incomplete and no new data is received for this 
+								time.</simpara>
+							</listitem>
+							<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+								<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+								In Packet Based length mode, the driver assumes that a message 
+								is completely received when no data is received during this 
+								timeout.</simpara>
+							</listitem>
+						</itemizedlist>
+					</listitem>
+				</varlistentry>
+				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 					Reverse byte order</term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -304,6 +327,14 @@ barcodescanner1.company.com,Device3</programlisting>
 				currently edited message.</simpara>
 				<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
                   termlength="15">
+					<varlistentry>
+						<term>Message Type</term>
+						<listitem>
+							<simpara>This settings decides if the message has a fixed length 
+							(determined by the configured tags) or a variable length that is 
+							determined by the length of the received data packet.</simpara>
+						</listitem>
+					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 						Queue Mode</term>
@@ -386,6 +417,15 @@ barcodescanner1.company.com,Device3</programlisting>
 							<superscript xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 							TM</superscript>) the parent elements are useless (although they 
 							may be coerced to a string).</simpara>
+						</listitem>
+					</varlistentry>
+					<varlistentry>
+						<term>Length Type</term>
+						<listitem>
+							<simpara>This setting is only visible for messages with 
+							&apos;Packet Based&apos; length. One tag can be configured to 
+							have a variable length. This tag receives all data that exceeds 
+							the length of the configured fixed length tags.</simpara>
 						</listitem>
 					</varlistentry>
 				</variablelist>

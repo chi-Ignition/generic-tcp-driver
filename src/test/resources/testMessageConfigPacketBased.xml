@@ -1,0 +1,20 @@
+<config type="MessageConfig">
+	<config type="TagConfig">
+		<setting name="Alias">Data1</setting>
+		<setting name="Id">1</setting>
+		<setting name="DataType">Int16</setting>
+		<setting name="Size">1</setting>
+	</config>
+	<config type="TagConfig">
+		<setting name="Alias">Data2</setting>
+		<setting name="Id">2</setting>
+		<setting name="DataType">String</setting>
+		<setting name="Size">3</setting>
+		<setting name="TagLengthType">PACKET_BASED</setting>
+	</config>
+	<setting name="MessageType">PACKET_BASED</setting>
+	<setting name="MessageAlias">Alias1</setting>
+	<setting name="MessageId">1</setting>
+	<setting name="UsePersistance">false</setting>
+	<setting name="QueueMode">NONE</setting>
+</config>

@@ -14,6 +14,8 @@ import com.chitek.ignition.drivers.generictcp.meta.config.MessageConfig;
 import com.chitek.ignition.drivers.generictcp.meta.config.TagConfig;
 import com.chitek.ignition.drivers.generictcp.tests.DriverTestSuite;
 import com.chitek.ignition.drivers.generictcp.types.HeaderDataType;
+import com.chitek.ignition.drivers.generictcp.types.MessageType;
+import com.chitek.ignition.drivers.generictcp.types.TagLengthType;
 
 public class TestConfigParser {
 
@@ -38,10 +40,41 @@ public class TestConfigParser {
 		InputStream in = this.getClass().getResourceAsStream("/testMessageConfig.xml");
 		String xml = IOUtils.toString(in);
 		MessageConfig messageConfig = MessageConfig.fromXMLString(xml);
+		assertEquals("MessageType", MessageType.FIXED_LENGTH, messageConfig.getMessageType());
 		assertEquals("Message id", 1, messageConfig.getMessageId());
 		assertEquals("Message length", 4, messageConfig.getMessageLength());
 		assertEquals("Configured tags", 2 , messageConfig.tags.size());
 		TagConfig tag = messageConfig.tags.get(0);
 		assertEquals("Tag 1 ID", 1, tag.getId());
+	}
+	
+	@Test
+	public void testMessageConfigPacketBased() throws Exception {
+		InputStream in = this.getClass().getResourceAsStream("/testMessageConfigPacketBased.xml");
+		String xml = IOUtils.toString(in);
+		MessageConfig messageConfig = MessageConfig.fromXMLString(xml);
+		assertEquals("MessageType", MessageType.PACKET_BASED, messageConfig.getMessageType());
+		assertEquals("Message id", 1, messageConfig.getMessageId());
+		assertEquals("Message length", 5, messageConfig.getMessageLength());
+		assertEquals("Configured tags", 2 , messageConfig.tags.size());
+		TagConfig tag = messageConfig.tags.get(1);
+		assertEquals("TagLengthType", TagLengthType.PACKET_BASED, tag.getTagLengthType());
+	}
+	
+	@Test
+	public void testMessageConfigPacketBasedCycle() throws Exception {
+		InputStream in = this.getClass().getResourceAsStream("/testMessageConfigPacketBased.xml");
+		String xml = IOUtils.toString(in);
+		MessageConfig inputConfig = MessageConfig.fromXMLString(xml);
+		
+		String configString = inputConfig.toXMLString();
+		MessageConfig messageConfig = MessageConfig.fromXMLString(configString);
+		
+		assertEquals("MessageType", MessageType.PACKET_BASED, messageConfig.getMessageType());
+		assertEquals("Message id", 1, messageConfig.getMessageId());
+		assertEquals("Message length", 5, messageConfig.getMessageLength());
+		assertEquals("Configured tags", 2 , messageConfig.tags.size());
+		TagConfig tag = messageConfig.tags.get(1);
+		assertEquals("TagLengthType", TagLengthType.PACKET_BASED, tag.getTagLengthType());
 	}
 }

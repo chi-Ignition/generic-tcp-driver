@@ -3,8 +3,9 @@ package com.chitek.ignition.drivers.generictcp.io;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
@@ -13,6 +14,8 @@ import com.chitek.ignition.drivers.generictcp.folder.MessageHeader;
 import com.chitek.ignition.drivers.generictcp.meta.config.DriverConfig;
 import com.chitek.ignition.drivers.generictcp.meta.config.IDriverSettings;
 import com.chitek.ignition.drivers.generictcp.meta.config.MessageConfig;
+import com.chitek.ignition.drivers.generictcp.types.MessageType;
+import com.inductiveautomation.ignition.common.execution.ExecutionManager;
 import com.inductiveautomation.xopc.driver.util.ByteUtilities;
 
 public class MessageState {
@@ -20,10 +23,10 @@ public class MessageState {
 	private final Logger log;
 
 	// Configuration
+	private final DriverConfig driverConfig;
 	private final MessageHeader messageHeader;
 	private final int headerLength;
 	private final IDriverSettings settings;
-	private final Map<Integer, Integer> messageLengthMap;
 
 	private IMessageHandler messageHandler = null;
 	private final InetSocketAddress remoteSocket;
@@ -44,41 +47,54 @@ public class MessageState {
 	/** Buffer for header data */
 	ByteBuffer headerData;
 
+	private final ExecutionManager executionManager;
+	private ScheduledFuture<?> timeoutSchedule;
+	private final TimeoutHandler timeoutHandler;
+	private Object messageLock = new Object();
+	
 	private int currentMessageId = 0;
-	private int currentMsgLength = 0;
+	private MessageConfig currentMsgConfig;
 	private int currentMsgPos = 0;
 	/** Buffer for current message **/
 	private byte[] currentMsgData;
 
-	public MessageState(InetSocketAddress remoteSocket, MessageHeader messageHeader, DriverConfig driverConfig, IDriverSettings settings) {
-		this(remoteSocket, messageHeader, driverConfig, settings, Logger.getLogger(MessageState.class.getSimpleName()));
+	public MessageState(InetSocketAddress remoteSocket, ExecutionManager executionManager, MessageHeader messageHeader, DriverConfig driverConfig, IDriverSettings settings) {
+		this(remoteSocket, executionManager, messageHeader, driverConfig, settings, Logger.getLogger(MessageState.class.getSimpleName()));
 	}
 
 	/**
 	 * 
 	 * @param remoteSocket
 	 * 	The remote socket that sends the data to this message state
+	 * @param executionManager
+	 *  The ExecutionManager to use for scheduled commands
 	 * @param messageHeader
-	 * 	The configured haeader. May be null, if no header is used
+	 * 	The configured header. May be null, if no header is used
 	 * @param driverConfig
 	 *  The driver configuration
 	 * @param settings
 	 *  The driver settings
 	 * @param log
 	 */
-	public MessageState(InetSocketAddress remoteSocket, MessageHeader messageHeader, DriverConfig driverConfig, IDriverSettings settings, Logger log) {
+	public MessageState(InetSocketAddress remoteSocket, ExecutionManager executionManager, MessageHeader messageHeader, DriverConfig driverConfig, IDriverSettings settings, Logger log) {
 
 		this.log = log;
 
 		this.remoteSocket = remoteSocket;
 		this.messageHeader = messageHeader;
+		this.driverConfig = driverConfig;
 
+		this.executionManager = executionManager;
+		if (executionManager != null) {
+			timeoutHandler = new TimeoutHandler();
+		} else {
+			timeoutHandler = null;
+		}
+		
 		// Message lengths are stored in a map, to get fast access when evaluating incoming data
 		int maxLength = 0;
-		this.messageLengthMap = new HashMap<Integer, Integer>(driverConfig.messages.size());
 		for (Map.Entry<Integer, MessageConfig> configEntry : driverConfig.messages.entrySet()) {
 			MessageConfig messageConfig = configEntry.getValue();
-			messageLengthMap.put(messageConfig.getMessageId(), messageConfig.getMessageLength());
 			maxLength = Math.max(maxLength, messageConfig.getMessageLength());
 		}
 		this.headerLength = messageHeader != null ? messageHeader.getHeaderLength() : 0;
@@ -127,7 +143,18 @@ public class MessageState {
 		if (log.isTraceEnabled()) {
 			log.trace(String.format("Received packet with %d bytes of data", data.remaining()));
 		}
-		checkMessageTimeout();
+	
+		synchronized (messageLock) {
+			if (timeoutSchedule != null) {
+				timeoutSchedule.cancel(false);
+				timeoutSchedule = null;
+			}
+		}
+
+		// Timeout schedule is only used for packet based messages
+		if (currentMsgConfig == null || currentMsgConfig.getMessageType()==MessageType.FIXED_LENGTH) {
+			checkMessageTimeout();
+		}
 
 		while (data.hasRemaining()) {
 
@@ -161,8 +188,10 @@ public class MessageState {
 				} else {
 					// Message Id is received
 					currentMessageId = getMessageId(messageIdBytes);
-					Integer msgLength = messageLengthMap.get(currentMessageId);
-					if (msgLength != null) {
+					currentMsgConfig = driverConfig.getMessageConfig(currentMessageId);
+					
+					if (currentMsgConfig != null) {
+						Integer msgLength = currentMsgConfig.getMessageLength();
 						if (headerReceived && msgLength > pendingBytes) {
 							// Packet is to short to contain the message
 							log.warn(String.format(
@@ -173,7 +202,6 @@ public class MessageState {
 						} else {
 							// Start evaluating the message
 							messagePending = true;
-							currentMsgLength = msgLength;
 							currentMsgPos = 0;
 							// Use message length for pending bytes when no header is used
 							if (!headerReceived) {
@@ -197,7 +225,14 @@ public class MessageState {
 				}
 			} else if (messagePending) {
 				// valid message ID has been received
-				int bytesToRead = Math.min(data.remaining(), currentMsgLength-currentMsgPos);
+				boolean fixedLength = currentMsgConfig.getMessageType()==MessageType.FIXED_LENGTH;
+				int bytesToRead;
+				if (fixedLength) {
+					bytesToRead = Math.min(data.remaining(), currentMsgConfig.getMessageLength()-currentMsgPos);
+				} else {
+					// Variable length message - read all data that is received
+					bytesToRead = data.remaining();
+				}
 
 				// Resize the current message buffer if necessary			
 				if (currentMsgData.length < currentMsgPos + bytesToRead) {
@@ -207,19 +242,22 @@ public class MessageState {
 				data.get(currentMsgData, currentMsgPos, bytesToRead);
 				currentMsgPos += bytesToRead;
 				pendingBytes -= bytesToRead;
-				if (currentMsgPos == currentMsgLength) {
+				if (fixedLength && currentMsgPos == currentMsgConfig.getMessageLength()) {
 					// The message is complete
 					messagePending = false;
 					deliverMessage();
 				}
 
 				// The packet has been completely received - prepare for new packet
-				if (headerReceived && pendingBytes == 0) {
+				if (currentMsgConfig.getMessageType()==MessageType.FIXED_LENGTH && headerReceived && pendingBytes == 0) {
 					reset();
 				}
 			}
 		}
 
+		if (messagePending && currentMsgConfig.getMessageType() == MessageType.PACKET_BASED && executionManager != null) {
+			timeoutSchedule = executionManager.executeOnce(timeoutHandler, 2000, TimeUnit.MILLISECONDS);
+		}
 	}
 
 	private void checkMessageTimeout() {
@@ -345,5 +383,31 @@ public class MessageState {
 		messagePending = false;
 		messageIdBytesRec = 0;
 		msgNumber ++;
+	}
+	
+	private class TimeoutHandler implements Runnable {
+
+		@Override
+		public void run() {
+			synchronized (messageLock) {
+				if (log.isDebugEnabled()) {
+					log.debug(String.format("Timeout for message ID %d expired", currentMessageId));
+				}
+				
+				try {
+					if (currentMsgConfig != null && currentMsgConfig.getMessageType() == MessageType.PACKET_BASED && currentMsgPos >= currentMsgConfig.getMessageLength()) {
+						if (log.isDebugEnabled()) {
+							log.debug(String.format("Delivering packet based message ID %d", currentMessageId));
+						}
+						deliverMessage();
+					} else {
+						reset();
+					}
+				} finally {
+					timeoutSchedule = null;
+				}
+			}
+		}
+		
 	}
 }
