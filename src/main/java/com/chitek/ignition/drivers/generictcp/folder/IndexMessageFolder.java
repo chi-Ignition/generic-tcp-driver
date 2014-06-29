@@ -513,6 +513,9 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 					case String:
 						driverTag.setValue(buffer.readString(getTagReadSize(buffer.remaining(), driverTag)), timestampUtc);
 						break;
+					case RawString:
+						driverTag.setValue(buffer.readByteString(getTagReadSize(buffer.remaining(), driverTag)), timestampUtc);
+						break;
 					case MessageAge:
 						buffer.getInt(); // Has already been read - just skip
 						break;

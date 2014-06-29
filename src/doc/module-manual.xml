@@ -327,10 +327,12 @@ barcodescanner1.company.com,Device3</programlisting>
 				currently edited message.</simpara>
 				<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
                   termlength="15">
-					<varlistentry>
-						<term>Message Type</term>
-						<listitem>
-							<simpara>This settings decides if the message has a fixed length 
+					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+						Message Type</term>
+						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+							This settings decides if the message has a fixed length 
 							(determined by the configured tags) or a variable length that is 
 							determined by the length of the received data packet.</simpara>
 						</listitem>
@@ -419,13 +421,15 @@ barcodescanner1.company.com,Device3</programlisting>
 							may be coerced to a string).</simpara>
 						</listitem>
 					</varlistentry>
-					<varlistentry>
-						<term>Length Type</term>
-						<listitem>
-							<simpara>This setting is only visible for messages with 
-							&apos;Packet Based&apos; length. One tag can be configured to 
-							have a variable length. This tag receives all data that exceeds 
-							the length of the configured fixed length tags.</simpara>
+					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+						Length Type</term>
+						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+							This setting is only visible for messages with &apos;Packet 
+							Based&apos; length. One tag can be configured to have a variable 
+							length. This tag receives all data that exceeds the length of 
+							the configured fixed length tags.</simpara>
 						</listitem>
 					</varlistentry>
 				</variablelist>
@@ -526,6 +530,15 @@ barcodescanner1.company.com,Device3</programlisting>
 							trailing whitespaces and special chars are removed using the 
 							Java String#trim method.The size parameter defines the length of 
 							the string, arrays of strings are not supported.</simpara>
+						</listitem>
+					</varlistentry>
+					<varlistentry>
+						<term>Raw String</term>
+						<listitem>
+							<simpara>The received data bytes are converted to a Java Char 
+							array and then wrapped in a String without any encoding. The 
+							result might not be a valid String, but it&apos;s char array 
+							contains the unmodified raw data.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">

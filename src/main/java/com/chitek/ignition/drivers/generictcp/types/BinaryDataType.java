@@ -34,6 +34,7 @@ public enum BinaryDataType implements Serializable {
 	Int32("Integer 32Bit", 4, 1, DataType.Int32),
 	Float("Float", 4, 1,DataType.Float),
 	String("String", 1, 1, DataType.String),
+	RawString("RawString", 1, 1, DataType.String),
 	MessageAge("Message Age", 4, 1, DataType.UInt32, true, 0, false, false);
 	
 	private String displayString;
@@ -102,7 +103,7 @@ public enum BinaryDataType implements Serializable {
 	}
 	
 	public boolean isString() {
-		return this==BinaryDataType.String;
+		return this==BinaryDataType.String || this==BinaryDataType.RawString;
 	}
 	
 	public int getSpecialId() {
@@ -117,7 +118,7 @@ public enum BinaryDataType implements Serializable {
 	 * Returns <code>true</code> if the given BinaryDataType supports variable length.
 	 */
 	public boolean supportsVariableLength() {
-		return this == BinaryDataType.Dummy || this == BinaryDataType.String;
+		return this == BinaryDataType.Dummy || this == BinaryDataType.String || this == BinaryDataType.RawString;
 	}
 	
 	public static List<BinaryDataType> getOptions() {

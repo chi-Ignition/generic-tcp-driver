@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -523,6 +524,35 @@ public class TestMessageFolder {
 		// The folder should have added a schedule to evaluate the message
 		assertEquals(1, driverContext.getExecutor().getScheduledCount());
 		driverContext.getExecutor().runCommand();
+	}
+	
+	@Test
+	public void testDataTypes() throws Exception {
+		// Here we simply test that no Exception is thrown
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);
+		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigTypes.xml");
+		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
+		
+		ByteBuffer buffer = ByteBuffer.allocate(100);
+		buffer.put(new byte[]{0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0});	// Timestamps
+		buffer.put(" bcde".getBytes()); 	// Data 1 - String
+		buffer.put(new byte[]{1,2,0,(byte)254,(byte)255});	// Data 2 - ByteString
+		
+		buffer.flip();
+		byte[]data = new byte[buffer.remaining()];
+		buffer.get(data);
+		folder.messageArrived(data, null);
+
+		// The folder should have added a schedule to evaluate the message
+		assertEquals(1, driverContext.getExecutor().getScheduledCount());
+		driverContext.getExecutor().runCommand();
+		
+		DataValue value1 = FolderTestUtils.readValue(folder,"Alias1/Data1");
+		assertEquals("Result String should be trimmed", "bcde", value1.getValue().getValue());
+		DataValue value2 = FolderTestUtils.readValue(folder,"Alias1/Data2");
+		char[] charvalue = new char[5];
+		((String)value2.getValue().getValue()).getChars(0,5,charvalue,0);
+		assertArrayEquals(new char[]{1,2,0,254,255}, charvalue);
 	}
 	
 	@Test

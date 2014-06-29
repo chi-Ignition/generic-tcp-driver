@@ -258,7 +258,8 @@ public class VariantByteBuffer  {
 	}
 
 	/**
-	 * This method returns a String with the given length. Arrays of String are not supported.
+	 * This method returns a String with the given length. Used charset is "ISO-8859-1". Arrays of
+	 * String are not supported.
 	 * 
 	 * @param length
 	 * @return
@@ -284,6 +285,25 @@ public class VariantByteBuffer  {
 		return new Variant(value);
 	}
 
+	/**
+	 * This method returns a String with the given length. Arrays of String are not supported.
+	 * 
+	 * @param length
+	 * @return
+	 */
+	public Variant readByteString(int length) {
+
+		char[] charbuffer = new char[length];
+		for (int i=0; i<length; i++) {
+			byte b = buffer.get();
+			charbuffer[i]= b<0 ? (char)(b+256) : (char)b;
+		}
+		
+		String value = new String(charbuffer);
+		
+		return new Variant(value);
+	}
+	
 	private static Boolean[] Byte2BitArray(byte b) {
 
 		Boolean[] boolArray = new Boolean[8];

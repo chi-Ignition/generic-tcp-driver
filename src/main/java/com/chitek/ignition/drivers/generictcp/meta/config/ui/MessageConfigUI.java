@@ -556,7 +556,7 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 		};
 		
 		dropDown.add(new AjaxFormComponentUpdatingBehavior("onchange") {
-			
+	
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				target.add(feedback);
@@ -651,6 +651,12 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 				}
 				target.add(parent.get("size").setEnabled(dataType.isArrayAllowed()));
 				target.add(parent.get("tagLengthType").setEnabled(dataType.supportsVariableLength()));
+				if (!dataType.supportsVariableLength()) {
+					EditorListItem<TagConfig> listItem = getComponent().findParent(EditorListItem.class);
+					if (listItem != null) {
+						listItem.getModelObject().setTagLengthType(TagLengthType.FIXED_LENGTH);
+					}
+				}
 			}
 		});
 
@@ -949,6 +955,7 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 	 * @param target
 	 */
 	private void updateTagLength(AjaxRequestTarget target) {
+				
 		@SuppressWarnings("rawtypes")
 		List<DropDownChoice> choices = editor.getComponentsById("tagLengthType", DropDownChoice.class);
 		for (DropDownChoice<?> choice : choices) {
