@@ -110,7 +110,7 @@ public class UniqueListItemValidator<T> implements IValidator<T> {
 			return;
 		
 		for (FormComponent field : fields) {
-			String value = field.getInput();
+			String value = field.getRawInput().toString();
 
 			if (value != null && (caseSensitive ? value.equals(parentValue) : value.equalsIgnoreCase(parentValue)) ) {
 				count++;

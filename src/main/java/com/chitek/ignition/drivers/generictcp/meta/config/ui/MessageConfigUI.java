@@ -1055,6 +1055,8 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 				}
 			}
 			
+			editor.updateModel();
+			
 			if (currentMessage.getMessageType() == MessageType.PACKET_BASED) {
 				// Make sure the is an variable length tag
 				boolean ok = false;
