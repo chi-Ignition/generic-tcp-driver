@@ -256,7 +256,7 @@ public class MessageState {
 		}
 
 		if (messagePending && currentMsgConfig.getMessageType() == MessageType.PACKET_BASED && executionManager != null) {
-			timeoutSchedule = executionManager.executeOnce(timeoutHandler, 2000, TimeUnit.MILLISECONDS);
+			timeoutSchedule = executionManager.executeOnce(timeoutHandler, settings.getMessageTimeout(), TimeUnit.MILLISECONDS);
 		}
 	}
 
