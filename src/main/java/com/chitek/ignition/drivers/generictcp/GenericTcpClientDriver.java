@@ -309,7 +309,7 @@ public class GenericTcpClientDriver extends AbstractGenericTcpDriver implements 
 		if (acquired)
 			try {
 				disconnect();
-				connect();
+				scheduleConnect(false);
 			} finally {
 				reconnectSemaphore.release();
 			}
