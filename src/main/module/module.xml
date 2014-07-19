@@ -9,8 +9,8 @@
   		<freemodule>true</freemodule>
   		<license>license.html</license>
   		<documentation>manual-frame.html</documentation>
-		<requiredignitionversion>7.6.4</requiredignitionversion>
-		<requiredframeworkversion>5</requiredframeworkversion>
+		<requiredignitionversion>7.7.0</requiredignitionversion>
+		<requiredframeworkversion>6</requiredframeworkversion>
 		<depends scope="G">xopc</depends>
 		<jar scope="G">${project.artifactId}-${project.version}.jar</jar>
 		<hook scope="G">com.chitek.ignition.drivers.generictcp.ModuleHook</hook>

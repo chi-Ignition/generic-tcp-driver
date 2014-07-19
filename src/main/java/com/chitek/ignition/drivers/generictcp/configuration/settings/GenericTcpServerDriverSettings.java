@@ -166,10 +166,10 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 					config = DriverConfig.fromXMLString(configString);
 					return config;
 				} catch (Exception e) {
-					throw new Exception(BundleUtil._("GenericTcpDriver.error.xmlParseError", e.getMessage()));
+					throw new Exception(BundleUtil.i18n("GenericTcpDriver.error.xmlParseError", e.getMessage()));
 				}
 			} else {
-				throw new Exception(BundleUtil._("GenericTcpDriver.error.notBase64"));
+				throw new Exception(BundleUtil.i18n("GenericTcpDriver.error.notBase64"));
 			}
 		}
 
@@ -193,10 +193,10 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 					config = com.chitek.ignition.drivers.generictcp.meta.config.HeaderConfig.fromXMLString(configString);
 					return config;
 				} catch (Exception e) {
-					throw new Exception(BundleUtil._("GenericTcpDriver.error.xmlParseError", e.getMessage()));
+					throw new Exception(BundleUtil.i18n("GenericTcpDriver.error.xmlParseError", e.getMessage()));
 				}
 			} else {
-				throw new Exception(BundleUtil._("GenericTcpDriver.error.notBase64"));
+				throw new Exception(BundleUtil.i18n("GenericTcpDriver.error.notBase64"));
 			}
 		}
 
@@ -220,10 +220,10 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 					config = com.chitek.ignition.drivers.generictcp.meta.config.WritebackConfig.fromXMLString(configString);
 					return config;
 				} catch (Exception e) {
-					throw new Exception(BundleUtil._("GenericTcpDriver.error.xmlParseError", e.getMessage()));
+					throw new Exception(BundleUtil.i18n("GenericTcpDriver.error.xmlParseError", e.getMessage()));
 				}
 			} else {
-				throw new Exception(BundleUtil._("GenericTcpDriver.error.notBase64"));
+				throw new Exception(BundleUtil.i18n("GenericTcpDriver.error.notBase64"));
 			}
 		}
 

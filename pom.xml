@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.chitek.ignition</groupId>
 	<artifactId>generic-tcp-driver</artifactId>
-	<version>2.6.3</version>
+	<version>2.7.3</version>
 	<name>generic-tcp-driver</name>
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>
@@ -263,19 +263,19 @@
 		<dependency>
 			<groupId>com.inductiveautomation.ignition</groupId>
 			<artifactId>driver-api</artifactId>
-			<version>7.6.4</version>
+			<version>7.7.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.inductiveautomation.ignition</groupId>
 			<artifactId>ignition-common</artifactId>
-			<version>7.6.4</version>
+			<version>7.7.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.inductiveautomation.ignition</groupId>
 			<artifactId>gateway-api</artifactId>
-			<version>7.6.4</version>
+			<version>7.7.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
