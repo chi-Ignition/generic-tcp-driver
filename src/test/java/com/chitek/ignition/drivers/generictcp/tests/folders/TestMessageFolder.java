@@ -323,6 +323,27 @@ public class TestMessageFolder {
 	}
 	
 	@Test
+	public void testFolderWithHandshakeNoQueue() throws Exception {
+
+		// Create settings with message id type = None
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);
+		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigSimple.xml");
+		messageConfig.setQueueMode(QueueMode.NONE);
+
+		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
+
+		byte[] handshakeMessage = new byte[]{1,2,3,4};
+
+		folder.messageArrived(new byte[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,65,67}, handshakeMessage); // 65,67 == 'AC'
+		
+		// The folder should have added a schedule to evaluate the message
+		assertEquals(1, driverContext.getExecutor().getScheduledCount());
+		driverContext.getExecutor().runCommand();
+
+		assertArrayEquals(handshakeMessage, driverContext.getLastWrittenMessage());
+	}
+	
+	@Test
 	public void testQueueMode() throws Exception {
 		// Create settings with message id type = None
 		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);

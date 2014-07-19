@@ -306,6 +306,13 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 				@Override
 				public void run() {
 					evaluateMessage(message);
+					// If this message is the last one in a package with header, send the confirmation to the device
+					if (handshakeMsg != null) {
+						if (log.isDebugEnabled()) {
+							log.debug(String.format("Sending handshake message to device:%s", ByteUtilities.toString(handshakeMsg)));
+						}
+						writeHandshake(handshakeMsg);
+					}
 					pendingEvaluations.decrementAndGet();
 				}
 			});
