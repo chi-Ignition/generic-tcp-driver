@@ -6,6 +6,7 @@
  
 	<wicket:extend>
 	
+	<form wicket:id="upload-form">
 		<form wicket:id="edit-form">
 		<div style="position:relative;">
 			<div wicket:id="table-container">
@@ -126,12 +127,11 @@
 		</form>
 		
 		<hr />
-		<form wicket:id="upload-form">
+		
 		<div>
 			<input type="file" size="60" wicket:id="upload-field" /><br />
 			<span class="importlink">
 				<a href="#"	wicket:id="import-link"><wicket:message key="import.linklabel">Import Message</wicket:message></a>
-				<wicket:message key="import.hint" />
 			</span>
 		</div>
 		</form>

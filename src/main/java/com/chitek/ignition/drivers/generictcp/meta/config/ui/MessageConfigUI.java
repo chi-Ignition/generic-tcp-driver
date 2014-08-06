@@ -319,7 +319,7 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 		};
 		editForm.add(exportLink);
 
-		add(editForm);
+		uploadForm.add(editForm);
 	}
 
 	private DropDownChoice<Integer> getCurrentMessageIdDropdown() {
@@ -765,10 +765,15 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 
 			MessageConfig importConfig = MessageConfig.fromXMLString(sb.toString());
 
-			importConfig.setMessageId(currentMessageId);
+			// Increment imported message ID if necessary to make it unique
+			int newMessageId = getNextMessageId(importConfig.getMessageId() - 1);
+			if (newMessageId != importConfig.getMessageId()) {
+				importConfig.setMessageId(newMessageId);
+				warn(new StringResourceModel("warn.importIdChanged", this, null, currentMessageId).getString());
+			}
 			getConfig().addMessageConfig(importConfig);
 			currentMessage = importConfig;
-			currentMessageId = importConfig.messageId;
+			currentMessageId = importConfig.getMessageId();
 
 			// Refresh the model data in the list editor
 			currentMessageIdDropdown.clearInput();
@@ -782,6 +787,7 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 					ValidationError error = new ValidationError();
 					error.addKey(UniqueMessageAliasValidator.messageKey);
 					messageAliasTextField.error(error);
+					break;
 				}
 			}
 
@@ -943,13 +949,13 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 	private void updateForm(AjaxRequestTarget target) {
 		// Refresh the drop down choice
 		target.add(currentMessageIdDropdown);
-		target.add(target.getPage().get("config-contents:tabs:panel:edit-form:table-container:usePersistance"));
-		target.add(target.getPage().get("config-contents:tabs:panel:edit-form:table-container:queueMode"));
-		target.add(target.getPage().get("config-contents:tabs:panel:edit-form:table-container:messageType"));
+		target.add(target.getPage().get("config-contents:tabs:panel:upload-form:edit-form:table-container:usePersistance"));
+		target.add(target.getPage().get("config-contents:tabs:panel:upload-form:edit-form:table-container:queueMode"));
+		target.add(target.getPage().get("config-contents:tabs:panel:upload-form:edit-form:table-container:messageType"));
 
 		// Refresh the form
 		editor.reloadModel();
-		MarkupContainer listEditorContainer = (MarkupContainer) target.getPage().get("config-contents:tabs:panel:edit-form:table-container:list-editor");
+		MarkupContainer listEditorContainer = (MarkupContainer) target.getPage().get("config-contents:tabs:panel:upload-form:edit-form:table-container:list-editor");
 		target.add(listEditorContainer);
 	}
 
