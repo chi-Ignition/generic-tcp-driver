@@ -49,6 +49,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.ResourceModel;
 import org.apache.wicket.model.StringResourceModel;
+import org.apache.wicket.model.util.ListModel;
 import org.apache.wicket.request.handler.resource.ResourceStreamRequestHandler;
 import org.apache.wicket.request.resource.ContentDisposition;
 import org.apache.wicket.util.resource.IResourceStream;
@@ -137,7 +138,7 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 
 		// *******************************************************************************************
 		// *** Form for XML import
-		final FileUploadField uploadField = new FileUploadField("upload-field");
+		final FileUploadField uploadField = new FileUploadField("upload-field", new ListModel<FileUpload>());
 
 		Form<?> uploadForm = new Form<Object>("upload-form") {
 			@Override
@@ -146,6 +147,8 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 					FileUpload upload = uploadField.getFileUpload();
 					if (upload != null) {
 						handleOnUpload(upload.getInputStream());
+					} else {
+						warn(new StringResourceModel("warn.noFileToUpload", this, null).getString());
 					}
 				} catch (Exception e) {
 					this.error(new StringResourceModel("import.error", this, null).getString() + " Exception: " + e.toString());
