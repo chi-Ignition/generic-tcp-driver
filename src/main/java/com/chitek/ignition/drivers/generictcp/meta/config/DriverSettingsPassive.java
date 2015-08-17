@@ -14,6 +14,7 @@ import com.chitek.ignition.drivers.generictcp.types.RemoteDevice;
 public class DriverSettingsPassive implements IDriverSettings {
 	private final String serverHostname;
 	private final int serverPort;
+	private final boolean useUdp;
 	private final List<RemoteDevice> devices;
 	private final int messageTimeout;
 	private final ByteOrder byteOrder;
@@ -24,6 +25,7 @@ public class DriverSettingsPassive implements IDriverSettings {
 	public DriverSettingsPassive(
 		String serverHostname,
 		int serverPort,
+		boolean useUdp,
 		List<RemoteDevice> devices,
 		int packetTimeout,
 		boolean reverseByteOrder,
@@ -33,6 +35,7 @@ public class DriverSettingsPassive implements IDriverSettings {
 	{
 		this.serverHostname = serverHostname;
 		this.serverPort = serverPort;
+		this.useUdp = useUdp;
 		this.devices = devices;
 		this.messageTimeout = packetTimeout;
 		this.byteOrder = reverseByteOrder ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN;
@@ -47,6 +50,10 @@ public class DriverSettingsPassive implements IDriverSettings {
 
 	public int getServerPort() {
 		return serverPort;
+	}
+	
+	public boolean getUseUdp() {
+		return useUdp;
 	}
 
 	public List<RemoteDevice> getDevices() {

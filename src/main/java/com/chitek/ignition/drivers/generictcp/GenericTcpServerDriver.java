@@ -20,6 +20,8 @@ import com.chitek.ignition.drivers.generictcp.folder.SimpleWriteFolder;
 import com.chitek.ignition.drivers.generictcp.io.IMessageHandler;
 import com.chitek.ignition.drivers.generictcp.io.NioEventHandler;
 import com.chitek.ignition.drivers.generictcp.io.NioServer;
+import com.chitek.ignition.drivers.generictcp.io.NioTcpServer;
+import com.chitek.ignition.drivers.generictcp.io.NioUdpServer;
 import com.chitek.ignition.drivers.generictcp.meta.config.DriverConfig;
 import com.chitek.ignition.drivers.generictcp.meta.config.DriverSettingsPassive;
 import com.chitek.ignition.drivers.generictcp.meta.config.HeaderConfig;
@@ -238,7 +240,12 @@ implements IMessageHandler {
 					isa = new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(), driverSettings.getServerPort());
 				else
 					isa = new InetSocketAddress(driverSettings.getServerAddress(), driverSettings.getServerPort());
-				nioServer = new NioServer(isa, Logger.getLogger(log.getName() + "." + "NioServer"));
+				
+				if (driverSettings.getUseUdp()) {
+					nioServer = new NioUdpServer(isa, Logger.getLogger(log.getName() + "." + "NioServer"));
+				} else {
+					nioServer = new NioTcpServer(isa, Logger.getLogger(log.getName() + "." + "NioServer"));
+				}
 
 				nioServer.setEventHandler(new NioEventHandler(log, getExecutionManager(), messageConfig, driverSettings, messageHeader, this));
 				nioServer.start();

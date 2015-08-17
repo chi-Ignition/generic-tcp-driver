@@ -41,6 +41,7 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 	/* Connectivity */
 	public static StringField ServerHostname = new StringField(META, "ServerHostname");
 	public static IntField ServerPort = new IntField(META, "ServerPort", SFieldFlags.SMANDATORY);
+	public static BooleanField UseUdp = new BooleanField(META, "UseUdp");
 	public static StringField Devices = new StringField(META, "Devices");
 
 	/* Message Handling */
@@ -56,7 +57,7 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 
 	/* Categories */
 	public static final Category Connectivity = new Category("GenericTcpServerDriverSettings.Category.Connectivity", 1001)
-	.include(ServerHostname, ServerPort, Devices);
+	.include(ServerHostname, ServerPort, UseUdp, Devices);
 	public static Category MessageHandling = new Category("GenericTcpServerDriverSettings.Category.MessageHandling", 1002)
 	.include(PacketTimeout, ReverseByteOrder, TimestampFactor, MaxTimestamp);
 
@@ -67,6 +68,7 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 		WritebackConfig.getFormMeta().setVisible(false);
 
 		ServerPort.addValidator(new RangeValidator<Integer>(1, 65535));
+		UseUdp.setDefault(false);
 		PacketTimeout.setDefault(1000);
 		PacketTimeout.addValidator(new RangeValidator<Integer>(50, 10000));
 		ReverseByteOrder.setDefault(false);
@@ -99,6 +101,7 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 		return new DriverSettingsPassive(
 			getServerHostname(),
 			getServerPort(),
+			getUseUdp(),
 			getDevices(),
 			getPacketTimeout(),
 			getReverseByteOrder(),
@@ -115,6 +118,10 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 		return getInt(ServerPort);
 	}
 
+	public boolean getUseUdp() {
+		return getBoolean(UseUdp);
+	}
+	
 	public int getPacketTimeout() {
 		return getInt(PacketTimeout);
 	}
@@ -232,6 +239,10 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 
 	public void setServerPort(int port) {
 		setInt(ServerPort, port);
+	}
+	
+	public void setUseUdp(boolean useUdp) {
+		setBoolean(UseUdp, useUdp);
 	}
 
 	public void setPacketTimeout(int timeout) {

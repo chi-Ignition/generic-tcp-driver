@@ -23,11 +23,11 @@ public interface IIoEventHandler {
 	/**
 	 * Called when a remote client connects.
 	 * 
-	 * @param remoteAddress
+	 * @param remoteSocket
 	 * @return
 	 * 	<code>true</code> to accept the connection.
 	 */
-	public abstract boolean clientConnected(InetSocketAddress remoteAddress);
+	public abstract boolean clientConnected(InetSocketAddress remoteSocket);
 
 	/**
 	 * Called when a remote client closes the connection.

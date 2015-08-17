@@ -26,7 +26,7 @@ public class GenericTcpClientDriverType extends DriverType {
 	public static final String TYPE_ID = "GenericTcpClient";
 
 	public GenericTcpClientDriverType() {
-		super(TYPE_ID, "GenericTcpDriver.GenericTcpClientDriverType.Name", "GenericTcpDriver.TcpBinaryDriverType.Description");
+		super(TYPE_ID, "GenericTcpDriver.GenericTcpClientDriverType.Name", "GenericTcpDriver.GenericTcpClientDriverType.Description");
 	}
 
 	@Override
