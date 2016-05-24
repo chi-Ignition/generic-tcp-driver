@@ -178,6 +178,24 @@
 				</executions>
 			</plugin>
 			<plugin>
+                <groupId>com.inductiveautomation.ignitionsdk</groupId>
+                <artifactId>ignition-maven-plugin</artifactId>
+                <version>1.0.9</version>
+                <executions>
+                    <execution>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>post</goal>
+                        </goals>
+                        <configuration>
+                        	<gatewayAddress>${local-gateway-url}</gatewayAddress>
+                        	<moduleFile>${basedir}/target/${project.artifactId}-${project.version}-unsigned.modl</moduleFile>
+                        	<moduleName>${project.artifactId}-${project.version}</moduleName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<version>1.7</version>
 				<executions>
@@ -195,31 +213,7 @@
 							</target>
 						</configuration>
 					</execution>
-					<!-- deploy module to developer gateway -->
-					<execution>
-						<id>ant-deploy</id>
-						<phase>deploy</phase>
-						<configuration>
-							<target name="deploy">
-								<!-- Add the postmodule task. This task can deploy a module to a local Ignition gateway. -->
-								<taskdef name="postmodule" classname="com.inductiveautomation.ant.PostModule"
-									classpathref="maven.plugin.classpath" />
-								<postmodule posturl="${local-gateway-url}"
-									modulefile="${basedir}/target/${project.artifactId}-${project.version}-unsigned.modl" />
-							</target>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
 				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>com.inductiveautomation.ignition</groupId>
-						<artifactId>ant-lib</artifactId>
-						<version>LATEST</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>com.agilejava.docbkx</groupId>
@@ -261,21 +255,21 @@
 	</build>
 	<dependencies>
 		<dependency>
-			<groupId>com.inductiveautomation.ignition</groupId>
+			<groupId>com.inductiveautomation.ignitionsdk</groupId>
 			<artifactId>driver-api</artifactId>
-			<version>7.7.0</version>
+			<version>7.7.5</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.inductiveautomation.ignition</groupId>
+			<groupId>com.inductiveautomation.ignitionsdk</groupId>
 			<artifactId>ignition-common</artifactId>
-			<version>7.7.0</version>
+			<version>7.7.5</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.inductiveautomation.ignition</groupId>
+			<groupId>com.inductiveautomation.ignitionsdk</groupId>
 			<artifactId>gateway-api</artifactId>
-			<version>7.7.0</version>
+			<version>7.7.5</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -285,6 +279,22 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	<repositories>
+        <repository>
+            <id>ignition-releases</id>
+            <url>http://nexus.inductiveautomation.com:8081/nexus/content/repositories/inductiveautomation-releases</url>
+        </repository>
+        <repository>
+            <id>ignition-thirdparty</id>
+            <url>http://nexus.inductiveautomation.com:8081/nexus/content/repositories/inductiveautomation-thirdparty</url>
+        </repository>
+    </repositories>
+	<pluginRepositories>
+        <pluginRepository>
+            <id>ignition-releases</id>
+            <url>http://nexus.inductiveautomation.com:8081/nexus/content/repositories/inductiveautomation-releases</url>
+        </pluginRepository>
+    </pluginRepositories>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<local-gateway-url>http://10.224.10.104:8088/main/system/DeveloperModuleLoadingServlet</local-gateway-url>
