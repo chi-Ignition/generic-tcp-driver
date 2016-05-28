@@ -1,7 +1,9 @@
 package com.chitek.ignition.drivers.generictcp.io;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
@@ -27,7 +29,7 @@ public class NioTcpServer implements Runnable, NioServer {
 
 	private ServerSocketChannel serverChannel;
 	private Selector selector;
-	private volatile Map<InetSocketAddress, SocketChannel> clientMap = new HashMap<InetSocketAddress, SocketChannel>();
+	private volatile Map<InetAddress, SocketChannel> clientMap = new HashMap<InetAddress, SocketChannel>();
 	// A list of SocketChannels to put into write state
 	private final List<SocketChannel> writeInterest = new LinkedList<SocketChannel>();
 	// Maps a SocketChannel to a list of ByteBuffer instances
@@ -73,8 +75,8 @@ public class NioTcpServer implements Runnable, NioServer {
 			e.printStackTrace();
 		}
 
-		for (Iterator<Map.Entry<InetSocketAddress, SocketChannel>> it = clientMap.entrySet().iterator(); it.hasNext();) {
-			Entry<InetSocketAddress, SocketChannel> client = it.next();
+		for (Iterator<Map.Entry<InetAddress, SocketChannel>> it = clientMap.entrySet().iterator(); it.hasNext();) {
+			Entry<InetAddress, SocketChannel> client = it.next();
 			try {
 				if (client.getValue().isOpen())
 					client.getValue().close();
@@ -101,9 +103,9 @@ public class NioTcpServer implements Runnable, NioServer {
 		synchronized (this.writeInterest) {
 
 			// Get the SocketChannel for the given remote address
-			SocketChannel socketChannel = clientMap.get(remoteSocketAddress);
+			SocketChannel socketChannel = clientMap.get(remoteSocketAddress.getAddress());
 			if (socketChannel == null) {
-				log.error(String.format("Attempt to send to a not connected client: %s", remoteSocketAddress.getHostName()));
+				log.error(String.format("Attempt to send to a not connected client: %s", remoteSocketAddress));
 				return;
 			}
 
@@ -182,7 +184,7 @@ public class NioTcpServer implements Runnable, NioServer {
 					}
 				}
 			} catch (ClosedSelectorException e) {
-				log.debug("Selector closed");
+				log.debug("NioServer main loop ended: Selector closed");
 			} catch (Exception e) {
 				log.error("Exception in NioServer run() method.", e);
 			}
@@ -197,6 +199,14 @@ public class NioTcpServer implements Runnable, NioServer {
 	public int getConnectedClientCount() {
 		return clientMap.size();
 	}
+	
+	/**
+	 * @return
+	 * 	The SocketAddress of the server
+	 */
+	public SocketAddress getLocalAddress() {
+		return serverChannel.socket().getLocalSocketAddress();
+	}
 
 	private void accept(SelectionKey key) throws IOException {
 		// This cast is safe, because only ServerSocketChannels can have accepts pending
@@ -206,13 +216,21 @@ public class NioTcpServer implements Runnable, NioServer {
 		SocketChannel socketChannel = serverSocketChannel.accept();
 		socketChannel.configureBlocking(false);
 
-		InetSocketAddress remoteSocket = new InetSocketAddress(socketChannel.socket().getInetAddress(), socketChannel.socket().getPort());
-
+		InetAddress remoteAddress = socketChannel.socket().getInetAddress(); 
+		InetSocketAddress remoteSocket = new InetSocketAddress(remoteAddress, socketChannel.socket().getPort());
+		
+		// Check if there is already a connection from this address
+		SocketChannel existingChannel = clientMap.get(remoteAddress);
+		if (existingChannel != null) {
+			log.debug(String.format("New connection from client %s. Replacing existing connection.", remoteAddress));
+			disposeClientChannel((InetSocketAddress) existingChannel.socket().getRemoteSocketAddress());
+		}
+		
 		// Register the new SocketChannel with our Selector, indicating
 		// we'd like to be notified when there's data waiting to be read
 		socketChannel.register(this.selector, SelectionKey.OP_READ);
 
-		clientMap.put(remoteSocket, socketChannel);
+		clientMap.put(remoteAddress, socketChannel);
 		log.debug(String.format("Remote client %s connected.", remoteSocket));
 
 		boolean accept = eventHandler.clientConnected(remoteSocket);
@@ -237,8 +255,6 @@ public class NioTcpServer implements Runnable, NioServer {
 		} catch (IOException e) {
 			// The remote forcibly closed the connection, cancel
 			// the selection key and close the channel.
-			key.cancel();
-			socketChannel.close();
 			disposeClientChannel(remoteSocket);
 			log.debug(String.format("Remote client %s closed connection forcibly.", remoteSocket));
 			return;
@@ -247,8 +263,6 @@ public class NioTcpServer implements Runnable, NioServer {
 		if (numRead == -1) {
 			// Remote entity shut the socket down cleanly. Do the
 			// same from our end and cancel the channel.
-			socketChannel.close();
-			key.cancel();
 			disposeClientChannel(remoteSocket);
 			log.debug(String.format("Remote client %s closed connection.", remoteSocket));
 			return;
@@ -286,7 +300,12 @@ public class NioTcpServer implements Runnable, NioServer {
 	}
 
 	private void disposeClientChannel(InetSocketAddress remoteSocket) {
-		SocketChannel socketChannel = clientMap.remove(remoteSocket);
+		SocketChannel socketChannel = clientMap.remove(remoteSocket.getAddress());
+		socketChannel.keyFor(selector).cancel();
+		try {
+			socketChannel.close();
+		} catch (IOException e) {
+		}
 		synchronized (this.pendingData) {
 			List<ByteBuffer> pending = pendingData.remove(socketChannel);
 			if (pending != null) {
