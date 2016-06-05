@@ -1,7 +1,9 @@
 package com.chitek.ignition.drivers.generictcp.io;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.DatagramChannel;
@@ -27,11 +29,14 @@ public class NioUdpServer implements Runnable, NioServer {
 
 	private DatagramChannel serverChannel;
 	private Selector selector;
-	private volatile Map<InetSocketAddress, DatagramChannel> clientMap = new HashMap<InetSocketAddress, DatagramChannel>();
+	private volatile Map<InetAddress, DatagramChannel> clientMap = new HashMap<InetAddress, DatagramChannel>();
 	// A list of SocketChannels to put into write state
 	private final List<DatagramChannel> writeInterest = new LinkedList<DatagramChannel>();
 	// Maps a SocketChannel to a list of ByteBuffer instances
 	private final Map<DatagramChannel, List<ByteBuffer>> pendingData = new HashMap<DatagramChannel, List<ByteBuffer>>();
+	// Timeout supervision
+	private long timeout = 1000 * 60 * 120; // 120 minutes default
+	private TimeoutHandler timeoutHandler;
 
 	private boolean running;
 
@@ -49,6 +54,7 @@ public class NioUdpServer implements Runnable, NioServer {
 			return;
 		}
 
+		timeoutHandler=new TimeoutHandler(timeout);
 		running = true;
 		try {
 			createSocketSelector();
@@ -73,8 +79,8 @@ public class NioUdpServer implements Runnable, NioServer {
 			e.printStackTrace();
 		}
 
-		for (Iterator<Map.Entry<InetSocketAddress, DatagramChannel>> it = clientMap.entrySet().iterator(); it.hasNext();) {
-			Entry<InetSocketAddress, DatagramChannel> client = it.next();
+		for (Iterator<Map.Entry<InetAddress, DatagramChannel>> it = clientMap.entrySet().iterator(); it.hasNext();) {
+			Entry<InetAddress, DatagramChannel> client = it.next();
 			try {
 				if (client.getValue().isOpen())
 					client.getValue().close();
@@ -90,12 +96,23 @@ public class NioUdpServer implements Runnable, NioServer {
 	}
 
 	/**
+	 * Set the timeout for client connections. The timeout should be set before calling start().
+	 * 
+	 * @param timeout
+	 *            The timeout in milliseconds.
+	 */
+	public void setTimeout(long timeout) {
+		log.debug(String.format("Timeout set to %s ms", timeout));
+		this.timeout = timeout;
+	}
+
+	/**
 	 * Send the given ByteBuffer to a remote client.
 	 * 
 	 * @param remoteSocketAddress
-	 * 		The remote socket to send to.
+	 *            The remote socket to send to.
 	 * @param data
-	 * 		Data to send.
+	 *            Data to send.
 	 */
 	public void write(InetSocketAddress remoteSocketAddress, ByteBuffer data) {
 		synchronized (this.writeInterest) {
@@ -147,6 +164,8 @@ public class NioUdpServer implements Runnable, NioServer {
 	@Override
 	public void run() {
 		log.debug("NioServer main loop started.");
+
+		int keys = 0;
 		while (running) {
 			try {
 				// Switch marked SocketChannels to Write state
@@ -160,23 +179,30 @@ public class NioUdpServer implements Runnable, NioServer {
 				}
 
 				// Wait for an event one of the registered channels
-				this.selector.select();
+				keys = this.selector.select(timeoutHandler.getTimeToTimeout());
 
-				// Iterate over the set of keys for which events are available
-				Iterator<SelectionKey> selectedKeys = this.selector.selectedKeys().iterator();
-				while (selectedKeys.hasNext()) {
-					SelectionKey key = selectedKeys.next();
-					selectedKeys.remove();
+				if (keys == 0) {
+					// No updated keys - timeout expired or wakeup called
+					log.debug("NioServer main loop: select timeout expired or wakeup");
+					handleTimeout();
+				} else {
 
-					if (!key.isValid()) {
-						continue;
-					}
+					// Iterate over the set of keys for which events are available
+					Iterator<SelectionKey> selectedKeys = this.selector.selectedKeys().iterator();
+					while (selectedKeys.hasNext()) {
+						SelectionKey key = selectedKeys.next();
+						selectedKeys.remove();
 
-					// Check what event is available and deal with it
-					if (key.isReadable()) {
-						this.readFromSocket(key);
-					} else if (key.isWritable()) {
-						this.writeToSocket(key);
+						if (!key.isValid()) {
+							continue;
+						}
+
+						// Check what event is available and deal with it
+						if (key.isReadable()) {
+							this.readFromSocket(key);
+						} else if (key.isWritable()) {
+							this.writeToSocket(key);
+						}
 					}
 				}
 			} catch (ClosedSelectorException e) {
@@ -189,24 +215,30 @@ public class NioUdpServer implements Runnable, NioServer {
 	}
 
 	/**
-	 * @return
-	 * 	The count of connected client sockets.
+	 * @return The count of connected client sockets.
 	 */
 	public int getConnectedClientCount() {
 		return clientMap.size();
 	}
 
+	/**
+	 * @return
+	 * 	The SocketAddress of the server
+	 */
+	public SocketAddress getLocalAddress() {
+		return serverChannel.socket().getLocalSocketAddress();
+	}
+	
 	private void readFromSocket(SelectionKey key) throws IOException {
 		DatagramChannel channel = (DatagramChannel) key.channel();
-		
+
 		// For a datagram socket, we have to call receive to get the remote address
 		readBuffer.clear();
 		InetSocketAddress remoteSocket = (InetSocketAddress) channel.receive(readBuffer);
-		
 
 		// Check if we already know this client
 		if (!clientMap.containsKey(remoteSocket)) {
-			clientMap.put(remoteSocket, channel);
+			clientMap.put(remoteSocket.getAddress(), channel);
 			log.debug(String.format("Remote client %s connected.", remoteSocket));
 			boolean accept = eventHandler.clientConnected(remoteSocket);
 			if (!accept) {
@@ -258,4 +290,16 @@ public class NioUdpServer implements Runnable, NioServer {
 		eventHandler.connectionLost(remoteSocket);
 	}
 
+	/**
+	 * Close client connection after a timeout. This method is not synchronized and must only be called from the main
+	 * loop!
+	 */
+	private void handleTimeout() {
+		if (timeoutHandler.isTimeoutExpired()) {
+			DatagramChannel channel = clientMap.get(timeoutHandler.getTimeoutAddress());
+			InetSocketAddress address = (InetSocketAddress) channel.socket().getRemoteSocketAddress();
+			log.warn(String.format("Timeout for client connection from %s expired. Closing connection.", address));
+			disposeClientChannel(address);
+		}
+	}
 }

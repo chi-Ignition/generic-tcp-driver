@@ -11,6 +11,8 @@ public interface NioServer {
 	
 	public void setEventHandler(IIoEventHandler eventHandler);
 	
+	public void setTimeout(long timeout);
+	
 	public void write(InetSocketAddress remoteSocketAddress, ByteBuffer data);
 	
 	public int  getConnectedClientCount();

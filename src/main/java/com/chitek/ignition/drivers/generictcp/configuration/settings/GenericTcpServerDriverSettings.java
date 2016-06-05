@@ -41,6 +41,7 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 	/* Connectivity */
 	public static StringField ServerHostname = new StringField(META, "ServerHostname");
 	public static IntField ServerPort = new IntField(META, "ServerPort", SFieldFlags.SMANDATORY);
+	public static IntField Timeout = new IntField(META, "Timeout");
 	public static BooleanField UseUdp = new BooleanField(META, "UseUdp");
 	public static StringField Devices = new StringField(META, "Devices");
 
@@ -68,6 +69,8 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 		WritebackConfig.getFormMeta().setVisible(false);
 
 		ServerPort.addValidator(new RangeValidator<Integer>(1, 65535));
+		Timeout.setDefault(7200);
+		Timeout.addValidator(new RangeValidator<Integer>(0,864000));
 		UseUdp.setDefault(false);
 		PacketTimeout.setDefault(1000);
 		PacketTimeout.addValidator(new RangeValidator<Integer>(50, 10000));
@@ -101,6 +104,7 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 		return new DriverSettingsPassive(
 			getServerHostname(),
 			getServerPort(),
+			getTimeout(),
 			getUseUdp(),
 			getDevices(),
 			getPacketTimeout(),
@@ -118,6 +122,10 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 		return getInt(ServerPort);
 	}
 
+	public int getTimeout() {
+		return getInt(Timeout);
+	}
+	
 	public boolean getUseUdp() {
 		return getBoolean(UseUdp);
 	}
@@ -239,6 +247,10 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 
 	public void setServerPort(int port) {
 		setInt(ServerPort, port);
+	}
+	
+	public void setTimeout(int timeout) {
+		setInt(Timeout, timeout);
 	}
 	
 	public void setUseUdp(boolean useUdp) {

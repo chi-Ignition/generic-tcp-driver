@@ -14,6 +14,7 @@ import com.chitek.ignition.drivers.generictcp.types.RemoteDevice;
 public class DriverSettingsPassive implements IDriverSettings {
 	private final String serverHostname;
 	private final int serverPort;
+	private final int timeout;
 	private final boolean useUdp;
 	private final List<RemoteDevice> devices;
 	private final int messageTimeout;
@@ -25,6 +26,7 @@ public class DriverSettingsPassive implements IDriverSettings {
 	public DriverSettingsPassive(
 		String serverHostname,
 		int serverPort,
+		int timeout,
 		boolean useUdp,
 		List<RemoteDevice> devices,
 		int packetTimeout,
@@ -35,6 +37,7 @@ public class DriverSettingsPassive implements IDriverSettings {
 	{
 		this.serverHostname = serverHostname;
 		this.serverPort = serverPort;
+		this.timeout=timeout;
 		this.useUdp = useUdp;
 		this.devices = devices;
 		this.messageTimeout = packetTimeout;
@@ -50,6 +53,16 @@ public class DriverSettingsPassive implements IDriverSettings {
 
 	public int getServerPort() {
 		return serverPort;
+	}
+	
+	/** If no data is received for more than the time given here, the driver will disconnect.
+	 * 0 disables this function.
+	 *
+	 * @return
+	 * 	The timeout in ms.
+	 */
+	public long getTimeout() {
+		return timeout*1000;
 	}
 	
 	public boolean getUseUdp() {

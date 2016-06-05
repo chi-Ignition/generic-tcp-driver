@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -34,6 +35,9 @@ public class NioTcpServer implements Runnable, NioServer {
 	private final List<SocketChannel> writeInterest = new LinkedList<SocketChannel>();
 	// Maps a SocketChannel to a list of ByteBuffer instances
 	private final Map<SocketChannel, List<ByteBuffer>> pendingData = new HashMap<SocketChannel, List<ByteBuffer>>();
+	// Timeout supervision
+	private long timeout = 1000*60*120;	// 120 minutes default
+	private TimeoutHandler timeoutHandler;
 
 	private boolean running;
 
@@ -51,6 +55,7 @@ public class NioTcpServer implements Runnable, NioServer {
 			return;
 		}
 
+		timeoutHandler=new TimeoutHandler(timeout);
 		running = true;
 		try {
 			createSocketSelector();
@@ -83,7 +88,6 @@ public class NioTcpServer implements Runnable, NioServer {
 			} catch (IOException e) {
 			}
 		}
-
 		clientMap.clear();
 	}
 
@@ -91,6 +95,17 @@ public class NioTcpServer implements Runnable, NioServer {
 		this.eventHandler = eventHandler;
 	}
 
+	/**
+	 * Set the timeout for client connections. The timeout should be set before calling start().
+	 * 
+	 * @param timeout
+	 * 	The timeout in milliseconds.
+	 */
+	public void setTimeout(long timeout) {
+		log.debug(String.format("Timeout set to %s ms", timeout));
+		this.timeout = timeout;
+	}
+	
 	/**
 	 * Send the given ByteBuffer to a remote client.
 	 * 
@@ -135,7 +150,6 @@ public class NioTcpServer implements Runnable, NioServer {
 		this.selector = SelectorProvider.provider().openSelector();
 		this.serverChannel = ServerSocketChannel.open();
 		serverChannel.configureBlocking(false);
-
 		// Bind the server socket to the specified address and port
 		serverChannel.socket().bind(hostAddress);
 
@@ -149,6 +163,8 @@ public class NioTcpServer implements Runnable, NioServer {
 	@Override
 	public void run() {
 		log.debug("NioServer main loop started.");
+		
+		int keys=0;
 		while (running) {
 			try {
 				// Switch marked SocketChannels to Write state
@@ -156,31 +172,42 @@ public class NioTcpServer implements Runnable, NioServer {
 					Iterator<SocketChannel> it = writeInterest.iterator();
 					while (it.hasNext()) {
 						SocketChannel socketChannel = it.next();
-						socketChannel.keyFor(selector).interestOps(SelectionKey.OP_WRITE);
+						try {
+							socketChannel.keyFor(selector).interestOps(SelectionKey.OP_WRITE);
+						} catch (CancelledKeyException e) {
+							// The connections might have been closed
+							pendingData.remove(socketChannel);
+						}
 					}
 					writeInterest.clear();
 				}
-
+			
 				// Wait for an event one of the registered channels
-				this.selector.select();
+				keys = selector.select(timeoutHandler.getTimeToTimeout());
 
-				// Iterate over the set of keys for which events are available
-				Iterator<SelectionKey> selectedKeys = this.selector.selectedKeys().iterator();
-				while (selectedKeys.hasNext()) {
-					SelectionKey key = selectedKeys.next();
-					selectedKeys.remove();
+				if (keys == 0) {
+					// No updated keys - timeout expired or wakeup called
+					log.debug("NioServer main loop: select timeout expired or wakeup");
+					handleTimeout();
+				} else {
+					// Iterate over the set of keys for which events are available
+					Iterator<SelectionKey> selectedKeys = this.selector.selectedKeys().iterator();
+					while (selectedKeys.hasNext()) {
+						SelectionKey key = selectedKeys.next();
+						selectedKeys.remove();
 
-					if (!key.isValid()) {
-						continue;
-					}
+						if (!key.isValid()) {
+							continue;
+						}
 
-					// Check what event is available and deal with it
-					if (key.isAcceptable()) {
-						this.accept(key);
-					} else if (key.isReadable()) {
-						this.readFromSocket(key);
-					} else if (key.isWritable()) {
-						this.writeToSocket(key);
+						// Check what event is available and deal with it
+						if (key.isAcceptable()) {
+							this.accept(key);
+						} else if (key.isReadable()) {
+							this.readFromSocket(key);
+						} else if (key.isWritable()) {
+							this.writeToSocket(key);
+						}
 					}
 				}
 			} catch (ClosedSelectorException e) {
@@ -231,19 +258,20 @@ public class NioTcpServer implements Runnable, NioServer {
 		socketChannel.register(this.selector, SelectionKey.OP_READ);
 
 		clientMap.put(remoteAddress, socketChannel);
+		timeoutHandler.dataReceived(remoteAddress);
 		log.debug(String.format("Remote client %s connected.", remoteSocket));
 
 		boolean accept = eventHandler.clientConnected(remoteSocket);
 		if (!accept) {
-			socketChannel.close();
-			clientMap.remove(remoteSocket);
+			disposeClientChannel(remoteSocket);
 			log.debug(String.format("Remote client %s disconnected.", remoteSocket));
 		}
 	}
 
 	private void readFromSocket(SelectionKey key) throws IOException {
 		SocketChannel socketChannel = (SocketChannel) key.channel();
-		InetSocketAddress remoteSocket = new InetSocketAddress(socketChannel.socket().getInetAddress(), socketChannel.socket().getPort());
+		InetAddress remoteAddress = socketChannel.socket().getInetAddress();
+		InetSocketAddress remoteSocket = new InetSocketAddress(remoteAddress, socketChannel.socket().getPort());
 
 		// Clear out our read buffer so it's ready for new data
 		readBuffer.clear();
@@ -267,7 +295,10 @@ public class NioTcpServer implements Runnable, NioServer {
 			log.debug(String.format("Remote client %s closed connection.", remoteSocket));
 			return;
 		}
-
+		
+		// reset the timeout for this connection
+		timeoutHandler.dataReceived(remoteAddress);
+		
 		// Hand the data off to our worker thread
 		readBuffer.flip();
 		eventHandler.dataArrived(remoteSocket, readBuffer, numRead);
@@ -298,8 +329,11 @@ public class NioTcpServer implements Runnable, NioServer {
 			}
 		}
 	}
-
+	
 	private void disposeClientChannel(InetSocketAddress remoteSocket) {
+
+		timeoutHandler.removeAddress(remoteSocket.getAddress());
+		
 		SocketChannel socketChannel = clientMap.remove(remoteSocket.getAddress());
 		socketChannel.keyFor(selector).cancel();
 		try {
@@ -314,5 +348,17 @@ public class NioTcpServer implements Runnable, NioServer {
 		}
 		eventHandler.connectionLost(remoteSocket);
 	}
-
+	
+	/**
+	 * Close client connection after a timeout.
+	 * This method is not synchronized and must only be called from the main loop!
+	 */
+	private void handleTimeout() {
+		if (timeoutHandler.isTimeoutExpired()) {
+			SocketChannel channel = clientMap.get(timeoutHandler.getTimeoutAddress());
+			InetSocketAddress address = (InetSocketAddress) channel.socket().getRemoteSocketAddress();
+			log.warn(String.format("Timeout for client connection from %s expired. Closing connection.", address));
+			disposeClientChannel(address);	
+		}
+	}
 }

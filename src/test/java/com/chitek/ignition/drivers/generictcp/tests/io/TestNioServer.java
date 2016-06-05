@@ -26,12 +26,14 @@ public class TestNioServer {
 	
 	private CountDownLatch connectLatch;
 	private CountDownLatch disconnectLatch;
+	private CountDownLatch dataLatch;
 	
 	@Before
 	public void setup() throws Exception {
 		
 		connectLatch = new CountDownLatch(1);
 		disconnectLatch = new CountDownLatch(1);
+		dataLatch = new CountDownLatch(1);
 		
 		log = DriverTestSuite.getLogger();
 
@@ -52,7 +54,8 @@ public class TestNioServer {
 
 			@Override
 			public void dataArrived(InetSocketAddress remoteAddress, ByteBuffer data, int bytesRead) {
-								
+				log.debug("Data arrived");
+				dataLatch.countDown();				
 			}
 			
 		};
@@ -140,6 +143,60 @@ public class TestNioServer {
 			
 			server.stop();
 		}
+	}
+	
+	@Test(timeout = 200) 
+	public void testTimeout() throws Exception {
+
+		InetSocketAddress address = new InetSocketAddress(InetAddress.getLocalHost(), 0);
+		NioTcpServer server = new NioTcpServer(address, log);
+		server.setEventHandler(eventHandler);
+		server.setTimeout(25);
+		server.start();
+		
+		// Connect and wait for the server to call the event handler
+		Socket socket = connect((InetSocketAddress) server.getLocalAddress());
+		connectLatch.await();
+		assertEquals("Number of connected clients", 1, server.getConnectedClientCount());
+		
+		disconnectLatch.await();
+		assertEquals("Number of connected clients", 0, server.getConnectedClientCount());
+		
+		// Close this end of the connection
+		disconnect(socket);
+		
+		server.stop();
+
+	}
+	
+	@Test(timeout = 200) 
+	public void testTimeout2() throws Exception {
+
+		InetSocketAddress address = new InetSocketAddress(InetAddress.getLocalHost(), 0);
+		NioTcpServer server = new NioTcpServer(address, log);
+		server.setEventHandler(eventHandler);
+		server.setTimeout(25);
+		server.start();
+		
+		// Connect and wait for the server to call the event handler
+		Socket socket = connect((InetSocketAddress) server.getLocalAddress());
+		connectLatch.await();
+		assertEquals("Number of connected clients", 1, server.getConnectedClientCount());
+		
+		Thread.sleep(10);	
+		
+		byte[] bytes = new byte[]{1,2,3,4};
+		socket.getOutputStream().write(bytes);
+		dataLatch.await();
+		
+		disconnectLatch.await();
+		assertEquals("Number of connected clients", 0, server.getConnectedClientCount());
+		
+		// Close this end of the connection
+		disconnect(socket);
+		
+		server.stop();
+
 	}
 	
 	private Socket connect(InetSocketAddress address) {

@@ -248,6 +248,7 @@ implements IMessageHandler {
 				}
 
 				nioServer.setEventHandler(new NioEventHandler(log, getExecutionManager(), messageConfig, driverSettings, messageHeader, this));
+				nioServer.setTimeout(driverSettings.getTimeout());
 				nioServer.start();
 				notifyConnectDone(true);
 			}
