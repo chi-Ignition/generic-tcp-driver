@@ -7,9 +7,9 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.DatagramChannel;
+import java.nio.channels.NotYetConnectedException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
-import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -89,6 +89,7 @@ public class NioUdpServer implements Runnable, NioServer {
 		}
 
 		clientMap.clear();
+		timeoutHandler=null;
 	}
 
 	public synchronized void setEventHandler(IIoEventHandler eventHandler) {
@@ -118,9 +119,9 @@ public class NioUdpServer implements Runnable, NioServer {
 		synchronized (this.writeInterest) {
 
 			// Get the SocketChannel for the given remote address
-			DatagramChannel channel = clientMap.get(remoteSocketAddress);
+			DatagramChannel channel = clientMap.get(remoteSocketAddress.getAddress());
 			if (channel == null) {
-				log.error(String.format("Attempt to send to a not connected client: %s", remoteSocketAddress.getHostName()));
+				log.error(String.format("Attempt to send to a not connected client: %s", remoteSocketAddress));
 				return;
 			}
 
@@ -237,16 +238,21 @@ public class NioUdpServer implements Runnable, NioServer {
 		InetSocketAddress remoteSocket = (InetSocketAddress) channel.receive(readBuffer);
 
 		// Check if we already know this client
-		if (!clientMap.containsKey(remoteSocket)) {
-			clientMap.put(remoteSocket.getAddress(), channel);
-			log.debug(String.format("Remote client %s connected.", remoteSocket));
+		if (!clientMap.containsKey(remoteSocket.getAddress())) {
 			boolean accept = eventHandler.clientConnected(remoteSocket);
-			if (!accept) {
-				clientMap.remove(remoteSocket);
+			if (accept) {
+				clientMap.put(remoteSocket.getAddress(), channel);
+				channel.connect(remoteSocket);
+				log.debug(String.format("Remote client %s connected.", remoteSocket));
+			} else {
 				log.debug(String.format("Remote client %s not accepted.", remoteSocket));
+				return;
 			}
 		}
 
+		// reset the timeout for this connection
+		timeoutHandler.dataReceived(remoteSocket.getAddress());
+		
 		// Hand the data off to our worker thread
 		int numRead = readBuffer.position();
 		readBuffer.flip();
@@ -254,23 +260,25 @@ public class NioUdpServer implements Runnable, NioServer {
 	}
 
 	private void writeToSocket(SelectionKey key) throws IOException {
-		SocketChannel socketChannel = (SocketChannel) key.channel();
+		DatagramChannel channel = (DatagramChannel) key.channel();
 
 		synchronized (this.pendingData) {
-			List<ByteBuffer> queue = pendingData.get(socketChannel);
-
-			// Write until there's not more data ...
-			while (!queue.isEmpty()) {
-				ByteBuffer buf = queue.get(0);
-				socketChannel.write(buf);
-				if (buf.remaining() > 0) {
-					// ... or the socket's buffer fills up
-					break;
+			List<ByteBuffer> queue = pendingData.get(channel);
+			
+			try {
+				// Write until there's not more data ...
+				while (!queue.isEmpty()) {
+					ByteBuffer buf = queue.get(0);
+					channel.write(buf);
+					if (buf.remaining() > 0) {
+						// ... or the socket's buffer fills up
+						break;
+					}
+					queue.remove(0);
 				}
-				queue.remove(0);
-			}
-
-			if (queue.isEmpty()) {
+			} catch (NotYetConnectedException ex) {
+				log.error("Unexpected Exception in NioUDPServer.writeToSocket: Channel not yet connected!");
+			} finally {
 				// We wrote away all data, so we're no longer interested
 				// in writing on this socket. Switch back to waiting for
 				// data.
@@ -280,7 +288,10 @@ public class NioUdpServer implements Runnable, NioServer {
 	}
 
 	private void disposeClientChannel(InetSocketAddress remoteSocket) {
-		DatagramChannel channel = clientMap.remove(remoteSocket);
+		
+		timeoutHandler.removeAddress(remoteSocket.getAddress());
+		
+		DatagramChannel channel = clientMap.remove(remoteSocket.getAddress());
 		synchronized (this.pendingData) {
 			List<ByteBuffer> pending = pendingData.remove(channel);
 			if (pending != null) {
@@ -300,6 +311,8 @@ public class NioUdpServer implements Runnable, NioServer {
 			InetSocketAddress address = (InetSocketAddress) channel.socket().getRemoteSocketAddress();
 			log.warn(String.format("Timeout for client connection from %s expired. Closing connection.", address));
 			disposeClientChannel(address);
+		} else {
+			log.debug("No timeout");
 		}
 	}
 }
