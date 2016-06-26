@@ -10,6 +10,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.junit.Before;
@@ -71,12 +72,16 @@ public class TestNioServer {
 		
 		// Connect and wait for the server to call the event handler
 		Socket socket = connect((InetSocketAddress) server.getLocalAddress());
-		connectLatch.await();	
+		if (!connectLatch.await(50, TimeUnit.MILLISECONDS)) {
+			fail("Timeout while waiting for connect event");
+		}
 		assertEquals("Number of connected clients", 1, server.getConnectedClientCount());
 		
 		// Disconnect and wait for the server to call the event handler
 		disconnect(socket);
-		disconnectLatch.await();
+		if (!disconnectLatch.await(50, TimeUnit.MILLISECONDS)) {
+			fail("Timeout while waiting for disconnect event");
+		}
 		assertEquals("Number of connected clients", 0, server.getConnectedClientCount());
 		
 		server.stop();
@@ -93,21 +98,27 @@ public class TestNioServer {
 		
 		// Connect and wait for the server to call the event handler
 		Socket socket1 = connect((InetSocketAddress) server.getLocalAddress());
-		connectLatch.await();	
+		if (!connectLatch.await(50, TimeUnit.MILLISECONDS)) {
+			fail("Timeout while waiting for connect event");
+		}
 		assertEquals("Number of connected clients", 1, server.getConnectedClientCount());
 		
 		// Connect another and wait for the server to call the event handler
 		// The new connection should replace the existing one
 		connectLatch = new CountDownLatch(1);
 		Socket socket2 = connect((InetSocketAddress) server.getLocalAddress());
-		connectLatch.await();	
+		if (!connectLatch.await(50, TimeUnit.MILLISECONDS)) {
+			fail("Timeout while waiting for connect event on second connection");
+		}	
 		assertEquals("Number of connected clients", 1, server.getConnectedClientCount());
 		
 		// Disconnect and wait for the server to call the event handler
 		disconnect(socket1);
 		disconnectLatch = new CountDownLatch(1);
 		disconnect(socket2);
-		disconnectLatch.await();
+		if (!disconnectLatch.await(50, TimeUnit.MILLISECONDS)) {
+			fail("Timeout while waiting for disconnect event");
+		}
 		assertEquals("Number of connected clients", 0, server.getConnectedClientCount());
 		
 		server.stop();
@@ -123,7 +134,9 @@ public class TestNioServer {
 		
 		// Connect and wait for the server to call the event handler
 		Socket socket = connect((InetSocketAddress) server.getLocalAddress());
-		connectLatch.await();	
+		if (!connectLatch.await(50, TimeUnit.MILLISECONDS)) {
+			fail("Timeout while waiting for connect event");
+		}
 
 		byte[] bytes = new byte[]{1,2,3,4};
 		ByteBuffer data = ByteBuffer.wrap(bytes);
@@ -139,13 +152,15 @@ public class TestNioServer {
 		} finally {
 			// Disconnect and wait for the server to call the event handler
 			disconnect(socket);
-			disconnectLatch.await();
+			if (!disconnectLatch.await(50, TimeUnit.MILLISECONDS)) {
+				fail("Timeout while waiting for disconnect event");
+			}
 			
 			server.stop();
 		}
 	}
 	
-	@Test(timeout = 200) 
+	@Test(timeout = 250) 
 	public void testTimeout() throws Exception {
 
 		InetSocketAddress address = new InetSocketAddress(InetAddress.getLocalHost(), 0);
@@ -156,10 +171,14 @@ public class TestNioServer {
 		
 		// Connect and wait for the server to call the event handler
 		Socket socket = connect((InetSocketAddress) server.getLocalAddress());
-		connectLatch.await();
+		if (!connectLatch.await(50, TimeUnit.MILLISECONDS)) {
+			fail("Timeout while waiting for connect event");
+		}
 		assertEquals("Number of connected clients", 1, server.getConnectedClientCount());
 		
-		disconnectLatch.await();
+		if (!disconnectLatch.await(50, TimeUnit.MILLISECONDS)) {
+			fail("Disconnect event not triggered");
+		}
 		assertEquals("Number of connected clients", 0, server.getConnectedClientCount());
 		
 		// Close this end of the connection
@@ -169,7 +188,7 @@ public class TestNioServer {
 
 	}
 	
-	@Test(timeout = 200) 
+	@Test(timeout = 250) 
 	public void testTimeout2() throws Exception {
 
 		InetSocketAddress address = new InetSocketAddress(InetAddress.getLocalHost(), 0);
@@ -180,16 +199,22 @@ public class TestNioServer {
 		
 		// Connect and wait for the server to call the event handler
 		Socket socket = connect((InetSocketAddress) server.getLocalAddress());
-		connectLatch.await();
+		if (!connectLatch.await(50, TimeUnit.MILLISECONDS)) {
+			fail("Socket not connected");
+		}
 		assertEquals("Number of connected clients", 1, server.getConnectedClientCount());
 		
 		Thread.sleep(10);	
 		
 		byte[] bytes = new byte[]{1,2,3,4};
 		socket.getOutputStream().write(bytes);
-		dataLatch.await();
+		if (!dataLatch.await(50, TimeUnit.MILLISECONDS)) {
+			fail("No data received");
+		}
 		
-		disconnectLatch.await();
+		if (!disconnectLatch.await(50, TimeUnit.MILLISECONDS)) {
+			fail("Disconnect event not triggered");
+		}
 		assertEquals("Number of connected clients", 0, server.getConnectedClientCount());
 		
 		// Close this end of the connection

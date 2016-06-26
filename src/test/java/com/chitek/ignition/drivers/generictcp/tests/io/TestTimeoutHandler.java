@@ -41,7 +41,7 @@ public class TestTimeoutHandler {
 		assertThat(timeout, is(lessThanOrEqualTo(10L)));
 		
 		Thread.sleep(5);
-		assertThat(handler.getTimeToTimeout(), is(lessThanOrEqualTo(timeout-5L)));
+		assertThat(handler.getTimeToTimeout(), is(lessThanOrEqualTo(timeout-4L)));
 		
 		Thread.sleep(5);
 		assertTrue(handler.isTimeoutExpired());
