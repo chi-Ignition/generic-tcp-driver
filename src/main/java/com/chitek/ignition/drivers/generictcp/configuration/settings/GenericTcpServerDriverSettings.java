@@ -58,7 +58,7 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 
 	/* Categories */
 	public static final Category Connectivity = new Category("GenericTcpServerDriverSettings.Category.Connectivity", 1001)
-	.include(ServerHostname, ServerPort, UseUdp, Devices);
+	.include(ServerHostname, ServerPort, UseUdp, Timeout, Devices);
 	public static Category MessageHandling = new Category("GenericTcpServerDriverSettings.Category.MessageHandling", 1002)
 	.include(PacketTimeout, ReverseByteOrder, TimestampFactor, MaxTimestamp);
 
