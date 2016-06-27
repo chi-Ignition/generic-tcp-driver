@@ -1,16 +1,16 @@
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML 5.0//EN" "http://www.docbook.org/xml/5.0/dtd/docbook.dtd">
 <article xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-	<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-	Generic TCP Driver</title>
-	<subtitle xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-	A generic TCP OPC-UA driver.</subtitle>
+	<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Generic 
+	TCP Driver</title>
+	<subtitle xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">A 
+	generic TCP OPC-UA driver.</subtitle>
 	<info xmlns="http://docbook.org/ns/docbook">
 		<legalnotice xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 				<itemizedlist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						This module is provided on an &quot;AS IS&quot; BASIS, WITHOUT 
+						<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">This 
+						module is provided on an &quot;AS IS&quot; BASIS, WITHOUT 
 						WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied, 
 						including, without limitation, any warranties or conditions of 
 						TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A 
@@ -20,174 +20,181 @@
 						under this License</para>
 					</listitem>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						This module may cause the Ignition(tm) Software to fail to 
-						function correctly or function at all. An update of Ignition(tm) 
-						may cause this Module to fail to function correctly or function 
-						at all. The author shall have no liability whatsoever for any 
-						failure after the installation of this module or after the 
-						installation of a Software update.</para>
+						<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">This 
+						module may cause the Ignition(tm) Software to fail to function 
+						correctly or function at all. An update of Ignition(tm) may cause 
+						this Module to fail to function correctly or function at all. The 
+						author shall have no liability whatsoever for any failure after 
+						the installation of this module or after the installation of a 
+						Software update.</para>
 					</listitem>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						This module is licensed under the Apache License, Version 
-						2.0.</para>
+						<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">This 
+						module is licensed under the Apache License, Version 2.0.</para>
 					</listitem>
 				</itemizedlist>
 			</para>
 		</legalnotice>
 	</info>
 	<sect1 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-		<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-		Overview</title>
-		<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-		The generic tcp driver connects network devices that use a custom 
+		<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Overview</title>
+		<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+		generic tcp driver connects network devices that use a custom 
 		protocol to the Ignition 
-		<superscript xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-		TM</superscript> OPC-UA server. The communication protocol is 
-		configurable for each device. This driver does not poll data but 
-		expects the connected device to send messages on its own.</para>
+		<superscript xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">TM</superscript> 
+		OPC-UA server. The communication protocol is configurable for each 
+		device. This driver does not poll data but expects the connected 
+		device to send messages on its own.</para>
 		<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 			The Generic TCP Driver module adds two new drivers to the Ignition 
-			<superscript xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			TM</superscript>
+			<superscript xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">TM</superscript>
 			 OPC-UA Server:
 			<itemizedlist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 				<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					Generic TCP Client Driver</simpara>
-					<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					The client driver connects actively to a remote device.</simpara>
+					<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Generic 
+					TCP Client Driver</simpara>
+					<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+					client driver connects actively to a remote device.</simpara>
 				</listitem>
 				<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					Generic TCP Server Driver</simpara>
-					<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					The server driver is as a passive listener. It opens a tcp-port on 
-					the server machine and waits for remote devices to establish a 
+					<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Generic 
+					TCP Server Driver</simpara>
+					<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+					server driver is as a passive listener. It opens a tcp-port on the 
+					server machine and waits for remote devices to establish a 
 					connection. Each driver instance allows multiple remote devices to 
 					connect.</simpara>
-					<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					This mode is useful for devices like barcode scanners or network 
+					<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">This 
+					mode is useful for devices like barcode scanners or network 
 					cameras.</simpara>
 				</listitem>
 			</itemizedlist>
 		</para>
 	</sect1>
 	<sect1 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-		<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-		Driver Settings</title>
+		<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Driver 
+		Settings</title>
 		<sect2 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			General</title>
-			<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
-                 termlength="15">
+			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">General</title>
+			<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" termlength="15">
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					Device Name</term>
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Device 
+					Name</term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						The user-defined name for this Device. The name chosen will show 
-						up in OPC Item Paths and under the &quot;Devices&quot; folder on 
-						the OPC-UA server. If this name is changed, any queued messages 
-						in queue mode will get lost!</simpara>
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+						user-defined name for this Device. The name chosen will show up 
+						in OPC Item Paths and under the &quot;Devices&quot; folder on the 
+						OPC-UA server. If this name is changed, any queued messages in 
+						queue mode will get lost!</simpara>
 					</listitem>
 				</varlistentry>
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					Enable Device</term>
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Enable 
+					Device</term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Uncheck this setting to completely disable this driver instance. 
-						A disabled device will not show in the OPC-UA server and does not 
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Uncheck 
+						this setting to completely disable this driver instance. A 
+						disabled device will not show in the OPC-UA server and does not 
 						try to connect to the remote device.</simpara>
 					</listitem>
 				</varlistentry>
 			</variablelist>
 		</sect2>
 		<sect2 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			Connectivity (Server Driver)</title>
-			<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
-                 termlength="15">
+			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Connectivity 
+			(Client Driver)</title>
+			<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" termlength="15">
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					Hostname</term>
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Hostname</term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Hostname or IP address of the device.</simpara>
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Hostname 
+						or IP address of the device.</simpara>
 					</listitem>
 				</varlistentry>
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					Port</term>
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Port</term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						The port to connect to.</simpara>
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+						port to connect to.</simpara>
 					</listitem>
 				</varlistentry>
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					Connect on startup</term>
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Connect 
+					on startup</term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						If false, the driver will not connect on startup, but waits for a 
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">If 
+						false, the driver will not connect on startup, but waits for a 
 						client to set &apos;[Status]/Connect&apos; to true.</simpara>
 					</listitem>
 				</varlistentry>
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					Connection Timeout</term>
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Connection 
+					Timeout</term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Amount of time (in milliseconds) without receiving data from the 
-						device before a disconnect/reconnect is made. Set to 0 to disable 
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Amount 
+						of time (in milliseconds) without receiving data from the device 
+						before a disconnect/reconnect is made. Set to 0 to disable 
 						automatic reconnection.</simpara>
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						As this driver does not poll from the device, it will not notice 
-						a disrupted connection. It is recommended to have the device send 
-						a periodical watchdog message. A special message with only a 
-						dummy tag is sufficient for this purpose.</simpara>
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">As 
+						this driver does not poll from the device, it will not notice a 
+						disrupted connection. It is recommended to have the device send a 
+						periodical watchdog message. A special message with only a dummy 
+						tag is sufficient for this purpose.</simpara>
 					</listitem>
 				</varlistentry>
 			</variablelist>
 		</sect2>
 		<sect2 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			Connectivity (Client Driver)</title>
-			<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
-                 termlength="15">
+			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Connectivity 
+			(Server Driver)</title>
+			<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" termlength="15">
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					Local endpoint address</term>
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Local 
+					endpoint address</term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						The local ip address that is used by the driver. Optional, if 
-						empty, the address of the default network interface is 
-						used.</simpara>
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+						local ip address that is used by the driver. Optional, if empty, 
+						the address of the default network interface is used.</simpara>
 					</listitem>
 				</varlistentry>
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					Server Port</term>
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Server 
+					Port</term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						The number of the local port to listen on.</simpara>
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+						number of the local port to listen on.</simpara>
+					</listitem>
+				</varlistentry>
+				<varlistentry>
+					<term>Connection Timeout</term>
+					<listitem>
+						<simpara>When no data is received for this amount of time (in 
+						milliseconds), the driver closes the connection. It is up to the 
+						client to reconnect.</simpara>
+						<simpara>In UDP mode, there is no connection to close. The driver 
+						simply sets the the device state to &apos;not 
+						connected&apos;.</simpara>
+					</listitem>
+				</varlistentry>
+				<varlistentry>
+					<term>UPD mode</term>
+					<listitem>
+						<simpara>When this option is set, the driver listens on an UDP 
+						port instead of TCP.</simpara>
 					</listitem>
 				</varlistentry>
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					Devices</term>
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Devices</term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						A list of remote devices that are allowed to connect to the 
-						driver. Each device is given in a seperate line with 
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">A 
+						list of remote devices that are allowed to connect to the driver. 
+						Each device is given in a seperate line with 
 						&apos;hostname,alias&apos;. It is recommended to use a static 
 						IP-address instead of a hostname for better reliability.</simpara>
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Only devices in this list will be allowed to connect to the 
-						driver. Any other device will be immediately disconnected. In 
-						this case a warning is logged in the gateway protocol.</simpara>
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Only 
+						devices in this list will be allowed to connect to the driver. 
+						Any other device will be immediately disconnected. In this case a 
+						warning is logged in the gateway protocol.</simpara>
 						<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 							Example:
 							<informalexample xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -201,113 +208,106 @@ barcodescanner1.company.com,Device3</programlisting>
 			</variablelist>
 		</sect2>
 		<sect2 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			Message Handling</title>
-			<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
-                 termlength="15">
+			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Message 
+			Handling</title>
+			<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" termlength="15">
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					Packet Timeout</term>
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Packet 
+					Timeout</term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						The maximum time (in milliseconds) between incoming data 
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+						maximum time (in milliseconds) between incoming data 
 						packages.</simpara>
 						<itemizedlist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 							<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-								<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-								In Fixed Length mode, the reveived data will be discarded if a 
+								<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">In 
+								Fixed Length mode, the reveived data will be discarded if a 
 								packet is incomplete and no new data is received for this 
 								time.</simpara>
 							</listitem>
 							<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-								<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-								In Packet Based length mode, the driver assumes that a message 
-								is completely received when no data is received during this 
+								<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">In 
+								Packet Based length mode, the driver assumes that a message is 
+								completely received when no data is received during this 
 								timeout.</simpara>
 							</listitem>
 						</itemizedlist>
 					</listitem>
 				</varlistentry>
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					Reverse byte order</term>
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Reverse 
+					byte order</term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Set true to use LittleEndian (Intel) byte order instead of 
-						default BigEndian (Motorola).</simpara>
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Set 
+						true to use LittleEndian (Intel) byte order instead of default 
+						BigEndian (Motorola).</simpara>
 					</listitem>
 				</varlistentry>
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					Timestamp factor</term>
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Timestamp 
+					factor</term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						A multiplier for the timestamp / message age received from the 
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">A 
+						multiplier for the timestamp / message age received from the 
 						device. The driver expects those values to be in 
 						milliseconds.</simpara>
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						If the device, for example, provides the message age in seconds, 
-						use a factor of 1,000 to convert this to milliseconds.</simpara>
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">If 
+						the device, for example, provides the message age in seconds, use 
+						a factor of 1,000 to convert this to milliseconds.</simpara>
 					</listitem>
 				</varlistentry>
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					Max. Timestamp</term>
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Max. 
+					Timestamp</term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						The maximum possible timestamp that is used by the connected 
-						device. This value is used to detect an overflow in the device 
-						and calculate the age accordingly when the MessageAge tag is 
-						smaller than the 
-						<link xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#packet_timestamp">
-						Packet Timestamp</link> in the message header.</simpara>
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+						maximum possible timestamp that is used by the connected device. 
+						This value is used to detect an overflow in the device and 
+						calculate the age accordingly when the MessageAge tag is smaller 
+						than the 
+						<link xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#packet_timestamp">Packet 
+						Timestamp</link> in the message header.</simpara>
 					</listitem>
 				</varlistentry>
 			</variablelist>
 		</sect2>
 	</sect1>
 	<sect1 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-		<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-		Driver configuration</title>
-		<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"/>
+		<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Driver 
+		configuration</title>
 		<sect2 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			Message configuration</title>
-			<mediaobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			<imageobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			<imagedata xmlns="http://docbook.org/ns/docbook" fileref="image_en/message-config-en.png" scalefit="0" width="100%"/>
-			</imageobject></mediaobject>
+			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Message 
+			configuration</title>
+			<mediaobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><imageobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><imagedata xmlns="http://docbook.org/ns/docbook" fileref="image_en/message-config-en.png" scalefit="0" width="100%"/></imageobject></mediaobject>
 			<sect3 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-				<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-				General settings</title>
-				<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
-                  termlength="15">
+				<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">General 
+				settings</title>
+				<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" termlength="15">
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Type of message ID</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Type 
+						of message ID</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							The message id sent by the device. This id is used to 
-							distinguish between different message that are sent by the 
-							remote device.</simpara>
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							If used, the message id is always the first byte or word in the 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+							message id sent by the device. This id is used to distinguish 
+							between different message that are sent by the remote 
+							device.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">If 
+							used, the message id is always the first byte or word in the 
 							incoming data packet.</simpara>
 							<itemizedlist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 								<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-									<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-									None - Only a single message configured with ID 0 is 
-									used.</simpara>
+									<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">None 
+									- Only a single message configured with ID 0 is used.</simpara>
 								</listitem>
 								<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-									<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-									Byte - Message ID is sent as a byte. Message ID&apos;s 0..255 
-									can be used.</simpara>
+									<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Byte 
+									- Message ID is sent as a byte. Message ID&apos;s 0..255 can 
+									be used.</simpara>
 								</listitem>
 								<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-									<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-									Word - Message ID is sent as a word. Message ID&apos;s 
-									0..65535 can be used.</simpara>
+									<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Word 
+									- Message ID is sent as a word. Message ID&apos;s 0..65535 can 
+									be used.</simpara>
 								</listitem>
 							</itemizedlist>
 						</listitem>
@@ -315,45 +315,44 @@ barcodescanner1.company.com,Device3</programlisting>
 				</variablelist>
 			</sect3>
 			<sect3 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-				<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-				Message specific settings</title>
-				<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-				Use the &apos;Select Message&apos; dropdown to select the message 
-				to edit. The buttons 
-				<guibutton xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-				New</guibutton> and 
-				<guibutton xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-				Copy</guibutton> are used to create a new message or copy the 
-				currently edited message.</simpara>
-				<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
-                  termlength="15">
+				<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Message 
+				specific settings</title>
+				<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Use 
+				the &apos;Select Message&apos; dropdown to select the message to 
+				edit. The buttons 
+				<guibutton xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">New</guibutton> 
+				and 
+				<guibutton xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Copy</guibutton> 
+				are used to create a new message or copy the currently edited 
+				message.</simpara>
+				<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" termlength="15">
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Message Type</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Message 
+						Type</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							This settings decides if the message has a fixed length 
-							(determined by the configured tags) or a variable length that is 
-							determined by the length of the received data packet.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">This 
+							settings decides if the message has a fixed length (determined 
+							by the configured tags) or a variable length that is determined 
+							by the length of the received data packet.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Queue Mode</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Queue 
+						Mode</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							The queue mode is useful in situations, where the device sends 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+							queue mode is useful in situations, where the device sends 
 							messages faster than they can be evaluated by the client (see 
-							<link xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#sectqueuemode">
-							Queue Mode</link>).</simpara>
+							<link xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#sectqueuemode">Queue 
+							Mode</link>).</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Use Persistence</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Use 
+						Persistence</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							If true, the queue file is stored to the gateways disk on every 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">If 
+							true, the queue file is stored to the gateways disk on every 
 							change, to prevent data loss. If false, the queue is only saved 
 							on a regular shutdown or driver restart.</simpara>
 						</listitem>
@@ -361,72 +360,66 @@ barcodescanner1.company.com,Device3</programlisting>
 				</variablelist>
 			</sect3>
 			<sect3 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-				<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-				Tag configuration table</title>
-				<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-				The tags contained in a message can be freely configured. Up to 254 
+				<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Tag 
+				configuration table</title>
+				<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+				tags contained in a message can be freely configured. Up to 254 
 				tags are supported per Message.</simpara>
-				<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-				The first row of the config table is used to set message id and 
-				message alias. Subsequent rows are used to configure the 
-				tags.</simpara>
-				<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
-                  termlength="15">
-					<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					Columns in the configuration table:</title>
+				<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+				first row of the config table is used to set message id and message 
+				alias. Subsequent rows are used to configure the tags.</simpara>
+				<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" termlength="15">
+					<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Columns 
+					in the configuration table:</title>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Offset</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Offset</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							The byte offset in the message - Only for information.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+							byte offset in the message - Only for information.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Data Type</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Data 
+						Type</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							The tags data type (see below).</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+							tags data type (see below).</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						ID</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">ID</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							A unique tag id (1..254).</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">A 
+							unique tag id (1..254).</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Alias</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Alias</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							The tags alias - used as address and browse name.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+							tags alias - used as address and browse name.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Size</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Size</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							For String tags, this is the length of the string. With all 
-							other data types, an array of the given size is created. The 
-							driver creates a single child tag for every array element, the 
-							parent tag contains the complete array. For OPC-UA clients that 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">For 
+							String tags, this is the length of the string. With all other 
+							data types, an array of the given size is created. The driver 
+							creates a single child tag for every array element, the parent 
+							tag contains the complete array. For OPC-UA clients that 
 							don&apos;t support arrays (like Ignition 
-							<superscript xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							TM</superscript>) the parent elements are useless (although they 
-							may be coerced to a string).</simpara>
+							<superscript xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">TM</superscript>) 
+							the parent elements are useless (although they may be coerced to 
+							a string).</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Length Type</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Length 
+						Type</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							This setting is only visible for messages with &apos;Packet 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">This 
+							setting is only visible for messages with &apos;Packet 
 							Based&apos; length. One tag can be configured to have a variable 
 							length. This tag receives all data that exceeds the length of 
 							the configured fixed length tags.</simpara>
@@ -435,312 +428,297 @@ barcodescanner1.company.com,Device3</programlisting>
 				</variablelist>
 			</sect3>
 			<sect3 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-				<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-				Data Types</title>
+				<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Data 
+				Types</title>
 				<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Dummy</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Dummy</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							A byte at this position is simply ignored.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">A 
+							byte at this position is simply ignored.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Unsigned Byte</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Unsigned 
+						Byte</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							Unsigned Byte (0..255)</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Unsigned 
+							Byte (0..255)</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Signed Byte</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Signed 
+						Byte</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							Signed Byte (-128..127)</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Signed 
+							Byte (-128..127)</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Bool8</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Bool8</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							A byte treated as 8 single bits. The single bits are addressed 
-							by adding [nn] to the tags address where nn is the bit number. 
-							The special element [raw] contains the bytes value.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">A 
+							byte treated as 8 single bits. The single bits are addressed by 
+							adding [nn] to the tags address where nn is the bit number. The 
+							special element [raw] contains the bytes value.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Bool16</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Bool16</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							Same as Bool8 but with 16 bits.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Same 
+							as Bool8 but with 16 bits.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						UInt16</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">UInt16</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							An unsigned 16 bit integer.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">An 
+							unsigned 16 bit integer.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Int16</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Int16</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							A signed 16 Bit integer.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">A 
+							signed 16 Bit integer.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						UInt32</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">UInt32</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							An signed 32 bit integer.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">An 
+							signed 32 bit integer.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Int32</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Int32</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							A signed 32 bit integer.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">A 
+							signed 32 bit integer.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Float</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Float</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							A 32 bit float according to IEEE 754 floating-point &quot;single 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">A 
+							32 bit float according to IEEE 754 floating-point &quot;single 
 							format&quot;.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						String</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">String</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							The received data is decoded as a ISO-8859-1 string, leading and 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+							received data is decoded as a ISO-8859-1 string, leading and 
 							trailing whitespaces and special chars are removed using the 
 							Java String#trim method.The size parameter defines the length of 
 							the string, arrays of strings are not supported.</simpara>
 						</listitem>
 					</varlistentry>
-					<varlistentry>
-						<term>Raw String</term>
-						<listitem>
-							<simpara>The received data bytes are converted to a Java Char 
-							array and then wrapped in a String without any encoding. The 
-							result might not be a valid String, but it&apos;s char array 
-							contains the unmodified raw data.</simpara>
+					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Raw 
+						String</term>
+						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+							received data bytes are converted to a Java Char array and then 
+							wrapped in a String without any encoding. The result might not 
+							be a valid String, but it&apos;s char array contains the 
+							unmodified raw data.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Message Age</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Message 
+						Age</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							An unsigned 32 bit Integer with the absolute age of the message 
-							or a relative timestamp if a header with a packet timestamp is 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">An 
+							unsigned 32 bit Integer with the absolute age of the message or 
+							a relative timestamp if a header with a packet timestamp is 
 							configured.</simpara>
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							This value is used to calculate the special _Timestamp tag and 
-							the timestamps of all tags in this message.</simpara>
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							The incoming value is multiplied by the 
-							<link xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" linkend="conftimestampfactor">
-							timestamp factor</link> to get a millisecond resolution. The 
-							published OPC tag _Message Age contains the calculated 
-							value.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">This 
+							value is used to calculate the special _Timestamp tag and the 
+							timestamps of all tags in this message.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+							incoming value is multiplied by the 
+							<link xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" linkend="conftimestampfactor">timestamp 
+							factor</link> to get a millisecond resolution. The published OPC 
+							tag _Message Age contains the calculated value.</simpara>
 						</listitem>
 					</varlistentry>
 				</variablelist>
 			</sect3>
 		</sect2>
 		<sect2 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			Header configuration</title>
-			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			This section configures a data header that a device may send before 
-			the actual payload messages. There are some common usages for a 
+			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Header 
+			configuration</title>
+			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">This 
+			section configures a data header that a device may send before the 
+			actual payload messages. There are some common usages for a 
 			header:</para>
 			<itemizedlist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 				<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					The remote device sends a fixed header with every message and you 
+					<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+					remote device sends a fixed header with every message and you 
 					don&apos;t want to repeat the header configuration for every 
 					message.</simpara>
 				</listitem>
 				<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					The device expects an acknowledgement for every message. Use the 
+					<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+					device expects an acknowledgement for every message. Use the 
 					handshake message in this case.</simpara>
 				</listitem>
 				<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					The device combines multiple messages and sends them out in a 
-					single data packet. The use of a header allows a single 
-					acknowledgement (handshake) to be sent back in this case. It is 
-					also possible to extract the timestamps of the single messages 
-					using the timestamp mechanism.</simpara>
-					<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					A Typical use case is a device that logs fast changing data in an 
+					<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+					device combines multiple messages and sends them out in a single 
+					data packet. The use of a header allows a single acknowledgement 
+					(handshake) to be sent back in this case. It is also possible to 
+					extract the timestamps of the single messages using the timestamp 
+					mechanism.</simpara>
+					<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">A 
+					Typical use case is a device that logs fast changing data in an 
 					internal buffer.</simpara>
 				</listitem>
 			</itemizedlist>
-			<mediaobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			<imageobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			<imagedata xmlns="http://docbook.org/ns/docbook" fileref="image_en/header-config-en.png" scalefit="0"/>
-			</imageobject></mediaobject>
+			<mediaobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><imageobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><imagedata xmlns="http://docbook.org/ns/docbook" fileref="image_en/header-config-en.png" scalefit="0"/></imageobject></mediaobject>
 			<sect3 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-				<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-				General settings</title>
+				<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">General 
+				settings</title>
 				<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Use Header</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Use 
+						Header</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							If true, all incoming data packets have to start with the 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">If 
+							true, all incoming data packets have to start with the 
 							configured header. If false, a header is not used.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Packet size includes header</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Packet 
+						size includes header</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							If true, the packet size received with the header includes the 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">If 
+							true, the packet size received with the header includes the 
 							length of the header itself.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Use Handshake Message</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Use 
+						Handshake Message</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							If true, a handshake message is send back to the device after 
-							all messages that have been received with the current header 
-							have been evaluated and added to the queue in queue 
-							mode.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">If 
+							true, a handshake message is send back to the device after all 
+							messages that have been received with the current header have 
+							been evaluated and added to the queue in queue mode.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Handshake message</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Handshake 
+						message</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							The handshake message to send. A comma seperated list of bytes. 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+							handshake message to send. A comma seperated list of bytes. 
 							Decimal, hexadecimal, and octal numbers are accepted. Allowed 
 							decimal range is -128...255. Accepted seperators are comma, 
 							semicolon and space.</simpara>
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							The strings &apos;timestamp&apos; and &apos;sequence&apos; are 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+							strings &apos;timestamp&apos; and &apos;sequence&apos; are 
 							replaced with the received value, &apos;lenb&apos; (Byte) or 
 							&apos;lenw&apos; are replaced with the message length.</simpara>
 							<informalexample xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-								<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-								<code xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-								lenw, 0xff,0xfe,timestamp,sequence</code></simpara>
+								<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><code xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">lenw, 
+								0xff,0xfe,timestamp,sequence</code></simpara>
 							</informalexample>
 						</listitem>
 					</varlistentry>
 				</variablelist>
 			</sect3>
 			<sect3 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-				<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-				Packet configuration table</title>
-				<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-				Like the message data, the header is freely configurable. The 
+				<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Packet 
+				configuration table</title>
+				<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Like 
+				the message data, the header is freely configurable. The 
 				configuration table works just like the message 
 				configuration.</para>
 			</sect3>
 			<sect3 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-				<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-				Header Data types</title>
+				<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Header 
+				Data types</title>
 				<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Packet Size</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Packet 
+						Size</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							A 16bit value containing the size of the packet in bytes. The 
-							<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							Packet size includes header</varname> settings decides whether 
-							the size of the header itself is contained in this 
-							length.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">A 
+							16bit value containing the size of the packet in bytes. The 
+							<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Packet 
+							size includes header</varname> settings decides whether the size 
+							of the header itself is contained in this length.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Packet Timestamp</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Packet 
+						Timestamp</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="packet_timestamp">
-							A 32bit timestamp. Used in combination with a MessageAge tag to 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="packet_timestamp">A 
+							32bit timestamp. Used in combination with a MessageAge tag to 
 							calculate the age of individual messages in the packet.</simpara>
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							This mechanism is useful if the connected device does not send 
-							data immediately but has some kind of internal storage. Every 
-							time a message is stored, the devices stores an internal 
-							timestamp in this message. When the stored messages are sent 
-							later on, the device updates the packet timestamp in the header 
-							with the current value of the same internal timestamp.</simpara>
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							When receiving the packet, the driver calculates the age of each 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">This 
+							mechanism is useful if the connected device does not send data 
+							immediately but has some kind of internal storage. Every time a 
+							message is stored, the devices stores an internal timestamp in 
+							this message. When the stored messages are sent later on, the 
+							device updates the packet timestamp in the header with the 
+							current value of the same internal timestamp.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">When 
+							receiving the packet, the driver calculates the age of each 
 							individual message as the difference between the two timestamps 
 							(PacketTimestamp-MessageAge).</simpara>
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							Note that the device timestamps do not have to be a real 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Note 
+							that the device timestamps do not have to be a real 
 							&apos;time&apos;. You can also use internal uptime counters or 
 							time ticks, which should be available even if the connected 
 							device does not have a real time clock.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Sequence Id</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Sequence 
+						Id</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							A sequence id send by the device. This type is intended to be 
-							used in the handshake message.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">A 
+							sequence id send by the device. This type is intended to be used 
+							in the handshake message.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Fixed Byte</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Fixed 
+						Byte</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							A byte with the given value has to be present in the header to 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">A 
+							byte with the given value has to be present in the header to 
 							indicate a valid packet. If the received header contains any 
 							other value at this position, the complete packet is discarded. 
 							It is recommended to supply a packet size if this may 
 							happen.</simpara>
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							The value is interpreted as hexadecimal if it starts with 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+							value is interpreted as hexadecimal if it starts with 
 							&apos;0x&apos;. Valid range is 0 - 255 or 0x00 - 0xff.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Fixed Word</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Fixed 
+						Word</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							Same as fixed byte, but checks a 16 bit value (range 0 - 65535 
-							or 0x0000 - 0xffff).</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Same 
+							as fixed byte, but checks a 16 bit value (range 0 - 65535 or 
+							0x0000 - 0xffff).</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Dummy</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Dummy</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							The number of bytes given in &apos;Size&apos; is simply 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+							number of bytes given in &apos;Size&apos; is simply 
 							ignored.</simpara>
 						</listitem>
 					</varlistentry>
@@ -748,157 +726,149 @@ barcodescanner1.company.com,Device3</programlisting>
 			</sect3>
 		</sect2>
 		<sect2 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			Writeback</title>
-			<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			The driver supports a simple writeback mechanism to write data to 
-			the connected device. The main purpose of this function is to 
-			request data updates from the plc or acknowledge incoming data. It 
-			is not designed for transferring large amounts of data (though this 
-			is possibly using the ByteString data type).</simpara>
-			<mediaobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			<imageobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			<imagedata xmlns="http://docbook.org/ns/docbook" fileref="image_en/writeback-config-en.png" scalefit="0"/>
-			</imageobject></mediaobject>
+			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Writeback</title>
+			<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+			driver supports a simple writeback mechanism to write data to the 
+			connected device. The main purpose of this function is to request 
+			data updates from the plc or acknowledge incoming data. It is not 
+			designed for transferring large amounts of data (though this is 
+			possibly using the ByteString data type).</simpara>
+			<mediaobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><imageobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><imagedata xmlns="http://docbook.org/ns/docbook" fileref="image_en/writeback-config-en.png" scalefit="0"/></imageobject></mediaobject>
 			<sect3 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-				<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-				Configuration</title>
+				<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Configuration</title>
 				<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Enable writing to device</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Enable 
+						writing to device</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							This checkbox enables the writeback mechanism.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">This 
+							checkbox enables the writeback mechanism.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Use Prefix</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Use 
+						Prefix</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							If true, the configured prefix (header) will be send at the 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">If 
+							true, the configured prefix (header) will be send at the 
 							beginning of the outgoing message.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Use message ID</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Use 
+						message ID</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							Select 
-							<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							Byte</varname> or 
-							<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							Word</varname> to send a message id. The message id is unsigned, 
-							negative values are not accepted.</simpara>
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							The message id is only send if it is configured in the 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Select 
+							<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Byte</varname> 
+							or 
+							<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Word</varname> 
+							to send a message id. The message id is unsigned, negative 
+							values are not accepted.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+							message id is only send if it is configured in the 
 							Prefix.</simpara>
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							The message id is set by the client with the &apos; 
-							<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							ID</varname>&apos; tag.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+							message id is set by the client with the &apos; 
+							<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">ID</varname>&apos; 
+							tag.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Prefix</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Prefix</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							A comma seperated list of bytes. Decimal, hexadecimal, and octal 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">A 
+							comma seperated list of bytes. Decimal, hexadecimal, and octal 
 							numbers are accepted.</simpara>
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							To send the message length use the strings &apos;lenb&apos; 
-							(Byte) or &apos;lenw&apos; (Word).</simpara>
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							The String &apos;id&apos; is replaced by the message Id set by 
-							the client.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">To 
+							send the message length use the strings &apos;lenb&apos; (Byte) 
+							or &apos;lenw&apos; (Word).</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+							String &apos;id&apos; is replaced by the message Id set by the 
+							client.</simpara>
 							<informalexample xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-								<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-								<code xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-								lenb, 0xfe, 0xfe, id</code></simpara>
+								<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><code xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">lenb, 
+								0xfe, 0xfe, id</code></simpara>
 							</informalexample>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Data Type</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Data 
+						Type</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							The data type to send.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+							data type to send.</simpara>
 							<itemizedlist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 								<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-									<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-									UInt16 - Unsigned 16bit Integer</simpara>
+									<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">UInt16 
+									- Unsigned 16bit Integer</simpara>
 								</listitem>
 								<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-									<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-									Int16 - Signed 16bit Integer</simpara>
+									<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Int16 
+									- Signed 16bit Integer</simpara>
 								</listitem>
 								<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-									<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-									UInt32 - Unsigned 32bit Integer</simpara>
+									<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">UInt32 
+									- Unsigned 32bit Integer</simpara>
 								</listitem>
 								<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-									<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-									Int32 - Signed 32bit Integer</simpara>
+									<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Int32 
+									- Signed 32bit Integer</simpara>
 								</listitem>
 								<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-									<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-									ByteString - A comma seperated list of bytes. Decimal, 
-									hexadecimal, and octal numbers are accepted. Allowed decimal 
-									range is -128...255. Accepted seperators are comma, semicolon 
-									and space.</simpara>
-									<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-									Example: 0xff,255,-127,127 will be parsed as 
+									<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">ByteString 
+									- A comma seperated list of bytes. Decimal, hexadecimal, and 
+									octal numbers are accepted. Allowed decimal range is 
+									-128...255. Accepted seperators are comma, semicolon and 
+									space.</simpara>
+									<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Example: 
+									0xff,255,-127,127 will be parsed as 
 									&apos;0xff,0xff,0x81,0x7f&apos;</simpara>
 								</listitem>
 							</itemizedlist>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Send on value change</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Send 
+						on value change</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							If true, the driver will send a message as soon as the client 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">If 
+							true, the driver will send a message as soon as the client 
 							changes the value. If false, send must be triggered explicitly 
 							with the special &apos; 
-							<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							Write</varname>&apos; tag.</simpara>
+							<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Write</varname>&apos; 
+							tag.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Send initial value</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Send 
+						initial value</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							Sends an initial value as soon as the connection to the device 
-							has been established. This function may be used to request 
-							initial values from the connected device.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Sends 
+							an initial value as soon as the connection to the device has 
+							been established. This function may be used to request initial 
+							values from the connected device.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Initial value</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Initial 
+						value</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							The value to send after connection to the device has been 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+							value to send after connection to the device has been 
 							established.</simpara>
 						</listitem>
 					</varlistentry>
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Initial ID</term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Initial 
+						ID</term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							The ID to send after connection to the device has been 
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+							ID to send after connection to the device has been 
 							established.</simpara>
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							The initial id and the initial value are set 
-							&apos;silently&apos;, an id or value that has been set by a 
-							client will not change.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+							initial id and the initial value are set &apos;silently&apos;, 
+							an id or value that has been set by a client will not 
+							change.</simpara>
 						</listitem>
 					</varlistentry>
 				</variablelist>
@@ -906,151 +876,131 @@ barcodescanner1.company.com,Device3</programlisting>
 		</sect2>
 	</sect1>
 	<sect1 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-		<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-		OPC-UA Adressing</title>
-		<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-		The general addressing scheme used by the driver is:</para>
-		<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-		<code xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-		messageAlias/tagAlias[Index][Bit]</code> in active mode and</para>
-		<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-		<code xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-		deviceAlias/messageAlias/tagAlias[Index][Bit]</code> in passive 
-		mode.</para>
-		<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-		Note: In the browse tree, the square brackets are replaced by a 
-		underscore to support drag&apos;n&apos;drop with clients that 
-		don&apos;t allow brackets in the tag name.</para>
+		<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">OPC-UA 
+		Adressing</title>
+		<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+		general addressing scheme used by the driver is:</para>
+		<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><code xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">messageAlias/tagAlias[Index][Bit]</code> 
+		in active mode and</para>
+		<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><code xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">deviceAlias/messageAlias/tagAlias[Index][Bit]</code> 
+		in passive mode.</para>
+		<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Note: 
+		In the browse tree, the square brackets are replaced by a underscore 
+		to support drag&apos;n&apos;drop with clients that don&apos;t allow 
+		brackets in the tag name.</para>
 		<sect2 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			Special tags</title>
-			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			The driver generates some special tags for each configured 
+			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Special 
+			tags</title>
+			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+			driver generates some special tags for each configured 
 			message:</para>
 			<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					_Timestamp</varname></term>
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">_Timestamp</varname></term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Time when the current message was received from the device, maybe 
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Time 
+						when the current message was received from the device, maybe 
 						corrected by a configured 
-						<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						MessageAge</varname> tag.</simpara>
+						<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">MessageAge</varname> 
+						tag.</simpara>
 					</listitem>
 				</varlistentry>
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					_MessageCount</varname></term>
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">_MessageCount</varname></term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Total count of messages published to clients. In Handshake Mode 
-						this is the count of published messages, without messages still 
-						waiting in the buffer.</simpara>
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						In redundant systems, this tag will be reset to 0 when the active 
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Total 
+						count of messages published to clients. In Handshake Mode this is 
+						the count of published messages, without messages still waiting 
+						in the buffer.</simpara>
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">In 
+						redundant systems, this tag will be reset to 0 when the active 
 						node changes.</simpara>
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						If using the queue mode &apos;Handshake&apos; with a transaction 
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">If 
+						using the queue mode &apos;Handshake&apos; with a transaction 
 						group, it is recommended to use this tag as a trigger, because 
 						the current message may be republished after a failover, so the 
 						timestamp or values may not change in this situation.</simpara>
 					</listitem>
 				</varlistentry>
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					_Handshake</varname></term>
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">_Handshake</varname></term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Writable handshake for synchronisation (see 
-						<link xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#secthandshakemode">
-						Handshake Mode</link>). Only allowed value to write is 
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Writable 
+						handshake for synchronisation (see 
+						<link xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#secthandshakemode">Handshake 
+						Mode</link>). Only allowed value to write is 
 						&apos;True&apos;.</simpara>
 					</listitem>
 				</varlistentry>
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					_QueueSize</varname></term>
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">_QueueSize</varname></term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Count of queued messages in handshake or delayed mode.</simpara>
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Count 
+						of queued messages in handshake or delayed mode.</simpara>
 					</listitem>
 				</varlistentry>
 			</variablelist>
 		</sect2>
 		<sect2 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			Status Folder (Client mode)</title>
-			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			The client (active mode) driver adds the 
-			<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			[Status]</varname> folder that contains some tags to control the 
-			device connection:</para>
+			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Status 
+			Folder (Client mode)</title>
+			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+			client (active mode) driver adds the 
+			<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">[Status]</varname> 
+			folder that contains some tags to control the device 
+			connection:</para>
 			<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					Device Name</varname></term>
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Device 
+					Name</varname></term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						The device name as configured in the Driver Settings.</simpara>
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+						device name as configured in the Driver Settings.</simpara>
 					</listitem>
 				</varlistentry>
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					Is connected</varname></term>
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Is 
+					connected</varname></term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						True if the driver is connected to the device.</simpara>
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">True 
+						if the driver is connected to the device.</simpara>
 					</listitem>
 				</varlistentry>
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					Connected Host</varname></term>
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Connected 
+					Host</varname></term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						IP address and hostname of the connected device.</simpara>
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">IP 
+						address and hostname of the connected device.</simpara>
 					</listitem>
 				</varlistentry>
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					Hostname</varname></term>
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Hostname</varname></term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Writable tag to set hostname or IP-address. Only effective if 
-						Connect is false.</simpara>
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Writable 
+						tag to set hostname or IP-address. Only effective if Connect is 
+						false.</simpara>
 					</listitem>
 				</varlistentry>
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					Port</varname></term>
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Port</varname></term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Writable tag to set the port to connect to. Only effective if 
-						Connect is false.</simpara>
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Writable 
+						tag to set the port to connect to. Only effective if Connect is 
+						false.</simpara>
 					</listitem>
 				</varlistentry>
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-					Connect</varname></term>
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Connect</varname></term>
 					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Writable tag to control the connection state. Writing 
-						&apos;false&apos; will disconnect from the device.</simpara>
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Writable 
+						tag to control the connection state. Writing &apos;false&apos; 
+						will disconnect from the device.</simpara>
 					</listitem>
 				</varlistentry>
 			</variablelist>
-			<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			Example script for changing hostname or port:</simpara>
+			<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Example 
+			script for changing hostname or port:</simpara>
 			<informalexample xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 				<programlisting xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">system.opc.writeValue(&apos;Ignition OPC-UA Server&apos;, &apos;[TCPBin][Status]/Connect&apos;, 0) 
 system.opc.writeValue(&apos;Ignition OPC-UA Server&apos;, &apos;[TCPBin][Status]/Hostname&apos;, &apos;device.example.org&apos;) 
@@ -1059,21 +1009,20 @@ system.opc.writeValue(&apos;Ignition OPC-UA Server&apos;, &apos;[TCPBin][Status]
 			</informalexample>
 		</sect2>
 		<sect2 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			Device Status Folder (Server mode)</title>
-			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			The server (passive mode) driver adds a 
-			<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			[Status]</varname> folder to every configured remote device.</para>
+			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Device 
+			Status Folder (Server mode)</title>
+			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+			server (passive mode) driver adds a 
+			<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">[Status]</varname> 
+			folder to every configured remote device.</para>
 			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 				<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 					<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-						Is connected</varname></term>
+						<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><varname xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Is 
+						connected</varname></term>
 						<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-							True if the device is connected to the driver.</simpara>
+							<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">True 
+							if the device is connected to the driver.</simpara>
 						</listitem>
 					</varlistentry>
 				</variablelist>
@@ -1081,76 +1030,74 @@ system.opc.writeValue(&apos;Ignition OPC-UA Server&apos;, &apos;[TCPBin][Status]
 		</sect2>
 	</sect1>
 	<sect1 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-		<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-		Queue Mode</title>
-		<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="sectqueuemode">
-		This driver does not poll, but receives messages sent by the 
-		connected device. If the device sends messages at a faster rate than 
-		the publishing interval used by the OPC-Client (in Ignition 
-		<superscript xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-		TM</superscript> this is the rate of the scan class), you will loose 
-		data. It is up to the programmer of the connected device to send data 
-		at a reasonable rate.</para>
-		<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-		For situations where a device sends a burst of messages, Handshake or 
+		<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Queue 
+		Mode</title>
+		<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="sectqueuemode">This 
+		driver does not poll, but receives messages sent by the connected 
+		device. If the device sends messages at a faster rate than the 
+		publishing interval used by the OPC-Client (in Ignition 
+		<superscript xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">TM</superscript> 
+		this is the rate of the scan class), you will loose data. It is up to 
+		the programmer of the connected device to send data at a reasonable 
+		rate.</para>
+		<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">For 
+		situations where a device sends a burst of messages, Handshake or 
 		Delayed queue modes can be used. In this mode, the driver buffers 
 		incoming messages in memory and publishes them one by one to the 
 		client.</para>
-		<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-		To prevent message loss in case of an server failure, buffered 
-		messages are stored to the gateway&apos;s disk 
-		(data/drivers/TcpBin_...) if the message is configured to use 
-		persistance. They are reloaded on startup, unless the message 
-		configuration has been changed. The storage mechanism used is a 
-		compromise between performance and data safety. The file handles are 
-		kept open all the time, but the file is flushed after each write. The 
-		file is also periodically rewritten completely, so there are 
-		(minimal) time spans where a failure will result in complete data 
-		loss.</para>
-		<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-		The message is removed from the queue only after the handshake is set 
-		by a client or the delay is expired. If a shutdown happens during 
-		this period, the same message will be published again after the 
-		restart. This behaviour ensures that no data is lost, but requires 
-		additional actions to prevent double logging (e.g. using the 
-		timestamp as a unique key.) It also means that values or timestamp 
-		should not be used as triggers.</para>
+		<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">To 
+		prevent message loss in case of an server failure, buffered messages 
+		are stored to the gateway&apos;s disk (data/drivers/TcpBin_...) if 
+		the message is configured to use persistance. They are reloaded on 
+		startup, unless the message configuration has been changed. The 
+		storage mechanism used is a compromise between performance and data 
+		safety. The file handles are kept open all the time, but the file is 
+		flushed after each write. The file is also periodically rewritten 
+		completely, so there are (minimal) time spans where a failure will 
+		result in complete data loss.</para>
+		<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+		message is removed from the queue only after the handshake is set by 
+		a client or the delay is expired. If a shutdown happens during this 
+		period, the same message will be published again after the restart. 
+		This behaviour ensures that no data is lost, but requires additional 
+		actions to prevent double logging (e.g. using the timestamp as a 
+		unique key.) It also means that values or timestamp should not be 
+		used as triggers.</para>
 		<warning xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			Even if using the persistent queue mode or redundant configurations, 
+			<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Even 
+			if using the persistent queue mode or redundant configurations, 
 			there are situations where data will be lost!</simpara>
-			<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			Do not use this driver if this is not acceptable!</simpara>
+			<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Do 
+			not use this driver if this is not acceptable!</simpara>
 		</warning>
 		<sect2 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			HandshakeMode</title>
-			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="secthandshakemode">
-			In this mode a special witeable tag _Handshake is added to the 
-			message. Once the handshake is set by the client, the driver 
-			publishes the next message and resets the handshake tag.</para>
-			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			The client should not use the _Handshake tag to detect a new message 
-			but use the Timestamp or MessageCount tag instead.</para>
-			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			Please note that the driver will not publish new messages if the 
-			client does not set the handshake. It may be a bad idea to use the 
+			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">HandshakeMode</title>
+			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="secthandshakemode">In 
+			this mode a special witeable tag _Handshake is added to the message. 
+			Once the handshake is set by the client, the driver publishes the 
+			next message and resets the handshake tag.</para>
+			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
+			client should not use the _Handshake tag to detect a new message but 
+			use the Timestamp or MessageCount tag instead.</para>
+			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Please 
+			note that the driver will not publish new messages if the client 
+			does not set the handshake. It may be a bad idea to use the 
 			handshake mode with Ignitions 
-			<superscript xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			TM</superscript> default transaction group handshake.</para>
+			<superscript xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">TM</superscript> 
+			default transaction group handshake.</para>
 		</sect2>
 		<sect2 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			Delayed Mode</title>
-			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			In this mode incoming messages are published to clients with a fixed 
+			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Delayed 
+			Mode</title>
+			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">In 
+			this mode incoming messages are published to clients with a fixed 
 			delay. This delay is 3 times the fastest subscription rate for the 
 			respective message, so make sure to subscribe at least with about 
 			the triple rate of expected data changes.</para>
-			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			Publishing of messages in delayed mode starts when one of tags 
-			_Timestamp or _MessageCount are subscribed by a client. If there are 
-			no subscriptions, no messages are published. This makes sure that a 
+			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Publishing 
+			of messages in delayed mode starts when one of tags _Timestamp or 
+			_MessageCount are subscribed by a client. If there are no 
+			subscriptions, no messages are published. This makes sure that a 
 			client is connected before the driver start publishing 
 			messages.</para>
 		</sect2>
