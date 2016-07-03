@@ -163,7 +163,7 @@ implements IMessageHandler {
 							new IndexMessageFolder(
 									message,
 									driverSettings,
-									FolderManager.getFolderId(device.getDeviceId(), message.getMessageId()),
+									device.getDeviceId(),
 									String.format("%s/%s", device.getAlias(), message.getMessageAlias()),
 									this);
 					addFolder(messageFolder);
