@@ -51,6 +51,10 @@ public class RemoteDevice {
 		return remoteAddress != null;
 	}
 
+	/**
+	 * Returns the configured address for this device.
+	 * @return
+	 */
 	public InetAddress getInetAddress() {
 		if (remoteAddress != null) {
 			return remoteAddress;

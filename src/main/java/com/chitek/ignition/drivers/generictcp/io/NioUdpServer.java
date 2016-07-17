@@ -237,6 +237,10 @@ public class NioUdpServer implements Runnable, NioServer {
 		readBuffer.clear();
 		InetSocketAddress remoteSocket = (InetSocketAddress) channel.receive(readBuffer);
 
+		if (log.isTraceEnabled()) {
+			log.trace(String.format("%d bytes of data received from %s", readBuffer.position(), remoteSocket));
+		}
+		
 		// Check if we already know this client
 		if (!clientMap.containsKey(remoteSocket.getAddress())) {
 			boolean accept = eventHandler.clientConnected(remoteSocket);
@@ -297,6 +301,11 @@ public class NioUdpServer implements Runnable, NioServer {
 			if (pending != null) {
 				pending.clear();
 			}
+		}
+		try {
+			channel.disconnect();
+			//channel.close();
+		} catch (IOException e) {
 		}
 		eventHandler.connectionLost(remoteSocket);
 	}

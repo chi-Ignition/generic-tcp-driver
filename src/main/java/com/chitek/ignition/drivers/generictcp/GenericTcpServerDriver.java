@@ -350,16 +350,24 @@ implements IMessageHandler {
 
 	@Override
 	public boolean clientConnected(InetSocketAddress remoteSocket) {
-
-		if (log.isDebugEnabled()) {
-			log.debug(String.format("Remote device %s(%s) connected.", remoteSocket.getHostName(), remoteSocket.getAddress().getHostAddress()));
+		
+		// Try to find the connecting device in our configuration
+		// Try host address first, in this case we don't need to lookup the hostname
+		for (RemoteDevice device : driverSettings.getDevices()) {
+			if (device.getInetAddress().equals(remoteSocket.getAddress())) {
+				if (log.isDebugEnabled()) {
+					log.debug(String.format("Remote device %s connected, identified by ip-address.", remoteSocket.getAddress().getHostAddress()));
+				}
+				processClientConnected(device, remoteSocket);
+				return true;
+			}
 		}
 
-		// Try to find the connecting device in our configuration
 		for (RemoteDevice device : driverSettings.getDevices()) {
-			if (device.getHostname().equals(remoteSocket.getAddress().getHostAddress())
-				|| device.getHostname().equalsIgnoreCase(remoteSocket.getHostName())) {
-
+			if (device.getHostname().equalsIgnoreCase(remoteSocket.getHostName())) {
+				if (log.isDebugEnabled()) {
+					log.debug(String.format("Remote device %s connected, identified by hostname.", remoteSocket.getAddress().getHostAddress()));
+				}
 				processClientConnected(device, remoteSocket);
 				return true;
 			}
@@ -367,7 +375,7 @@ implements IMessageHandler {
 
 		// If we arrive here, the connecting device was not found in the configuration
 		// Returning false will close the connection
-		log.warn(String.format("Remote device %s(%s) tried to connect but is not listed in the driver settings.", remoteSocket.getHostName(), remoteSocket.getAddress().getHostAddress()));
+		log.warn(String.format("Remote device %s tried to connect but is not listed in the driver settings.", remoteSocket.getAddress().getHostAddress()));
 		return false;
 	}
 
@@ -375,7 +383,7 @@ implements IMessageHandler {
 	public void clientDisconnected(InetSocketAddress remoteSocket) {
 
 		if (log.isDebugEnabled()) {
-			log.debug(String.format("Remote device %s(%s) disconnected.", remoteSocket.getHostName(), remoteSocket.getAddress().getHostAddress()));
+			log.debug(String.format("Remote device %s disconnected.", remoteSocket.getAddress().getHostAddress()));
 		}
 
 		// Remove disconnected device from map
