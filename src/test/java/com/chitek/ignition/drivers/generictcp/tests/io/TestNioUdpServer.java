@@ -164,7 +164,7 @@ public class TestNioUdpServer {
 		// The new connection should replace the existing one
 		dataLatch = new CountDownLatch(1);
 		DatagramSocket socket2 = connect((InetSocketAddress) server.getLocalAddress());
-		sendData(socket1, bytes, (InetSocketAddress) server.getLocalAddress());
+		sendData(socket2, bytes, (InetSocketAddress) server.getLocalAddress());
 		
 		if (!dataLatch.await(100, TimeUnit.MILLISECONDS)) {
 			fail("No data received from second connection");

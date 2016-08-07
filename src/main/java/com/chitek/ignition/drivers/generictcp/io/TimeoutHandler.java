@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.chitek.ignition.drivers.generictcp.io;
 
-import java.net.InetAddress;
+import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -30,8 +30,8 @@ public class TimeoutHandler {
 	private long timeout=0;
 
 	private long oldestTime=0;
-	private InetAddress oldestAddress = null;
-	private Map<InetAddress, Long> timeoutMap = new HashMap<InetAddress, Long>();
+	private SocketAddress oldestAddress = null;
+	private Map<SocketAddress, Long> timeoutMap = new HashMap<SocketAddress, Long>();
 	
 	/**
 	 * @param timeout
@@ -47,7 +47,7 @@ public class TimeoutHandler {
 	 * @param address
 	 * 	The InetAddress for which to reset the timeout
 	 */
-	public void dataReceived(InetAddress address) {
+	public void dataReceived(SocketAddress address) {
 		
 		timeoutMap.put(address, System.nanoTime()/1000000);
 				
@@ -63,7 +63,7 @@ public class TimeoutHandler {
 	 * @param address
 	 * 	The InetAddress to remove
 	 */
-	public void removeAddress(InetAddress address) {
+	public void removeAddress(SocketAddress address) {
 		timeoutMap.remove(address);
 		if (timeoutMap.isEmpty()) {
 			oldestAddress = null;
@@ -113,16 +113,16 @@ public class TimeoutHandler {
 	 * @return
 	 * 	The InetAddress that caused a timeout.
 	 */
-	public InetAddress getTimeoutAddress() {
+	public SocketAddress getTimeoutAddress() {
 		return oldestAddress;
 	}
 	
 	private void updateTimeout() {
 		long earliestTime=Long.MAX_VALUE;
-		InetAddress address=null;
-		Iterator<Entry<InetAddress, Long>> it = timeoutMap.entrySet().iterator();
+		SocketAddress address=null;
+		Iterator<Entry<SocketAddress, Long>> it = timeoutMap.entrySet().iterator();
 		while (it.hasNext()) {
-			Entry<InetAddress, Long>entry = it.next();
+			Entry<SocketAddress, Long>entry = it.next();
 			if (entry.getValue() < earliestTime) {
 				earliestTime=entry.getValue();
 				address=entry.getKey();

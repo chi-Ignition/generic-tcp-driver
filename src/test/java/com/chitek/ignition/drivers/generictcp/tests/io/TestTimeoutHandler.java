@@ -9,6 +9,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 import org.junit.Test;
 
@@ -22,9 +23,9 @@ public class TestTimeoutHandler {
 		
 		assertEquals(10, handler.getTimeToTimeout());
 		assertEquals(null, handler.getTimeoutAddress());
-		
-		InetAddress addr1 = InetAddress.getByAddress(new byte[]{(byte) 192,(byte) 168,0,1});
-		InetAddress addr2 = InetAddress.getByAddress(new byte[]{(byte) 192,(byte) 168,0,2});
+	
+		InetSocketAddress addr1 = new InetSocketAddress(InetAddress.getByAddress(new byte[]{(byte) 192,(byte) 168,0,1}),9999);
+		InetSocketAddress addr2 = new InetSocketAddress(InetAddress.getByAddress(new byte[]{(byte) 192,(byte) 168,0,2}),9998);
 		
 		handler.dataReceived(addr1);
 		assertThat(handler.getTimeToTimeout(), is(greaterThanOrEqualTo(9L)));

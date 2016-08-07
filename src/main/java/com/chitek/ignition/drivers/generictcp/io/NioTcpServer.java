@@ -30,7 +30,7 @@ public class NioTcpServer implements Runnable, NioServer {
 
 	private ServerSocketChannel serverChannel;
 	private Selector selector;
-	private volatile Map<InetAddress, SocketChannel> clientMap = new HashMap<InetAddress, SocketChannel>();
+	private volatile Map<InetSocketAddress, SocketChannel> clientMap = new HashMap<InetSocketAddress, SocketChannel>();
 	// A list of SocketChannels to put into write state
 	private final List<SocketChannel> writeInterest = new LinkedList<SocketChannel>();
 	// Maps a SocketChannel to a list of ByteBuffer instances
@@ -80,8 +80,8 @@ public class NioTcpServer implements Runnable, NioServer {
 			e.printStackTrace();
 		}
 
-		for (Iterator<Map.Entry<InetAddress, SocketChannel>> it = clientMap.entrySet().iterator(); it.hasNext();) {
-			Entry<InetAddress, SocketChannel> client = it.next();
+		for (Iterator<Map.Entry<InetSocketAddress, SocketChannel>> it = clientMap.entrySet().iterator(); it.hasNext();) {
+			Entry<InetSocketAddress, SocketChannel> client = it.next();
 			try {
 				if (client.getValue().isOpen())
 					client.getValue().close();
@@ -118,7 +118,7 @@ public class NioTcpServer implements Runnable, NioServer {
 		synchronized (this.writeInterest) {
 
 			// Get the SocketChannel for the given remote address
-			SocketChannel socketChannel = clientMap.get(remoteSocketAddress.getAddress());
+			SocketChannel socketChannel = clientMap.get(remoteSocketAddress);
 			if (socketChannel == null) {
 				log.error(String.format("Attempt to send to a not connected client: %s", remoteSocketAddress));
 				return;
@@ -243,22 +243,23 @@ public class NioTcpServer implements Runnable, NioServer {
 		SocketChannel socketChannel = serverSocketChannel.accept();
 		socketChannel.configureBlocking(false);
 
-		InetAddress remoteAddress = socketChannel.socket().getInetAddress(); 
-		InetSocketAddress remoteSocket = new InetSocketAddress(remoteAddress, socketChannel.socket().getPort());
+		InetSocketAddress remoteSocket = (InetSocketAddress) socketChannel.getRemoteAddress();
 		
 		// Check if there is already a connection from this address
-		SocketChannel existingChannel = clientMap.get(remoteAddress);
-		if (existingChannel != null) {
-			log.debug(String.format("New connection from client %s. Replacing existing connection.", remoteAddress));
-			disposeClientChannel((InetSocketAddress) existingChannel.socket().getRemoteSocketAddress());
+		for (Entry<InetSocketAddress, SocketChannel> entry : clientMap.entrySet()) {
+			if (entry.getKey().getAddress().equals(remoteSocket.getAddress())) {
+				log.debug(String.format("New connection from client %s. Replacing existing connection.", remoteSocket));
+				disposeClientChannel(entry.getKey());
+				break;
+			}
 		}
 		
 		// Register the new SocketChannel with our Selector, indicating
 		// we'd like to be notified when there's data waiting to be read
 		socketChannel.register(this.selector, SelectionKey.OP_READ);
 
-		clientMap.put(remoteAddress, socketChannel);
-		timeoutHandler.dataReceived(remoteAddress);
+		clientMap.put(remoteSocket, socketChannel);
+		timeoutHandler.dataReceived(remoteSocket);
 		log.debug(String.format("Remote client %s connected.", remoteSocket));
 
 		boolean accept = eventHandler.clientConnected(remoteSocket);
@@ -297,7 +298,7 @@ public class NioTcpServer implements Runnable, NioServer {
 		}
 		
 		// reset the timeout for this connection
-		timeoutHandler.dataReceived(remoteAddress);
+		timeoutHandler.dataReceived(remoteSocket);
 		
 		// Hand the data off to our worker thread
 		readBuffer.flip();
@@ -332,9 +333,9 @@ public class NioTcpServer implements Runnable, NioServer {
 	
 	private void disposeClientChannel(InetSocketAddress remoteSocket) {
 
-		timeoutHandler.removeAddress(remoteSocket.getAddress());
+		timeoutHandler.removeAddress(remoteSocket);
 		
-		SocketChannel socketChannel = clientMap.remove(remoteSocket.getAddress());
+		SocketChannel socketChannel = clientMap.remove(remoteSocket);
 		socketChannel.keyFor(selector).cancel();
 		try {
 			socketChannel.close();
