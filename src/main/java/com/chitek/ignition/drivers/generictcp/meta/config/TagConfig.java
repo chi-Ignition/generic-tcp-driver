@@ -36,7 +36,7 @@ public class TagConfig implements Serializable {
 	// Set a default datatype for new items
 	public TagConfig()
 	{
-		dataType = BinaryDataType.Byte;
+		dataType = BinaryDataType.Int16;
 		size = 1;
 	}
 

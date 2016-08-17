@@ -286,7 +286,9 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 		listEditorContainer.add(new EditorSubmitLink("add-row-link") {
 			@Override
 			public void onSubmit() {
-				editor.addItem(new TagConfig());
+				
+				// set the next available tag id
+				editor.addItem(createNewTag(editor.getList().size()));
 
 				// Adjust the visibility of the edit links
 				updateListEditor(editor);
@@ -678,12 +680,11 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 
 			@Override
 			public void onSubmit() {
-				ListEditor<TagConfig> editor = getEditor();
-				// add a new item at the end of the list
-				addItem(new TagConfig());
-
-				// shift the index property of all items after current one
+				//ListEditor<TagConfig> editor = getEditor();
 				int idx = getItem().getIndex();
+				
+				// add a new item at the end of the list
+				editor.addItem(createNewTag(idx));
 
 				// Move the new item up to the required position
 				for (int i = editor.size() - 1; i > idx; i--) {
@@ -912,6 +913,53 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 		}
 	}
 
+	/**
+	 * Creates a new tag. The tag will be of the same type as the tag at the given index. The id will be
+	 * the next available id that is greater than the id of the tag at the given index.
+	 * 
+	 * @param idx
+	 * 	The index of the tag to copy the type form.
+	 */
+	private TagConfig createNewTag(int idx) {
+
+		// Create the new tag config
+		TagConfig newTag = new TagConfig();
+		int newTagId = 1;
+
+		if (idx < 1) {
+			idx=1;
+		}
+		if (idx > editor.getList().size()) {
+			idx = editor.getList().size() + 1;
+		}
+		
+		// set the new item to the same type as the previous item
+		if (editor.getList().size()>0) {
+			TagConfig tc = editor.getList().get(idx-1);
+			BinaryDataType type = tc.getDataType();
+			if (!type.isSpecial()) {
+				newTag.setDataType(tc.getDataType());
+				newTagId=tc.getId()+1;
+			}
+		}
+		
+		// find the next available id
+		whileLoop:
+		while (true) {
+			for (TagConfig tag : editor.getList()) {
+				if (tag.getId() == newTagId) {
+					newTagId++;
+					continue whileLoop;
+				}
+			}
+			// when the for loop completes, the id is ok
+			break;
+		}
+		newTag.setId(newTagId);
+		
+		return newTag;
+	}
+	
 	/**
 	 * Get the next available message id.
 	 * 
