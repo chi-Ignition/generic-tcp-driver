@@ -111,7 +111,7 @@ public class TestNioUdpServer {
 		DatagramSocket socket = connect((InetSocketAddress) server.getLocalAddress());
 		sendData(socket, bytes, (InetSocketAddress) server.getLocalAddress());
 		// The UDP server calls clientConnected when receiving data for the first time
-		if (!connectLatch.await(100, TimeUnit.MILLISECONDS)) {
+		if (!dataLatch.await(100, TimeUnit.MILLISECONDS)) {
 			fail("No data received");
 		}
 
@@ -193,7 +193,8 @@ public class TestNioUdpServer {
 		DatagramSocket socket = connect((InetSocketAddress) server.getLocalAddress());
 		byte[] bytes = new byte[] { 1, 2, 3, 4 };
 		sendData(socket, bytes, (InetSocketAddress) server.getLocalAddress());
-		if (!connectLatch.await(100, TimeUnit.MILLISECONDS)) {
+		if (!dataLatch.await(100, TimeUnit.MILLISECONDS)) {
+			// The client count is updated AFTER the call to clientConnected, so we wait here for dataArrived instead.
 			fail("No data received");
 		}
 		assertEquals("Number of connected clients", 1, server.getConnectedClientCount());
