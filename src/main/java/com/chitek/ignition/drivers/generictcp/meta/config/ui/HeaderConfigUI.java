@@ -395,6 +395,10 @@ public class HeaderConfigUI extends AbstractConfigUI<HeaderConfig> {
 			List<TextField> values = editor.getComponentsById("rawValue", TextField.class);
 			boolean sizeTagDefined = false;
 
+			if (!useHeaderCheckbox.getConvertedInput()) {
+				return;
+			}
+
 			for (int i=0; i < types.size(); i++) {
 				HeaderDataType type = (HeaderDataType) types.get(i).getConvertedInput();
 				String inputVal=(String) values.get(i).getConvertedInput();
