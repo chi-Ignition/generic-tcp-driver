@@ -165,22 +165,26 @@
 						number of the local port to listen on.</simpara>
 					</listitem>
 				</varlistentry>
-				<varlistentry>
-					<term>Connection Timeout</term>
-					<listitem>
-						<simpara>When no data is received for this amount of time (in 
-						milliseconds), the driver closes the connection. It is up to the 
-						client to reconnect.</simpara>
-						<simpara>In UDP mode, there is no connection to close. The driver 
-						simply sets the the device state to &apos;not 
-						connected&apos;.</simpara>
+				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Connection 
+					Timeout</term>
+					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">When 
+						no data is received for this amount of time (seconds), the driver 
+						closes the connection. It is up to the client to 
+						reconnect.</simpara>
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">In 
+						UDP mode, there is no connection to close. The driver simply sets 
+						the the device state to &apos;not connected&apos;.</simpara>
 					</listitem>
 				</varlistentry>
-				<varlistentry>
-					<term>UPD mode</term>
-					<listitem>
-						<simpara>When this option is set, the driver listens on an UDP 
-						port instead of TCP.</simpara>
+				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">UPD 
+					mode</term>
+					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">When 
+						this option is set, the driver listens on an UDP port instead of 
+						TCP.</simpara>
 					</listitem>
 				</varlistentry>
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
