@@ -31,6 +31,8 @@ public class TestNioUdpServer {
 	private CountDownLatch disconnectLatch;
 	private CountDownLatch dataLatch;
 
+	private boolean clientAllowed=true;
+
 	@Before
 	public void setup() throws Exception {
 
@@ -46,7 +48,7 @@ public class TestNioUdpServer {
 			public boolean clientConnected(InetSocketAddress remoteSocket) {
 				log.debug("Client connected");
 				connectLatch.countDown();
-				return true;
+				return clientAllowed;
 			}
 
 			@Override
@@ -193,8 +195,7 @@ public class TestNioUdpServer {
 		DatagramSocket socket = connect((InetSocketAddress) server.getLocalAddress());
 		byte[] bytes = new byte[] { 1, 2, 3, 4 };
 		sendData(socket, bytes, (InetSocketAddress) server.getLocalAddress());
-		if (!dataLatch.await(100, TimeUnit.MILLISECONDS)) {
-			// The client count is updated AFTER the call to clientConnected, so we wait here for dataArrived instead.
+		if (!connectLatch.await(100, TimeUnit.MILLISECONDS)) {
 			fail("No data received");
 		}
 		assertEquals("Number of connected clients", 1, server.getConnectedClientCount());
@@ -211,6 +212,32 @@ public class TestNioUdpServer {
 
 	}
 
+	@Test(timeout = 200)
+	public void testClientNotAllowed() throws Exception {
+
+		InetSocketAddress address = new InetSocketAddress(InetAddress.getLocalHost(), 0);
+		NioUdpServer server = new NioUdpServer(address, log);
+		server.setEventHandler(eventHandler);
+		server.setTimeout(25);
+		server.start();
+
+		// Connect and wait for the server to call the event handler
+		clientAllowed=false;
+		DatagramSocket socket = connect((InetSocketAddress) server.getLocalAddress());
+		byte[] bytes = new byte[] { 1, 2, 3, 4 };
+		sendData(socket, bytes, (InetSocketAddress) server.getLocalAddress());
+		if (!connectLatch.await(100, TimeUnit.MILLISECONDS)) {
+			fail("No data received");
+		}
+		assertEquals("Number of connected clients", 0, server.getConnectedClientCount());
+
+		// Close this end of the connection
+		disconnect(socket);
+
+		server.stop();
+
+	}
+	
 	private DatagramSocket connect(InetSocketAddress address) {
 		DatagramSocket socket;
 		try {

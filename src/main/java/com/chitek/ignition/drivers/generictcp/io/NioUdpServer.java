@@ -225,11 +225,12 @@ public class NioUdpServer implements Runnable, NioServer {
 				}
 			}
 			
+			clientMap.put(remoteSocket, remoteSocket);
 			boolean accept = eventHandler.clientConnected(remoteSocket);
 			if (accept) {
-				clientMap.put(remoteSocket, remoteSocket);
 				log.debug(String.format("Remote client %s connected.", remoteSocket));
 			} else {
+				clientMap.remove(remoteSocket);
 				log.debug(String.format("Remote client %s not accepted.", remoteSocket));
 				return;
 			}
