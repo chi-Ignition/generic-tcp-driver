@@ -1,5 +1,6 @@
 package com.chitek.ignition.drivers.generictcp;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -89,6 +90,10 @@ implements IMessageHandler {
 	}
 
 	private void initialize(GenericTcpServerDriverSettings deviceSettings) {
+
+		// Create the disk folder for message queues
+		File folder = new File(getDiskPath());
+		folder.mkdir();		// is mkdir atomic? may fail if multiple devices start up at the same time
 
 		// There is no configuration, if the user never clicked 'save' in the config page
 		if (messageConfig == null || messageConfig.messages.size() == 0) {

@@ -264,7 +264,12 @@ public abstract class AbstractGenericTcpDriver
 
 	@Override
 	public String getDiskPath() {
-		return String.format("%s%sTcpBin_%s%s", getDriverContext().getHomeFolder(), File.separator, getDeviceName(), File.separator);
+	    String diskPath = getDriverContext().getHomeFolder().getPath();
+	    if (!diskPath.endsWith(File.separator)) {
+	    	diskPath = diskPath + File.separator;
+	    }
+		
+		return diskPath;
 	}
 	
 	@Override
