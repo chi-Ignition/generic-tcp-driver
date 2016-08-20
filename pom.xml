@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.chitek.ignition</groupId>
 	<artifactId>generic-tcp-driver</artifactId>
-	<version>2.7.3</version>
+	<version>2.8.4</version>
 	<name>generic-tcp-driver</name>
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>
@@ -102,8 +102,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.1</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
 			<!-- git plugin extracts build number and date -->
@@ -257,20 +257,23 @@
 		<dependency>
 			<groupId>com.inductiveautomation.ignitionsdk</groupId>
 			<artifactId>driver-api</artifactId>
-			<version>7.7.5</version>
+			<version>7.8.0</version>
 			<scope>provided</scope>
+			<type>pom</type>
 		</dependency>
 		<dependency>
 			<groupId>com.inductiveautomation.ignitionsdk</groupId>
 			<artifactId>ignition-common</artifactId>
-			<version>7.7.5</version>
+			<version>7.8.0</version>
 			<scope>provided</scope>
+			<type>pom</type>
 		</dependency>
 		<dependency>
 			<groupId>com.inductiveautomation.ignitionsdk</groupId>
 			<artifactId>gateway-api</artifactId>
-			<version>7.7.5</version>
+			<version>7.8.0</version>
 			<scope>provided</scope>
+			<type>pom</type>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -286,15 +289,15 @@
 		</dependency>
 	</dependencies>
 	<repositories>
-        <repository>
-            <id>ignition-releases</id>
-            <url>http://nexus.inductiveautomation.com:8081/nexus/content/repositories/inductiveautomation-releases</url>
-        </repository>
-        <repository>
-            <id>ignition-thirdparty</id>
-            <url>http://nexus.inductiveautomation.com:8081/nexus/content/repositories/inductiveautomation-thirdparty</url>
-        </repository>
-    </repositories>
+		<repository>
+			<id>ignition-releases</id>
+			<url>http://nexus.inductiveautomation.com:8081/nexus/content/repositories/inductiveautomation-releases</url>
+		</repository>
+		<repository>
+			<id>ignition-thirdparty</id>
+			<url>http://nexus.inductiveautomation.com:8081/nexus/content/repositories/inductiveautomation-thirdparty</url>
+		</repository>
+	</repositories>
 	<pluginRepositories>
         <pluginRepository>
             <id>ignition-releases</id>
@@ -303,6 +306,6 @@
     </pluginRepositories>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<local-gateway-url>http://10.224.10.104:8088/main/system/DeveloperModuleLoadingServlet</local-gateway-url>
+		<local-gateway-url>http://10.224.10.104:8088</local-gateway-url>
 	</properties>
 </project>
