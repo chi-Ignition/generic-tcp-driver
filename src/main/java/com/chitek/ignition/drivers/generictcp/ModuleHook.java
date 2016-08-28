@@ -108,4 +108,7 @@ public class ModuleHook extends AbstractDriverModuleHook {
 		return DRIVER_TYPES;
 	}
 
+	public boolean isFreeModule() {
+		return true;
+	}
 }
