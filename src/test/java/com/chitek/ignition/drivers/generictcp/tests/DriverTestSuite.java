@@ -1,8 +1,6 @@
 package com.chitek.ignition.drivers.generictcp.tests;
 
-import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -31,9 +29,6 @@ public class DriverTestSuite {
 	private static Logger log;
 
 	static {
-		PatternLayout layout = new PatternLayout("%r [%t] %-5p %c %x - %m%n");
-		ConsoleAppender consoleAppender = new ConsoleAppender(layout);
-		Logger.getRootLogger().addAppender(consoleAppender);
 		log = Logger.getRootLogger();
 	}
 
