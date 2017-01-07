@@ -71,7 +71,7 @@
 		                    <requiredIgnitionVersion>7.9.0</requiredIgnitionVersion>
 		                    <requiredFrameworkVersion>7</requiredFrameworkVersion>
 		                    <licenseFile>license.html</licenseFile>
-							<documentationFile>doc/index.html</documentationFile>
+							<documentationFile>doc/manual-frame.html</documentationFile>
 								
 							<depends>
 								<depend>
@@ -131,6 +131,7 @@
 				</configuration>
 			</plugin>
             <plugin>
+            	<!-- Copy resources for html docs -->
 				<artifactId>maven-resources-plugin</artifactId>
 				<version>2.6</version>
 				<executions>
@@ -147,6 +148,7 @@
 									<directory>../../src/doc</directory>
 									<includes>
 										<include>*.html</include>
+										<include>*.png</include>
 									</includes>
 								</resource>
 							</resources>

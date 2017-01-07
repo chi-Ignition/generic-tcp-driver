@@ -282,7 +282,7 @@ barcodescanner1.company.com,Device3</programlisting>
 		<sect2 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Message 
 			configuration</title>
-			<mediaobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><imageobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><imagedata xmlns="http://docbook.org/ns/docbook" fileref="image_en/message-config-en.png" scalefit="0" width="100%"/></imageobject></mediaobject>
+			<mediaobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><imageobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><imagedata xmlns="http://docbook.org/ns/docbook" fileref="message-config-en.png" scalefit="0" width="100%"/></imageobject></mediaobject>
 			<sect3 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 				<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">General 
 				settings</title>
@@ -583,7 +583,7 @@ barcodescanner1.company.com,Device3</programlisting>
 					internal buffer.</simpara>
 				</listitem>
 			</itemizedlist>
-			<mediaobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><imageobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><imagedata xmlns="http://docbook.org/ns/docbook" fileref="image_en/header-config-en.png" scalefit="0"/></imageobject></mediaobject>
+			<mediaobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><imageobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><imagedata xmlns="http://docbook.org/ns/docbook" fileref="header-config-en.png" scalefit="0"/></imageobject></mediaobject>
 			<sect3 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 				<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">General 
 				settings</title>
@@ -737,7 +737,7 @@ barcodescanner1.company.com,Device3</programlisting>
 			data updates from the plc or acknowledge incoming data. It is not 
 			designed for transferring large amounts of data (though this is 
 			possibly using the ByteString data type).</simpara>
-			<mediaobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><imageobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><imagedata xmlns="http://docbook.org/ns/docbook" fileref="image_en/writeback-config-en.png" scalefit="0"/></imageobject></mediaobject>
+			<mediaobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><imageobject xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"><imagedata xmlns="http://docbook.org/ns/docbook" fileref="writeback-config-en.png" scalefit="0"/></imageobject></mediaobject>
 			<sect3 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 				<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Configuration</title>
 				<variablelist xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
