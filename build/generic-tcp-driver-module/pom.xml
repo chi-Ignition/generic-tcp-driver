@@ -67,7 +67,7 @@
 							<moduleId>chitek.generictcpdriver</moduleId>
 		                    <moduleName>Generic Tcp Driver</moduleName>
 		                    <moduleDescription>A generic TCP client or server driver.</moduleDescription>
-		                    <moduleVersion>${project.version}</moduleVersion>
+		                    <moduleVersion>${project.version}.${git.commit.time}</moduleVersion>
 		                    <requiredIgnitionVersion>7.9.0</requiredIgnitionVersion>
 		                    <requiredFrameworkVersion>7</requiredFrameworkVersion>
 		                    <licenseFile>license.html</licenseFile>
