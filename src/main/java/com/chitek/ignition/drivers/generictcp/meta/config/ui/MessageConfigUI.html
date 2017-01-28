@@ -17,7 +17,7 @@
 					</thead>
 					<tbody>
 						<tr>
-							<td class="trow-title">
+							<td class="trow-title">EIn Test
 								<wicket:message key="messageIdType.DisplayName">messageId</wicket:message></td>
 							<td class="trow-body">
 								<select class="headeritem" wicket:id="messageIdType" />
@@ -38,10 +38,10 @@
 								<wicket:message key="selectMessageLabel">selectMessage</wicket:message>
 							</td>
 							<td class="trow-body">
-								<select style="width: 15em;" wicket:id="currentMessage" />
-								<input wicket:id="new" type="button" wicket:message="value:submit.new,title:submit.newTitle" />
-								<input wicket:id="copy" type="button" wicket:message="value:submit.copy,title:submit.copyTitle" />
-								<input wicket:id="delete" type="button" wicket:message="value:submit.delete,title:submit.deleteTitle" />
+								<select style="width: 15em; display: inline;" wicket:id="currentMessage" />
+								<input class="gentcp_table_btn" wicket:id="new" type="button" wicket:message="value:submit.new,title:submit.newTitle" />
+								<input class="gentcp_table_btn" wicket:id="copy" type="button" wicket:message="value:submit.copy,title:submit.copyTitle" />
+								<input class="gentcp_table_btn" wicket:id="delete" type="button" wicket:message="value:submit.delete,title:submit.deleteTitle" />
 							</td>
 						</tr>
 						<tr>
@@ -65,7 +65,7 @@
 					</tbody>
 				</table>
 
-				<table wicket:id="list-editor" class="actiontable" cellpadding="0" cellspacing="0">
+				<table wicket:id="list-editor" class="gentcpActiontable" cellpadding="0" cellspacing="0">
 					<thead>
 						<tr>
 							<td class="offset">

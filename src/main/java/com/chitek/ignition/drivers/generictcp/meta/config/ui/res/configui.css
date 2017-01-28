@@ -1,46 +1,57 @@
-table.actiontable tbody tr td {
+div#configcontents table.gentcpActiontable thead {
+	border: none;
+}
+
+div#configcontents table.gentcpActiontable thead tr td {
+	border: 1px solid gray;
+	background-color: #DDD;
+}
+
+
+div#configcontents table.gentcpActiontable tbody tr td {
+	border: 1px solid gray;
 	vertical-align: middle;
 	padding: 4px 6px;
 }
 
 /* Show message alias with dark background  */
-table.actiontable tbody td.noedit {
+div#configcontents table.gentcpActiontable tbody td.noedit {
 	background-color: #DDD;
 	color: #000;
 	font-weight: bold;
 }
 
 /* Fixed width for Offset column */
-table.actiontable td.offset {
+table.gentcpActiontable td.offset {
 	width: 5ex;
 }
 
 /* The action links with images */
-table.actiontable td.links {
+div#configcontents table.gentcpActiontable td.links {
 	padding: 0px;
 	width: 22px;
 	background-color: transparent;
 	border: none;
 }
-td.links a {
+table.gentcpActiontable td.links a {
  background-repeat: no-repeat;
  background-position: center;
  padding-right: 2px;
  padding-left: 16px;
 }
-td.links a:hover {
+table.gentcpActiontable td.links a:hover {
  border-bottom: 2px solid;
 }
-a.insert-link {
+table.gentcpActiontable a.insert-link {
  background-image: url('row_insert.png');
 }
-a.delete-link {
+table.gentcpActiontable a.delete-link {
  background-image: url('row_delete.png');
 }
-a.move-up-link {
+table.gentcpActiontable a.move-up-link {
  background-image: url('row_up.png');
 }
-a.move-down-link {
+table.gentcpActiontable a.move-down-link {
  background-image: url('row_down.png');
 }
 span.importlink
@@ -57,6 +68,24 @@ div.ajax-indicator {
 	background-image: url('indicator.gif');
 	background-repeat: no-repeat;
 	background-position: center center;
+}
+
+div#configcontents select {
+	height: 30px;
+	margin: 0px 0px;
+}
+
+div#configcontents input[type=button].gentcp_table_btn {
+	margin-left: 5px;
+	margin-right: 5px;
+	padding: 0.2rem 0.3rem;
+	float: none;
+	background-color:red;
+}
+
+div#configcontents input, div#configcontents select {
+	height: 30px;
+	margin: 0px 0px;
 }
 
 /* The help link */
