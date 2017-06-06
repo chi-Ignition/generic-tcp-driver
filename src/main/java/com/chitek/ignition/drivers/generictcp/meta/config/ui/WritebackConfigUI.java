@@ -159,10 +159,11 @@ public class WritebackConfigUI extends AbstractConfigUI<WritebackConfig> {
 				Component prefixTextField = getComponent().getParent().get("prefix");
 				if (value && !prefixTextField.isEnabled()) {
 					prefixTextField.setEnabled(true);
-				} else {
+					target.add(prefixTextField);
+				} else if (!value) {
 					prefixTextField.setEnabled(false);
+					target.add(prefixTextField);
 				}
-				target.add(prefixTextField);
 			}
 		});
 
