@@ -118,6 +118,10 @@ public class MessageHeader {
 	 */
 	public boolean evaluateHeader(final byte[] message) {
 
+		if (log.isTraceEnabled()) {
+			log.trace(String.format("Evaluating header: %s", Util.byteArray2HexString(message)));
+		}
+		
 		// Read the packetSize first
 		packetSize = byteOrder.equals(ByteOrder.LITTLE_ENDIAN) ? (int) ((message[packetSizeTag.getOffset() + 1] & 0xff << 8) | (message[packetSizeTag.getOffset() & 0xff]))
 				: (int) ((message[packetSizeTag.getOffset()] & 0xff << 8) | (message[packetSizeTag.getOffset() + 1] & 0xff));
@@ -126,9 +130,9 @@ public class MessageHeader {
 		if (config.isSizeIncludesHeader() && packetSize < config.getHeaderSize()) {
 			headerValid = false;
 			if (log.isDebugEnabled()) {
-				log.debug(String.format("Header invalid. Received packet size %d is shorter that header length.", packetSize));
+				log.debug(String.format("Header invalid. Received packet size %d is shorter than header length.", packetSize));
 			}
-			// We return the header length here, as this is the amoutn of bytes to discard
+			// We return the header length here, as this is the amount of bytes to discard
 			packetSize = message.length;
 			return false;		
 		}
@@ -226,8 +230,8 @@ public class MessageHeader {
 				log.debug("Stacktrace:", ex);
 		}
 
-		if (log.isTraceEnabled())
-			log.trace(String.format("Message header evaluated. Message length: %d - Timestamp: %d - Message Valid: %b", packetSize, headerTimestamp, headerValid));
+		if (log.isDebugEnabled())
+			log.debug(String.format("Message header evaluated. Packet length: %d - Timestamp: %d - Header Valid: %b", packetSize, headerTimestamp, headerValid));
 
 		return headerValid;
 	}
