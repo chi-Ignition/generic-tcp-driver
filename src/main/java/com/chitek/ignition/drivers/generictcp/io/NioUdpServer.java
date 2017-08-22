@@ -191,7 +191,9 @@ public class NioUdpServer implements Runnable, NioServer {
 	 * @return The count of connected client sockets.
 	 */
 	public int getConnectedClientCount() {
-		return clientMap.size();
+		synchronized(clientMap) {
+			return clientMap.size();
+		}
 	}
 
 	/**
@@ -215,24 +217,25 @@ public class NioUdpServer implements Runnable, NioServer {
 		
 		// Check if we already know this client
 		if (!clientMap.containsKey(remoteSocket)) {
-			
-			// Check if there is already a connection from this remote address
-			for (InetSocketAddress existingSocket : clientMap.keySet()) {
-				if (existingSocket.getAddress().equals(remoteSocket.getAddress())) {
-					log.debug(String.format("New connection from client %s. Replacing existing connection.", remoteSocket));
-					disposeClientChannel(existingSocket);
-					break;
+			synchronized (clientMap) {
+				// Check if there is already a connection from this remote address
+				for (InetSocketAddress existingSocket : clientMap.keySet()) {
+					if (existingSocket.getAddress().equals(remoteSocket.getAddress())) {
+						log.debug(String.format("New connection from client %s. Replacing existing connection.", remoteSocket));
+						disposeClientChannel(existingSocket);
+						break;
+					}
 				}
-			}
-			
-			clientMap.put(remoteSocket, remoteSocket);
-			boolean accept = eventHandler.clientConnected(remoteSocket);
-			if (accept) {
-				log.debug(String.format("Remote client %s connected.", remoteSocket));
-			} else {
-				clientMap.remove(remoteSocket);
-				log.debug(String.format("Remote client %s not accepted.", remoteSocket));
-				return;
+
+				clientMap.put(remoteSocket, remoteSocket);
+				boolean accept = eventHandler.clientConnected(remoteSocket);
+				if (accept) {
+					log.debug(String.format("Remote client %s connected.", remoteSocket));
+				} else {
+					clientMap.remove(remoteSocket);
+					log.debug(String.format("Remote client %s not accepted.", remoteSocket));
+					return;
+				}
 			}
 		}
 
