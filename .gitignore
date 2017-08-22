@@ -2,5 +2,5 @@
 .project
 .classpath
 /target
-/build/generic-tcp-driver-module/doc/
-/build/generic-tcp-driver-gateway/target/
+/build/
+/logs/
