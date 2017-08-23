@@ -123,8 +123,9 @@ public class MessageHeader {
 		}
 		
 		// Read the packetSize first
-		packetSize = byteOrder.equals(ByteOrder.LITTLE_ENDIAN) ? (int) ((message[packetSizeTag.getOffset() + 1] & 0xff << 8) | (message[packetSizeTag.getOffset() & 0xff]))
-				: (int) ((message[packetSizeTag.getOffset()] & 0xff << 8) | (message[packetSizeTag.getOffset() + 1] & 0xff));
+		packetSize = byteOrder.equals(ByteOrder.LITTLE_ENDIAN) 
+				? (int) (((message[packetSizeTag.getOffset() + 1] & 0xff) << 8) | (message[packetSizeTag.getOffset() & 0xff]))
+				: (int) (((message[packetSizeTag.getOffset()] & 0xff) << 8) | (message[packetSizeTag.getOffset() + 1] & 0xff));
 
 		// Check if packet size is valid
 		if (config.isSizeIncludesHeader() && packetSize < config.getHeaderSize()) {
@@ -146,8 +147,9 @@ public class MessageHeader {
 				value = message[firstFixedTag.getOffset()] & 0xff;
 				break;
 			case Word:
-				value = byteOrder.equals(ByteOrder.LITTLE_ENDIAN) ? (int) ((message[firstFixedTag.getOffset() + 1] & 0xff << 8) | (message[firstFixedTag.getOffset()] & 0xff))
-						: (int) ((message[firstFixedTag.getOffset()] & 0xff << 8) | (message[firstFixedTag.getOffset() + 1] & 0xff));
+				value = byteOrder.equals(ByteOrder.LITTLE_ENDIAN) 
+					? (int) (((message[firstFixedTag.getOffset() + 1] & 0xff) << 8) | (message[firstFixedTag.getOffset()] & 0xff))
+					: (int) (((message[firstFixedTag.getOffset()] & 0xff) << 8) | (message[firstFixedTag.getOffset() + 1] & 0xff));
 				break;
 			default:
 				value = 0;

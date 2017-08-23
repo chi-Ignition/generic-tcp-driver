@@ -98,6 +98,15 @@ public class TestMessageState {
 	}
 	
 	@Test
+	public void testPacketSize() throws Exception {
+		MessageState state = new MessageState(remoteSocket, null, messageHeader, driverConfig, driverSettings);
+		ByteBuffer data = ByteBuffer.wrap(new byte[] { (byte) 1, (byte) 100, 0, 2 });
+		state.addData(data);
+		assertFalse("Header should be invalid (fixed value mismatch)", state.isHeaderValid());
+		assertEquals("PacketSize", 356 - 4, state.getPendingBytes());
+	}
+	
+	@Test
 	public void testPacketSizeUnsigned() throws Exception {
 		MessageState state = new MessageState(remoteSocket, null, messageHeader, driverConfig, driverSettings);
 		ByteBuffer data = ByteBuffer.wrap(new byte[] { (byte) 255, (byte) 255, 0, 2 });
@@ -109,11 +118,11 @@ public class TestMessageState {
 	@Test
 	public void testFixedWord() throws Exception {
 		HeaderConfig headerConfig = TestUtils.readHeaderConfig("/testHeaderConfig.xml");
-		headerConfig.getTags().get(1).setRawValue("65530");
+		headerConfig.getTags().get(1).setRawValue("31399");
 		messageHeader = new MessageHeader(headerConfig, ByteOrder.BIG_ENDIAN);
 		
 		MessageState state = new MessageState(remoteSocket, null, messageHeader, driverConfig, driverSettings);
-		ByteBuffer data = ByteBuffer.wrap(new byte[] { 0, 8, (byte) 0xff, (byte) 0xfa });
+		ByteBuffer data = ByteBuffer.wrap(new byte[] { 0, 8, (byte) 0x7a, (byte) 0xa7 });
 		state.addData(data);
 		assertTrue("Header should be valid", state.isHeaderValid());
 		assertEquals("PacketSize", 4, state.getPendingBytes());
