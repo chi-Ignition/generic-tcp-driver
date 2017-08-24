@@ -1,5 +1,7 @@
 package com.chitek.ignition.drivers.generictcp.folder;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -7,10 +9,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.inductiveautomation.ignition.common.execution.SchedulingController;
 import com.inductiveautomation.ignition.common.execution.SelfSchedulingRunnable;
 import com.inductiveautomation.opcua.types.DataValue;
@@ -40,7 +44,9 @@ public class SubscriptionUpdater implements SelfSchedulingRunnable {
 
 	private final List<SubscriptionTransaction> transactions = new LinkedList<SubscriptionTransaction>();
 	private final Map<String, AggregateSubscriptionItem> items = new HashMap<String, AggregateSubscriptionItem>();
-
+	/* Subscriptions that are used as a trigger (e.g. _MessageCount). Those items must be updated last after all data items */
+	private final List<AggregateSubscriptionItem> specialItems = new ArrayList<AggregateSubscriptionItem>();
+	
 	public SubscriptionUpdater(Lock tagLock, Logger log, ISubscriptionChangeListener listener) {
 		this.log = Logger.getLogger(String.format("%s.Subscription", log.getName()));
 		this.tagLock = tagLock;
@@ -82,14 +88,32 @@ public class SubscriptionUpdater implements SelfSchedulingRunnable {
 		synchronized (this.items) {
 			for (SubscriptionItem item : added) {
 				String address = item.getAddress();
-				AggregateSubscriptionItem aggregate = items.get(address);
+				AggregateSubscriptionItem aggregate;
+				aggregate = items.get(address);
 				if (aggregate == null) {
-					if (log.isTraceEnabled()) {
-						log.trace("Creating AggregateSubscriptionItem for " + address);
+					// Maybe it's a special item
+					for (AggregateSubscriptionItem asi:specialItems) {
+						if (asi.getAddress().equals(address)) {
+							aggregate = asi;
+							break;
+						}
+					}	
+				}
+				if (aggregate == null) {
+					if (log.isDebugEnabled()) {
+						log.debug("Creating AggregateSubscriptionItem for " + address);
 					}
 					aggregate = new AggregateSubscriptionItem(item);
 					aggregate.setAddressObject(item.getAddressObject());
-					items.put(address, aggregate);
+					if (address.endsWith(MessageFolder.TIMESTAMP_TAG_NAME) 
+							|| address.endsWith(MessageFolder.MESSAGE_COUNT_TAG_NAME)
+							|| address.endsWith(MessageFolder.QUEUE_SIZE_TAG_NAME)) {
+						// Trigger items are stored separate, they have to be updated after all other items
+						specialItems.add(aggregate);
+						specialItems.sort(ItemComparator);
+					} else {
+						items.put(address, aggregate);
+					}
 				} else {
 					aggregate.addItem(item);
 					if (this.log.isTraceEnabled()) {
@@ -104,7 +128,17 @@ public class SubscriptionUpdater implements SelfSchedulingRunnable {
 		synchronized (this.items) {
 			for (SubscriptionItem item : removed) {
 				String address = item.getAddress();
-				AggregateSubscriptionItem aggregate = items.get(address);
+				AggregateSubscriptionItem aggregate;
+				aggregate = items.get(address);
+				if (aggregate == null) {
+					// Maybe it's a special item
+					for (AggregateSubscriptionItem asi:specialItems) {
+						if (asi.getAddress().equals(address)) {
+							aggregate = asi;
+							break;
+						}
+					}	
+				}
 				if (aggregate == null) {
 					log.warn(String.format("Tried to unsubscribe item %s that was not subscribed.", address));
 				} else {
@@ -112,10 +146,12 @@ public class SubscriptionUpdater implements SelfSchedulingRunnable {
 					if (this.log.isTraceEnabled()) {
 						this.log.trace(String.format("Removed item %s from AggregateSubscriptionItem. Count now %d", address, aggregate.getItems().size()));
 					}
-					if (aggregate.isEmpty())
-						this.items.remove(address);
-					if (this.log.isTraceEnabled()) {
-						this.log.trace(String.format("Removed empty AggregateSubscriptionItem for item %s.", address));
+					if (aggregate.isEmpty()) {
+						if (this.items.remove(address) == null)
+							this.specialItems.remove(aggregate);
+						if (this.log.isDebugEnabled()) {
+							this.log.debug(String.format("Removed empty AggregateSubscriptionItem for item %s.", address));
+						}
 					}
 				}
 			}
@@ -151,7 +187,7 @@ public class SubscriptionUpdater implements SelfSchedulingRunnable {
 
 		try {
 			int samplingRate = Integer.MAX_VALUE;
-			for (SubscriptionItem item : items.values()) {
+			for (SubscriptionItem item : Iterables.concat(items.values(), specialItems)) {
 				DynamicDriverTag tag = (DynamicDriverTag) item.getAddressObject();
 				DataValue value;
 				if (tag != null) {
@@ -177,7 +213,7 @@ public class SubscriptionUpdater implements SelfSchedulingRunnable {
 			
 			if (subscriptionChanged) {
 				// Copy the addresses before passing to the listener
-				Set<String> addresses = ImmutableSet.copyOf(items.keySet());
+				Set<String> addresses = ImmutableSet.copyOf(Iterables.concat(items.keySet(), specialItems.stream().map(item -> item.getAddress()).collect(Collectors.toList()) ));
 				subscriptionChangeListener.subscriptionChanged(subscriptionRate, addresses);
 			}
 			
@@ -206,4 +242,19 @@ public class SubscriptionUpdater implements SelfSchedulingRunnable {
 			this.toRemove = toRemove;
 		}
 	}
+	
+	private static Comparator<AggregateSubscriptionItem> ItemComparator = new Comparator<AggregateSubscriptionItem>() {
+		@Override
+		public int compare(AggregateSubscriptionItem o1, AggregateSubscriptionItem o2) {
+			return getOrder(o1.getAddress())-getOrder(o2.getAddress());
+		}
+		
+		private int getOrder(String address) {
+			// sort order - message count is always the last after the timestamp
+			if (address.endsWith(MessageFolder.MESSAGE_COUNT_TAG_NAME)) return 10;
+			if (address.endsWith(MessageFolder.TIMESTAMP_TAG_NAME)) return 5;
+			return 0;
+		}
+	};
+	
 }
