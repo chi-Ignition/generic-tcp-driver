@@ -59,6 +59,10 @@ public abstract class MessageFolder implements ISubscriptionChangeListener{
 
 	protected static final DataValue EMPTY_STRING_VALUE = new DataValue(new Variant(""));
 	public static final String UPDATER_COMMAND_NAME = "subscriptions";
+	public static final String TIMESTAMP_TAG_NAME = "/_Timestamp";
+	public static final String MESSAGE_COUNT_TAG_NAME = "/_MessageCount";
+	public static final String HANDSHAKE_TAG_NAME = "/_Handshake";
+	public static final String QUEUE_SIZE_TAG_NAME = "/_QueueSize";
 
 	/**
 	 * Mapping of address strings to driver tags

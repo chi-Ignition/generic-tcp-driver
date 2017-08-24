@@ -320,8 +320,8 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 			// Add message to queue
 			synchronized (queueLock) {
 				if (queue.size()>MAX_QUEUE_SIZE) {
-					pollMessageFromQueue();
 					log.error("Maximum queue size exceeded, discarding oldest message.");
+					pollMessageFromQueue(false);	
 				}
 				addMessageToQueue(message);
 
@@ -366,7 +366,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 
 				// In delayed mode, evaluate next message after the given time
 				if (queueMode == QueueMode.DELAYED && delayActive) {
-					delaySchedule=getDriverContext().executeOnce(new queueDelay(), subscriptionRate*3, TimeUnit.MILLISECONDS);
+					delaySchedule=getDriverContext().executeOnce(new queueDelay(), subscriptionRate*2, TimeUnit.MILLISECONDS);
 				}
 			} else {
 				// No message queued
@@ -383,10 +383,13 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 
 		// This method executes in the run() method of our SubscriptionUpdater
 		
+		if (log.isDebugEnabled())
+			log.debug(String.format("Subscription changed. New rate:%dms, items:%d", rate, itemAddresses.size()));
+		
 		subscriptionPresent = false;
 		if (itemAddresses.size() > 0) {
 			for (String itemAddress : itemAddresses) {
-				if (itemAddress.endsWith("_Timestamp") || itemAddress.endsWith("_MessageCount")) {
+				if (itemAddress.endsWith(TIMESTAMP_TAG_NAME) || itemAddress.endsWith(MESSAGE_COUNT_TAG_NAME)) {
 					subscriptionPresent = true;
 					break;
 				}
@@ -419,7 +422,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 		public void run() {
 			// Remove the acknowledged message from queue and evaluate the next one
 			if (delayActive)
-				pollMessageFromQueue();
+				pollMessageFromQueue(true);
 		}
 	}
 
@@ -740,7 +743,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 	protected void addDefaultTags(String folderName) {
 
 		// Special tags
-		DynamicDriverTag driverTag = new DynamicDriverTag(folderName + "/_Timestamp", DataType.DateTime) {
+		DynamicDriverTag driverTag = new DynamicDriverTag(folderName + TIMESTAMP_TAG_NAME, DataType.DateTime) {
 			@Override
 			public DataValue getValue() {
 				return timestampValue;
@@ -749,7 +752,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 		buildAndAddNode(driverTag).setValue(driverTag.getValue());
 
 		// MessageCount
-		driverTag = new DynamicDriverTag(folderName + "/_MessageCount", DataType.UInt32) {
+		driverTag = new DynamicDriverTag(folderName + MESSAGE_COUNT_TAG_NAME, DataType.UInt32) {
 			@Override
 			public DataValue getValue() {
 				return messageCountValue;
@@ -759,7 +762,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 
 		// Writable handshake tag
 		if (queueMode==QueueMode.HANDSHAKE) {
-			WritableTag handshakeTag = new WritableTag(folderName + "/_Handshake", DataType.Boolean) {
+			WritableTag handshakeTag = new WritableTag(folderName + HANDSHAKE_TAG_NAME, DataType.Boolean) {
 				@Override
 				public StatusCode setValue(DataValue paramDataValue) {
 					boolean newValue;
@@ -789,7 +792,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 						log.debug(String.format("Handshake for message id %d set by client", getFolderId()));
 
 					// Remove the acknowledged message from queue and evaluate the next one
-					pollMessageFromQueue();
+					pollMessageFromQueue(true);
 
 					return StatusCode.GOOD;
 				}
@@ -805,7 +808,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 
 		if (queueMode != QueueMode.NONE) {
 			// QueueSize
-			driverTag = new DynamicDriverTag(folderName + "/_QueueSize", DataType.UInt32) {
+			driverTag = new DynamicDriverTag(folderName + QUEUE_SIZE_TAG_NAME, DataType.UInt32) {
 				@Override
 				public DataValue getValue() {
 					return queueSizeValue;
@@ -819,7 +822,12 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 		return configHash;
 	}
 
-	private void pollMessageFromQueue() {
+	/**
+	 * 
+	 * @param evaluateNext
+	 * 	true - evaluate next message in queue
+	 */
+	private void pollMessageFromQueue(boolean evaluate) {
 		// Remove message from queue
 		synchronized (queueLock) {
 			byte[] removed =queue.peek();
@@ -837,12 +845,14 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 		}
 
 		// Start asynchronous evaluation of new message
-		getDriverContext().executeOnce(new Runnable() {
-			@Override
-			public void run() {
-				evaluateQueuedMessage();
-			}
-		});
+		if (evaluate) {
+			getDriverContext().executeOnce(new Runnable() {
+				@Override
+				public void run() {
+					evaluateQueuedMessage();
+				}
+			});
+		}
 	}
 
 	/**
