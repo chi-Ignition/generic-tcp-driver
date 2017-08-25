@@ -28,7 +28,7 @@ import com.inductiveautomation.xopc.driver.api.tags.DynamicDriverTag;
  */
 public class SubscriptionUpdater implements SelfSchedulingRunnable {
 
-	public final static int RESCHEDULE_RATE = 100;
+	public final static int RESCHEDULE_RATE = 250;
 	private final static DataValue DATAVALUE_ERROR = new DataValue(StatusCode.BAD_INTERNAL_ERROR);
 
 	private final Logger log;
@@ -39,6 +39,7 @@ public class SubscriptionUpdater implements SelfSchedulingRunnable {
 	private final ISubscriptionChangeListener subscriptionChangeListener;
 
 	private SchedulingController schedulingController;
+	private long nextExecTime = 0;
 
 	private volatile long subscriptionRate = 0;
 
@@ -66,24 +67,28 @@ public class SubscriptionUpdater implements SelfSchedulingRunnable {
 			transactions.add(transaction);
 		}
 
+		nextExecTime=Math.min(nextExecTime, System.currentTimeMillis()+RESCHEDULE_RATE);
 		schedulingController.requestReschedule(this);
 	}
 
 	@Override
 	public long getNextExecDelayMillis() {
-		synchronized (transactions) {
-			if (!transactions.isEmpty()) {
-				// There are subscription changes to process, do that soon.
-				if (subscriptionRate > 0 && subscriptionRate < RESCHEDULE_RATE) {
-					return subscriptionRate;
-				} else {
-					return RESCHEDULE_RATE;
-				}
-			}
+
+		if (nextExecTime>0) {
+			return nextExecTime-System.currentTimeMillis();
 		}
-		return subscriptionRate;
+		else 
+			return 0;
 	}
 
+	/**
+	 * Called by the message folder in queue mode to synchronize the subscription update
+	 */
+	public void syncExecution() {
+		nextExecTime=System.currentTimeMillis()+5;
+		schedulingController.requestReschedule(this);
+	}
+	
 	private void addSubscriptionItems(List<? extends SubscriptionItem> added) {
 		synchronized (this.items) {
 			for (SubscriptionItem item : added) {
@@ -165,6 +170,7 @@ public class SubscriptionUpdater implements SelfSchedulingRunnable {
 
 	@Override
 	public void run() {
+		nextExecTime=System.currentTimeMillis()+subscriptionRate;
 		tagLock.lock();
 
 		boolean subscriptionChanged = false;
@@ -209,6 +215,7 @@ public class SubscriptionUpdater implements SelfSchedulingRunnable {
 					log.debug(String.format("Subscription rate changed from %d to %d", subscriptionRate, samplingRate));
 				}
 				subscriptionRate = samplingRate;
+				nextExecTime=System.currentTimeMillis()+subscriptionRate;
 			}
 			
 			if (subscriptionChanged) {

@@ -374,8 +374,10 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 			}
 		}
 
-		if (message != null)
+		if (message != null) {
 			evaluateMessage(message);
+			subscriptionUpdater.syncExecution();
+		}
 	}
 
 	@Override
