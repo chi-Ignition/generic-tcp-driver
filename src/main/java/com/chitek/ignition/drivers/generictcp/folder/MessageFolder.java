@@ -85,7 +85,7 @@ public abstract class MessageFolder implements ISubscriptionChangeListener{
 	 */
 	protected Lock tagLock;
 
-	private SubscriptionUpdater subscriptionUpdater;
+	protected SubscriptionUpdater subscriptionUpdater;
 
 	/**
 	 * 
