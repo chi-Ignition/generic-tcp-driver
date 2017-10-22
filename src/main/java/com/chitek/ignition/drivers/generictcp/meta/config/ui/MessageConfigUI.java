@@ -640,16 +640,17 @@ public class MessageConfigUI extends AbstractConfigUI<DriverConfig> implements I
 				// Current state is determined by the enabled state of TextField("id")
 				DropDownChoice<BinaryDataType> choice = (DropDownChoice<BinaryDataType>) getComponent();
 				MarkupContainer parent = choice.getParent();
-				Component idTextField = parent.get("id");
+				TextField<Integer> idTextField = (TextField<Integer>) parent.get("id");
 				BinaryDataType dataType = choice.getConvertedInput();
-				if (dataType.isSpecial() && idTextField.isEnabled()) {
+				boolean isSpecialIdTextField = !(idTextField.getValidators().get(0) instanceof CompoundValidator);	// Type of validator is used do determine which text field is active
+				if (dataType.isSpecial() && !isSpecialIdTextField) {
 					// DataType changed to special type
 					// Store current values
-					((TextField<Integer>) idTextField).getRawInput();
+					idTextField.getRawInput();
 					idTextField.replaceWith(getSpecialIdTextField().setEnabled(false));
 					target.add(parent.get("id"));
 					target.add(parent.get("alias").setVisible(false));
-				} else if (!idTextField.isEnabled()) {
+				} else if (!dataType.isSpecial() && isSpecialIdTextField) {
 					idTextField.replaceWith(getIdTextField());
 					target.add(parent.get("id").setEnabled(true));
 					target.add(parent.get("alias").setVisible(true));
