@@ -920,6 +920,9 @@ barcodescanner1.company.com,Device3</programlisting>
 						redundant systems, this tag will be reset to 0 when the active 
 						node changes.</simpara>
 						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">If 
+						using the queue mode &apos;Delayed&apos;, the driver waits for a subscription to this tag before queued 
+						messages are published to clients.</simpara>
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">If 
 						using the queue mode &apos;Handshake&apos; with a transaction 
 						group, it is recommended to use this tag as a trigger, because 
 						the current message may be republished after a failover, so the 
@@ -1082,7 +1085,7 @@ system.opc.writeValue(&apos;Ignition OPC-UA Server&apos;, &apos;[TCPBin][Status]
 			next message and resets the handshake tag.</para>
 			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
 			client should not use the _Handshake tag to detect a new message but 
-			use the Timestamp or MessageCount tag instead.</para>
+			use the _MessageCount tag instead.</para>
 			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Please 
 			note that the driver will not publish new messages if the client 
 			does not set the handshake. It may be a bad idea to use the 
@@ -1095,14 +1098,12 @@ system.opc.writeValue(&apos;Ignition OPC-UA Server&apos;, &apos;[TCPBin][Status]
 			Mode</title>
 			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">In 
 			this mode incoming messages are published to clients with a fixed 
-			delay. This delay is 3 times the fastest subscription rate for the 
+			delay. This delay is 2 times the fastest subscription rate for the 
 			respective message, so make sure to subscribe at least with about 
-			the triple rate of expected data changes.</para>
+			the double rate of expected data changes.</para>
 			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Publishing 
-			of messages in delayed mode starts when one of tags _Timestamp or 
-			_MessageCount are subscribed by a client. If there are no 
-			subscriptions, no messages are published. This makes sure that a 
-			client is connected before the driver start publishing 
+			of messages in delayed mode starts when the tag _MessageCount is subscribed by a client. If there are no 
+			subscriptions, no messages are published. This makes sure that a client is connected before the driver start publishing 
 			messages.</para>
 		</sect2>
 	</sect1>
