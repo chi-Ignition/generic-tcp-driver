@@ -13,7 +13,6 @@ import org.junit.rules.TemporaryFolder;
 
 import com.chitek.ignition.drivers.generictcp.folder.IndexMessageFolder;
 import com.chitek.ignition.drivers.generictcp.folder.MessageFolder;
-import com.chitek.ignition.drivers.generictcp.folder.SubscriptionUpdater;
 import com.chitek.ignition.drivers.generictcp.meta.config.DriverSettings;
 import com.chitek.ignition.drivers.generictcp.meta.config.MessageConfig;
 import com.chitek.ignition.drivers.generictcp.tests.MockDriverContext;
@@ -60,55 +59,14 @@ public class TestSubscription {
 		
 		SelfSchedulingRunnable subscriptionUpdater = driverContext.getSelfSchedulingRunnable(folder.getFolderAddress(), MessageFolder.UPDATER_COMMAND_NAME);
 		assertNotNull(subscriptionUpdater);
-		assertEquals("Expected subscription rate", SubscriptionUpdater.RESCHEDULE_RATE, subscriptionUpdater.getNextExecDelayMillis());
 	
 		// We have to run the subscription updater to update the subscriptions
 		subscriptionUpdater.run();
-		
-		// Next execution should be scheduled at the subscription rate
-		assertEquals("Expected subscription rate", 1000, subscriptionUpdater.getNextExecDelayMillis());
 
 		// The subscription item should have a valid value now
 		assertEquals("AB", subscriptionData1.getValue().getValue().getValue());
 	}
 
-
-	
-	@Test
-	public void testSubscriptionRate() throws Exception {
-		
-		List<SubscriptionItem> items = new ArrayList<SubscriptionItem>();
-		MockSubscriptionItem subscriptionData1 = new MockSubscriptionItem("Alias1/Data1", 1000);
-		items.add(subscriptionData1);
-		
-		folder.changeSubscription(items, null);
-		long rate = runUpdater();
-		
-		// Next execution should be scheduled at the subscription rate
-		assertEquals("Expected subscription rate", 1000, rate);
-
-		items = new ArrayList<SubscriptionItem>();
-		MockSubscriptionItem subscriptionData2 = new MockSubscriptionItem("Alias1/Data1", 500);
-		items.add(subscriptionData2);
-		
-		folder.changeSubscription(items, null);
-		rate = runUpdater();
-		
-		// Next execution should be scheduled at the new subscription rate
-		assertEquals("Expected subscription rate", 500, rate);
-		
-		// Both items should have a valid value
-		assertEquals("AB", subscriptionData1.getValue().getValue().getValue());
-		assertEquals("AB", subscriptionData2.getValue().getValue().getValue());
-		
-		// Remove the last added item subscriptionData2
-		folder.changeSubscription(null, items);
-		rate = runUpdater();
-		
-		// Next execution should be scheduled at the new subscription rate
-		assertEquals("Expected subscription rate", 1000, rate);
-	}
-	
 	@Test
 	public void testValueUpdates() throws Exception {
 		
@@ -136,6 +94,8 @@ public class TestSubscription {
 		SelfSchedulingRunnable subscriptionUpdater = driverContext.getSelfSchedulingRunnable(folder.getFolderAddress(), MessageFolder.UPDATER_COMMAND_NAME);
 	
 		// We have to run the subscription updater to update the subscriptions
+		subscriptionUpdater.run();
+		// The updater has to run twice, first run updates data items, second run updates special items
 		subscriptionUpdater.run();	
 		return subscriptionUpdater.getNextExecDelayMillis();
 	}

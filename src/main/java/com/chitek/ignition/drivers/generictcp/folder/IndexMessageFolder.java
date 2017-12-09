@@ -230,7 +230,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 		// Not active -> Active
 		if (queueMode!=QueueMode.NONE && isActive && !queueActive) {
 			if (log.isDebugEnabled()) {
-				log.debug(String.format("'%s' update driver state -> Active with Handshake.", FolderManager.folderIdAsString(getFolderId())));
+				log.debug(String.format("'%s' update driver state -> Active with Queue.", FolderManager.folderIdAsString(getFolderId())));
 			}
 			
 			queueSizeValue = new DataValue(new Variant(new UInt16(queue.size())));
@@ -370,13 +370,14 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 				}
 			} else {
 				// No message queued
+				if (log.isDebugEnabled())
+					log.debug("Message queue empty. Set handshake true");
 				handshakeValue = true;
 			}
 		}
 
 		if (message != null) {
 			evaluateMessage(message);
-			subscriptionUpdater.syncExecution();
 		}
 	}
 
@@ -391,7 +392,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 		subscriptionPresent = false;
 		if (itemAddresses.size() > 0) {
 			for (String itemAddress : itemAddresses) {
-				if (itemAddress.endsWith(TIMESTAMP_TAG_NAME) || itemAddress.endsWith(MESSAGE_COUNT_TAG_NAME)) {
+				if (itemAddress.endsWith(MESSAGE_COUNT_TAG_NAME)) {
 					subscriptionPresent = true;
 					break;
 				}
@@ -408,11 +409,11 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 					delaySchedule = null;
 				}
 				if (log.isDebugEnabled())
-					log.debug("Message has no subscriptions to _Timestamp or _MessageCount. Delayed queue mode cancelled.");
+					log.debug("Message has no subscriptions to _MessageCount. Delayed queue mode cancelled.");
 			}
 			if (subscriptionPresent && !delayActive) {
 				if (log.isDebugEnabled())
-					log.debug("Message _Timestamp or _MessageCount subscribed. Delayed queue mode activated.");
+					log.debug("_MessageCount subscribed. Delayed queue mode activated.");
 				delayActive = true;
 				evaluateQueuedMessage();
 			}
@@ -874,6 +875,9 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 
 			if (handshakeValue && queueActive) {
 				// Evaluate message immediately if handshake is already set
+				if (log.isDebugEnabled()) {
+					log.debug("Handshake is true. Evaluate queued message without delay");
+				}
 				handshakeValue = false;
 				// Start asynchronous evaluation of queued message
 				getDriverContext().executeOnce(new Runnable() {

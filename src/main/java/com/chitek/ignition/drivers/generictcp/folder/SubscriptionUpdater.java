@@ -1,26 +1,22 @@
 package com.chitek.ignition.drivers.generictcp.folder;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.locks.Lock;
-import java.util.stream.Collectors;
-
 import org.apache.log4j.Logger;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
+import com.google.common.collect.ImmutableSet.Builder;
 import com.inductiveautomation.ignition.common.execution.SchedulingController;
 import com.inductiveautomation.ignition.common.execution.SelfSchedulingRunnable;
 import com.inductiveautomation.opcua.types.DataValue;
 import com.inductiveautomation.opcua.types.StatusCode;
 import com.inductiveautomation.xopc.driver.api.AggregateSubscriptionItem;
 import com.inductiveautomation.xopc.driver.api.items.SubscriptionItem;
+import com.inductiveautomation.xopc.driver.api.tags.DriverTag;
 import com.inductiveautomation.xopc.driver.api.tags.DynamicDriverTag;
 
 /**
@@ -29,6 +25,8 @@ import com.inductiveautomation.xopc.driver.api.tags.DynamicDriverTag;
 public class SubscriptionUpdater implements SelfSchedulingRunnable {
 
 	public final static int RESCHEDULE_RATE = 250;
+	/** Delay for updating special items subscription **/
+	public final static int SUBSCRIPTION_DELAY = 25;
 	private final static DataValue DATAVALUE_ERROR = new DataValue(StatusCode.BAD_INTERNAL_ERROR);
 
 	private final Logger log;
@@ -40,13 +38,17 @@ public class SubscriptionUpdater implements SelfSchedulingRunnable {
 
 	private SchedulingController schedulingController;
 	private long nextExecTime = 0;
+	private long nextExecTimeData = 0;
+	private boolean sendSpecialItems;
 
+	private volatile long newSubscriptionRate = 0;
 	private volatile long subscriptionRate = 0;
 
 	private final List<SubscriptionTransaction> transactions = new LinkedList<SubscriptionTransaction>();
 	private final Map<String, AggregateSubscriptionItem> items = new HashMap<String, AggregateSubscriptionItem>();
-	/* Subscriptions that are used as a trigger (e.g. _MessageCount). Those items must be updated last after all data items */
-	private final List<AggregateSubscriptionItem> specialItems = new ArrayList<AggregateSubscriptionItem>();
+	/* Subscriptions that is used as a trigger (_MessageCount). This items must be updated last after all data items */
+	private AggregateSubscriptionItem messageCountItem = null;
+	private volatile DataValue messageCountValue = null;
 	
 	public SubscriptionUpdater(Lock tagLock, Logger log, ISubscriptionChangeListener listener) {
 		this.log = Logger.getLogger(String.format("%s.Subscription", log.getName()));
@@ -74,21 +76,15 @@ public class SubscriptionUpdater implements SelfSchedulingRunnable {
 	@Override
 	public long getNextExecDelayMillis() {
 
-		if (nextExecTime>0) {
-			return nextExecTime-System.currentTimeMillis();
+		long time = System.currentTimeMillis();
+		long delay = nextExecTime>0?Math.max(5,nextExecTime-time):5;
+
+		if (log.isTraceEnabled()) {
+			log.trace(String.format("getNextExecDelay called at %s. Delay: %s", time, delay));
 		}
-		else 
-			return 0;
+		return delay;
 	}
 
-	/**
-	 * Called by the message folder in queue mode to synchronize the subscription update
-	 */
-	public void syncExecution() {
-		nextExecTime=System.currentTimeMillis()+5;
-		schedulingController.requestReschedule(this);
-	}
-	
 	private void addSubscriptionItems(List<? extends SubscriptionItem> added) {
 		synchronized (this.items) {
 			for (SubscriptionItem item : added) {
@@ -97,11 +93,9 @@ public class SubscriptionUpdater implements SelfSchedulingRunnable {
 				aggregate = items.get(address);
 				if (aggregate == null) {
 					// Maybe it's a special item
-					for (AggregateSubscriptionItem asi:specialItems) {
-						if (asi.getAddress().equals(address)) {
-							aggregate = asi;
-							break;
-						}
+					if (messageCountItem!=null && messageCountItem.getAddress().equals(address)) {
+						aggregate = messageCountItem;
+						break;
 					}	
 				}
 				if (aggregate == null) {
@@ -110,12 +104,9 @@ public class SubscriptionUpdater implements SelfSchedulingRunnable {
 					}
 					aggregate = new AggregateSubscriptionItem(item);
 					aggregate.setAddressObject(item.getAddressObject());
-					if (address.endsWith(MessageFolder.TIMESTAMP_TAG_NAME) 
-							|| address.endsWith(MessageFolder.MESSAGE_COUNT_TAG_NAME)
-							|| address.endsWith(MessageFolder.QUEUE_SIZE_TAG_NAME)) {
-						// Trigger items are stored separate, they have to be updated after all other items
-						specialItems.add(aggregate);
-						specialItems.sort(ItemComparator);
+					if (address.endsWith(MessageFolder.MESSAGE_COUNT_TAG_NAME)) {
+						// The message count Trigger item is stored separate, it has to be updated after all other items
+						messageCountItem=aggregate;
 					} else {
 						items.put(address, aggregate);
 					}
@@ -137,12 +128,10 @@ public class SubscriptionUpdater implements SelfSchedulingRunnable {
 				aggregate = items.get(address);
 				if (aggregate == null) {
 					// Maybe it's a special item
-					for (AggregateSubscriptionItem asi:specialItems) {
-						if (asi.getAddress().equals(address)) {
-							aggregate = asi;
-							break;
-						}
-					}	
+					if (messageCountItem!=null && messageCountItem.getAddress().equals(address)) {
+						aggregate = messageCountItem;
+						break;
+					}
 				}
 				if (aggregate == null) {
 					log.warn(String.format("Tried to unsubscribe item %s that was not subscribed.", address));
@@ -152,8 +141,10 @@ public class SubscriptionUpdater implements SelfSchedulingRunnable {
 						this.log.trace(String.format("Removed item %s from AggregateSubscriptionItem. Count now %d", address, aggregate.getItems().size()));
 					}
 					if (aggregate.isEmpty()) {
-						if (this.items.remove(address) == null)
-							this.specialItems.remove(aggregate);
+						if (this.items.remove(address) == null) {
+							// Aggregate is not in the items list - Must have been the _MessageCount
+							messageCountItem=null;
+						}
 						if (this.log.isDebugEnabled()) {
 							this.log.debug(String.format("Removed empty AggregateSubscriptionItem for item %s.", address));
 						}
@@ -170,60 +161,101 @@ public class SubscriptionUpdater implements SelfSchedulingRunnable {
 
 	@Override
 	public void run() {
-		nextExecTime=System.currentTimeMillis()+subscriptionRate;
+		
 		tagLock.lock();
 
-		boolean subscriptionChanged = false;
-		synchronized (transactions) {
-			if (!transactions.isEmpty()) {
-				Iterator<SubscriptionTransaction> it = transactions.iterator();
-				while (it.hasNext()) {
-					SubscriptionTransaction transaction = it.next();
-					it.remove();
-					if (transaction.toAdd != null && !transaction.toAdd.isEmpty()) {
-						addSubscriptionItems(transaction.toAdd);
-					}
-					if (transaction.toRemove != null && !transaction.toRemove.isEmpty()) {
-						removeSubscriptionItems(transaction.toRemove);
-					}
-				}
-				subscriptionChanged = true;
-			}
-		}
-
 		try {
-			int samplingRate = Integer.MAX_VALUE;
-			for (SubscriptionItem item : Iterables.concat(items.values(), specialItems)) {
-				DynamicDriverTag tag = (DynamicDriverTag) item.getAddressObject();
-				DataValue value;
-				if (tag != null) {
-					value = tag.getValue();
-				} else {
-					value = DATAVALUE_ERROR;
+			if (sendSpecialItems) {
+				sendSpecialItems = false;
+				if (messageCountItem != null) {
+					DataValue value = messageCountValue;
+					if (log.isTraceEnabled()) {
+						log.trace(String.format("Subscription updating special item %s Value:%s", messageCountItem.getAddress(), value.toString()));
+					}
+					messageCountItem.setValue(value);
+				}
+				
+				if (newSubscriptionRate != subscriptionRate) {
+					if (log.isDebugEnabled()) {
+						log.debug(String.format("Subscription rate changed from %d to %d", subscriptionRate, newSubscriptionRate));
+					}
+					subscriptionRate = newSubscriptionRate;
+					sendSpecialItems = false;
+					nextExecTimeData = System.currentTimeMillis() + subscriptionRate - SUBSCRIPTION_DELAY;
+				}
+				
+				nextExecTime = nextExecTimeData;
+				
+				if (log.isTraceEnabled()) {
+					log.trace(String.format("Special item subscriptions updated. Next exec: %s", nextExecTime));
+				}
+			} else {
+				nextExecTimeData = System.currentTimeMillis() + Math.max(subscriptionRate, 50);
+				// Update the special items in the next run
+				nextExecTime = System.currentTimeMillis() + SUBSCRIPTION_DELAY;
+				sendSpecialItems = true;
+
+				boolean subscriptionChanged = false;
+				synchronized (transactions) {
+					if (!transactions.isEmpty()) {
+						Iterator<SubscriptionTransaction> it = transactions.iterator();
+						while (it.hasNext()) {
+							SubscriptionTransaction transaction = it.next();
+							it.remove();
+							if (transaction.toAdd != null && !transaction.toAdd.isEmpty()) {
+								addSubscriptionItems(transaction.toAdd);
+							}
+							if (transaction.toRemove != null && !transaction.toRemove.isEmpty()) {
+								removeSubscriptionItems(transaction.toRemove);
+							}
+						}
+						subscriptionChanged = true;
+					}
 				}
 
+				newSubscriptionRate = Integer.MAX_VALUE;
+				for (SubscriptionItem item : items.values()) {
+					DynamicDriverTag tag = (DynamicDriverTag) item.getAddressObject();
+					DataValue value;
+					if (tag != null) {
+						value = tag.getValue();
+					} else {
+						value = DATAVALUE_ERROR;
+					}
+
+					if (log.isTraceEnabled()) {
+						log.trace(String.format("Subscription updating tag %s Value:%s", item.getAddress(), value.toString()));
+					}
+					item.setValue(value);
+					// The sampling rate is checked here as we have to iterate anyway.
+					newSubscriptionRate = Math.min(newSubscriptionRate, item.getSamplingRate());
+				}
+				
+				// Store value of _MessageCount tag
+				if (messageCountItem!=null) {
+					messageCountValue=((DriverTag) messageCountItem.getAddressObject()).getValue();
+				}
+
+				if (messageCountItem != null) {
+					// Check sampling rate for special items
+					newSubscriptionRate = Math.min(newSubscriptionRate, messageCountItem.getSamplingRate());
+				}
+
+				if (subscriptionChanged) {
+					// Copy the addresses before passing to the listener
+					Builder<String> b = ImmutableSet.builder();
+					b.addAll(items.keySet());
+					
+					if (messageCountItem != null)
+						b.add(messageCountItem.getAddress());
+					
+					subscriptionChangeListener.subscriptionChanged(newSubscriptionRate, b.build());
+				}
+				
 				if (log.isTraceEnabled()) {
-					log.trace(String.format("Subscription updating tag %s Value:%s", item.getAddress(), value.toString()));
+					log.trace(String.format("Data item subscriptions updated. SendSpecialItems: %s - Next exec: %s", sendSpecialItems, nextExecTime));
 				}
-				item.setValue(value);
-				// The sampling rate is checked here as we have to iterate anyway.
-				samplingRate = Math.min(samplingRate, item.getSamplingRate());
 			}
-			
-			if (samplingRate != subscriptionRate) {
-				if (log.isDebugEnabled()) {
-					log.debug(String.format("Subscription rate changed from %d to %d", subscriptionRate, samplingRate));
-				}
-				subscriptionRate = samplingRate;
-				nextExecTime=System.currentTimeMillis()+subscriptionRate;
-			}
-			
-			if (subscriptionChanged) {
-				// Copy the addresses before passing to the listener
-				Set<String> addresses = ImmutableSet.copyOf(Iterables.concat(items.keySet(), specialItems.stream().map(item -> item.getAddress()).collect(Collectors.toList()) ));
-				subscriptionChangeListener.subscriptionChanged(subscriptionRate, addresses);
-			}
-			
 		} catch (Exception ex) {
 			log.error("Exception in SubscriptionUpdater", ex);
 		} finally {
@@ -249,19 +281,5 @@ public class SubscriptionUpdater implements SelfSchedulingRunnable {
 			this.toRemove = toRemove;
 		}
 	}
-	
-	private static Comparator<AggregateSubscriptionItem> ItemComparator = new Comparator<AggregateSubscriptionItem>() {
-		@Override
-		public int compare(AggregateSubscriptionItem o1, AggregateSubscriptionItem o2) {
-			return getOrder(o1.getAddress())-getOrder(o2.getAddress());
-		}
-		
-		private int getOrder(String address) {
-			// sort order - message count is always the last after the timestamp
-			if (address.endsWith(MessageFolder.MESSAGE_COUNT_TAG_NAME)) return 10;
-			if (address.endsWith(MessageFolder.TIMESTAMP_TAG_NAME)) return 5;
-			return 0;
-		}
-	};
-	
+
 }
