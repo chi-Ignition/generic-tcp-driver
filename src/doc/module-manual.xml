@@ -920,13 +920,9 @@ barcodescanner1.company.com,Device3</programlisting>
 						redundant systems, this tag will be reset to 0 when the active 
 						node changes.</simpara>
 						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">If 
-						using the queue mode &apos;Delayed&apos;, the driver waits for a subscription to this tag before queued 
-						messages are published to clients.</simpara>
-						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">If 
-						using the queue mode &apos;Handshake&apos; with a transaction 
-						group, it is recommended to use this tag as a trigger, because 
-						the current message may be republished after a failover, so the 
-						timestamp or values may not change in this situation.</simpara>
+						using the queue mode &apos;Delayed&apos;, the driver waits for a 
+						subscription to this tag before queued messages are published to 
+						clients.</simpara>
 					</listitem>
 				</varlistentry>
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -935,8 +931,30 @@ barcodescanner1.company.com,Device3</programlisting>
 						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Writable 
 						handshake for synchronisation (see 
 						<link xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#secthandshakemode">Handshake 
-						Mode</link>). Only allowed value to write is 
-						&apos;True&apos;.</simpara>
+						Mode</link>). If a new message is ready to be read by a OPC-UA 
+						client, the _Handshake tag is set to the value of the 
+						_MessageCount tag. The clients sets _Handshake to 0 to confirm 
+						that the data has been processed.</simpara>
+						<simpara>If _Handshake or _MessageCount are subscribed, the 
+						driver will toggle the _Handshake tag to 0 after 5 subscription 
+						cycles if the client does not do so. After another 2 subscription 
+						cycles, the value is set back to the message count. This 
+						mechanism makes sure that an &apos;on-change&apos; in the 
+						connected client will not get stuck.</simpara>
+						<simpara>With Ignition transaction groups, it is recommended to 
+						use the _Handshake tag as a trigger in a run always expression 
+						with trigger condition &apos;is true&apos;:</simpara>
+						<informalexample>
+							<programlisting>hasChanged({[~]_Handshake}) 
+&amp;&amp; 
+{[~]_Handshake}!=0</programlisting>
+						</informalexample>
+						<simpara>To subscribe the _Handshake tag, check the &apos;Only 
+						evaluate when values have changed&apos; checkbox and select the 
+						handshake tag in the &apos;Tags to watch&apos; list.</simpara>
+						<simpara>To write the 0 back for confirmation, a triggered 
+						expression with a constant 0 value and the handshake tag as the 
+						write target can be used.</simpara>
 					</listitem>
 				</varlistentry>
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -1081,17 +1099,9 @@ system.opc.writeValue(&apos;Ignition OPC-UA Server&apos;, &apos;[TCPBin][Status]
 			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">HandshakeMode</title>
 			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="secthandshakemode">In 
 			this mode a special witeable tag _Handshake is added to the message. 
-			Once the handshake is set by the client, the driver publishes the 
-			next message and resets the handshake tag.</para>
-			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The 
-			client should not use the _Handshake tag to detect a new message but 
-			use the _MessageCount tag instead.</para>
-			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Please 
-			note that the driver will not publish new messages if the client 
-			does not set the handshake. It may be a bad idea to use the 
-			handshake mode with Ignitions 
-			<superscript xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">TM</superscript> 
-			default transaction group handshake.</para>
+			Once the handshake is reset to 0 by the client, the driver publishes 
+			the next message and sets the handshake tag to the same value as the 
+			_MessageCount tag.</para>
 		</sect2>
 		<sect2 xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
 			<title xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Delayed 
@@ -1101,14 +1111,19 @@ system.opc.writeValue(&apos;Ignition OPC-UA Server&apos;, &apos;[TCPBin][Status]
 			delay. This delay is 2 times the fastest subscription rate for the 
 			respective message, so make sure to subscribe at least with about 
 			the double rate of expected data changes.</para>
-			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
-			Example: A device with an internal data buffer send several data packets in a few milliseconds. Normally,
-			a connected OPC-UA client would only notice the last packet. In delayed mode, the packets are delivered to the client 
-			one by one, so that no data is missed. Of course this requires the client to process any change of the _MessageCount trigger tag
-			in a time shorter than the double subscription rate. If this can not be guaranteed, a handshake should be used.</para>
+			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Example: 
+			A device with an internal data buffer send several data packets in a 
+			few milliseconds. Normally, a connected OPC-UA client would only 
+			notice the last packet. In delayed mode, the packets are delivered 
+			to the client one by one, so that no data is missed. Of course this 
+			requires the client to process any change of the _MessageCount 
+			trigger tag in a time shorter than the double subscription rate. If 
+			this can not be guaranteed, a handshake should be used.</para>
 			<para xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Publishing 
-			of messages in delayed mode starts when the tag _MessageCount is subscribed by a client. If there are no 
-			subscriptions, no messages are published. This makes sure that a client is connected before the driver start publishing 
+			of messages in delayed mode or Handshake mode starts when the tag 
+			_MessageCount or _Handshake is subscribed by a client. If there are 
+			no subscriptions, no messages are published. This makes sure that a 
+			client is connected before the driver start publishing 
 			messages.</para>
 		</sect2>
 	</sect1>

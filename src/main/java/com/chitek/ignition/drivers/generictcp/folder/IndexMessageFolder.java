@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2013 C. Hiesserich
+ * Copyright 2012-2018 C. Hiesserich
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.chitek.ignition.drivers.generictcp.IGenericTcpDriverContext;
@@ -63,22 +61,22 @@ import com.inductiveautomation.xopc.driver.util.ByteUtilities;
  * 
  */
 public class IndexMessageFolder extends MessageFolder implements FolderStateProvider {
-	public final static String QUEUE_FILE_PREFIX="tcpBinMsgQueue";
-	public final static String QUEUE_FILE_EXTENSION=".que";
+	public final static String QUEUE_FILE_PREFIX = "tcpBinMsgQueue";
+	public final static String QUEUE_FILE_EXTENSION = ".que";
 	private final static int MAX_PENDING_MESSAGES = 15;
 	private static final int MAX_QUEUE_SIZE = 500;
 
 	protected final List<ReadableTcpDriverTag> varTags; // List of all configured tags
 	protected ReadableTcpDriverTag messageAgeTag = null;
 	protected ReadableTcpDriverTag varLengthTag = null;
-	
-	private final int deviceId;	// The device id is used for passive mode
-	protected final IDriverSettings driverSettings;
-	private final int configHash;	// HashCode of the message configuration
 
-	private int messageLength;			// Length of this message
-	private int messageBytesAfterVarTag;	// The message length after the variable length tag
-	private int messageAgeOffset=-1;	// Byte offset of the messageAge (if configured)
+	private final int deviceId; // The device id is used for passive mode
+	protected final IDriverSettings driverSettings;
+	private final int configHash; // HashCode of the message configuration
+
+	private int messageLength; // Length of this message
+	private int messageBytesAfterVarTag; // The message length after the variable length tag
+	private int messageAgeOffset = -1; // Byte offset of the messageAge (if configured)
 	private final MessageDataWrapper dataWrapper = new MessageDataWrapper();
 
 	protected volatile long messageCount;
@@ -86,7 +84,9 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 
 	private final QueueMode queueMode;
 	private boolean queueActive;
-	private volatile boolean handshakeValue;
+	private volatile boolean handshakeBit;
+	/** Wait for UPC-UA client to reset handshake in Handshake Mode */
+	private volatile boolean waitHandshake;
 	private volatile PersistentQueue<byte[]> queue;
 	private final Object queueLock = new Object();
 
@@ -97,14 +97,15 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 	private long lastPostedTimestamp;
 
 	private volatile boolean delayActive;
-	private volatile ScheduledFuture<?> delaySchedule;
+	/** timer for actions synchronized with the subscription */
+	private volatile int delayTimer;
 
 	/** true, if there are items subscribed **/
 	private volatile boolean subscriptionPresent;
-	private volatile long subscriptionRate;
 
 	protected DataValue messageCountValue;
 	protected DataValue timestampValue;
+	private volatile DataValue handshakeValue;
 	private DataValue queueSizeValue;
 
 	/**
@@ -134,15 +135,16 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 	 *
 	 * @param messageConfig
 	 * @param folderAddress
-	 * 	The name of the folder in the browse tree that contains this message
+	 *            The name of the folder in the browse tree that contains this message
 	 */
 	private void init(MessageConfig messageConfig, String folderAddress) {
 		createFolder(messageConfig);
 
 		timestampValue = new DataValue(StatusCode.BAD_WAITING_FOR_INITIAL_DATA);
 		messageCountValue = new DataValue(new Variant(new UInt32(0)));
+		handshakeValue = new DataValue(new Variant(new UInt32(0)));
 
-		this.handshakeValue = true;
+		this.handshakeBit = true;
 		this.subscriptionPresent = false;
 		this.delayActive = false;
 
@@ -165,7 +167,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 
 		addDefaultTags(folderAddress);
 
-		log.debug(String.format("Message initialized with %d tags. Queue size: %s", addressTagMap.size(), queue!=null?queue.size():"Not used"));
+		log.debug(String.format("Message initialized with %d tags. Queue size: %s", addressTagMap.size(), queue != null ? queue.size() : "Not used"));
 	}
 
 	@Override
@@ -178,30 +180,32 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 	@Override
 	public void connectionStateChanged(boolean isConnected) {
 		// Connection state is ignored if queue is used
-		if (queueMode!=QueueMode.NONE) {
+		if (queueMode != QueueMode.NONE) {
 			return;
 		}
-		
+
 		// Update tag qualities
-		StatusCode statusCode = isConnected	? StatusCode.BAD_WAITING_FOR_INITIAL_DATA : StatusCode.BAD_NOT_CONNECTED;
+		StatusCode statusCode = isConnected ? StatusCode.BAD_WAITING_FOR_INITIAL_DATA : StatusCode.BAD_NOT_CONNECTED;
 		setTagQuality(statusCode);
 	}
-	
+
 	@Override
 	public void activityLevelChanged(boolean isActive) {
 		// Activity Level is ignored if queue mode is not used
 		// In this case, we only react on connection state changes
-		if (queueMode==QueueMode.NONE) {
+		if (queueMode == QueueMode.NONE) {
 			return;
 		}
-		
+
 		StatusCode statusCode = (isActive) ? StatusCode.BAD_WAITING_FOR_INITIAL_DATA : StatusCode.BAD_NOT_CONNECTED;
 		setTagQuality(statusCode);
-		
+
 		// Active -> Not active
-		if (queueMode!=QueueMode.NONE && !isActive && queueActive) {
+		if (queueMode != QueueMode.NONE && !isActive && queueActive) {
 			queueActive = false;
 			firstPublishedTimestamp = 0;
+
+			cancelSchedule();
 
 			// Post remaining queue entry to new master
 			// There is a small time span after the full update message and before the driver becomes inactive.
@@ -210,14 +214,13 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 				synchronized (queueLock) {
 					int index = queue.size();
 					while (index > 0) {
-						byte[] message = queue.get(index-1);
+						byte[] message = queue.get(index - 1);
 						long tailTimestamp = ByteUtilities.get(driverSettings.getByteOrder()).getLong(message, 0);
 						if (tailTimestamp > lastPostedTimestamp) {
 							FolderStateUpdate stateUpdate = new FolderStateUpdate(getFolderId(), message, false);
 							getDriverContext().postRuntimeStateUpdate(stateUpdate);
 							if (log.isDebugEnabled()) {
-								log.debug(String.format("'%s' posted message id %d to redundant master that arrived after full update."
-										, FolderManager.folderIdAsString(getFolderId()), tailTimestamp));
+								log.debug(String.format("'%s' posted message id %d to redundant master that arrived after full update.", FolderManager.folderIdAsString(getFolderId()), tailTimestamp));
 							}
 							index -= 1;
 						} else
@@ -226,13 +229,13 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 				}
 			}
 		}
-		
+
 		// Not active -> Active
-		if (queueMode!=QueueMode.NONE && isActive && !queueActive) {
+		if (queueMode != QueueMode.NONE && isActive && !queueActive) {
 			if (log.isDebugEnabled()) {
 				log.debug(String.format("'%s' update driver state -> Active with Queue.", FolderManager.folderIdAsString(getFolderId())));
 			}
-			
+
 			queueSizeValue = new DataValue(new Variant(new UInt16(queue.size())));
 			queueActive = true;
 			// Start asynchronous evaluation of queued message
@@ -244,9 +247,9 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 			});
 		}
 	}
-	
+
 	/**
-	 * Update the status code for all tags (except %Handshake and %MessageCount which are always GOOD)  
+	 * Update the status code for all tags (except %Handshake and %MessageCount which are always GOOD)
 	 * 
 	 * @param statusCode
 	 */
@@ -254,7 +257,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 		if (log.isDebugEnabled()) {
 			log.debug(String.format("'%s' update driver state. Setting quality to %s", FolderManager.folderIdAsString(getFolderId()), statusCode.toString()));
 		}
-		
+
 		tagLock.lock();
 		try {
 			for (ReadableTcpDriverTag tag : varTags) {
@@ -262,33 +265,34 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 				tag.setUaNodeValue();
 			}
 
-			timestampValue=new DataValue(statusCode);
+			timestampValue = new DataValue(statusCode);
 		} finally {
 			tagLock.unlock();
-		}	
+		}
 	}
 
 	/**
-	 * In Handshake Mode, the incoming message is added to the handshake queue, without handshake
-	 * it is immediately published to clients.<br />
-	 * The first 8 bytes of the buffer have to contain the absolute time when the message was received by the driver
-	 * and the sequence number if multiple messages have been received with the same timestamp.<br />
+	 * In Handshake Mode, the incoming message is added to the handshake queue, without handshake it is immediately
+	 * published to clients.<br />
+	 * The first 8 bytes of the buffer have to contain the absolute time when the message was received by the driver and the
+	 * sequence number if multiple messages have been received with the same timestamp.<br />
 	 * The second 8 byte may contain a relative time offset received with a packet header.
 	 * 
 	 * @param message
 	 *            The incoming message.<br/>
-	 *            Bytes 0-7 in the array are combination of receive timestamp and the index of messages received with the same timestamp.<br />
-	 *             timestamp << 16 + number<br />
+	 *            Bytes 0-7 in the array are combination of receive timestamp and the index of messages received with the
+	 *            same timestamp.<br />
+	 *            timestamp << 16 + number<br />
 	 *            Bytes 8-15 contain the header timestamp or 0 if no header is used
 	 * @param handshakeMsg
-	 * 			if this param is not null, the value is sent back to the device after the message has been added to the queue
+	 *            if this param is not null, the value is sent back to the device after the message has been added to the
+	 *            queue
 	 */
-	public void messageArrived(final byte[] message, final byte[] handshakeMsg)  {
+	public void messageArrived(final byte[] message, final byte[] handshakeMsg) {
 
 		if (log.isTraceEnabled()) {
-			log.trace(String.format(
-				"Message with id %d received: %s",
-				ByteUtilities.get(driverSettings.getByteOrder()).getLong(message, 0), ByteUtilities.toString(Arrays.copyOfRange(message, 16, message.length))));
+			log.trace(String.format("Message with id %d received: %s", ByteUtilities.get(driverSettings.getByteOrder()).getLong(message, 0),
+					ByteUtilities.toString(Arrays.copyOfRange(message, 16, message.length))));
 		}
 
 		// Make sure that messages don't arrive to fast
@@ -300,7 +304,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 			return;
 		}
 
-		if (queueMode==QueueMode.NONE)
+		if (queueMode == QueueMode.NONE)
 			// No Handshake - Evaluate message
 			getDriverContext().executeOnce(new Runnable() {
 				@Override
@@ -319,9 +323,9 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 		else {
 			// Add message to queue
 			synchronized (queueLock) {
-				if (queue.size()>MAX_QUEUE_SIZE) {
+				if (queue.size() > MAX_QUEUE_SIZE) {
 					log.error("Maximum queue size exceeded, discarding oldest message.");
-					pollMessageFromQueue(false);	
+					pollMessageFromQueue(false);
 				}
 				addMessageToQueue(message);
 
@@ -347,10 +351,9 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 	}
 
 	/**
-	 * Start evaluation of the message queue. The oldest message is passed to the client, but not removed
-	 * from the queue until a client sets the handshake. This way, the current message will be saved on
-	 * shutdown. If the handshake is set at the moment a shutdown happens, the message may be evaluated twice
-	 * after the restart.
+	 * Start evaluation of the message queue. The oldest message is passed to the client, but not removed from the queue
+	 * until a client sets the handshake. This way, the current message will be saved on shutdown. If the handshake is set
+	 * at the moment a shutdown happens, the message may be evaluated twice after the restart.
 	 */
 	private void evaluateQueuedMessage() {
 		byte[] message;
@@ -362,17 +365,23 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 			if (message != null) {
 				if (log.isDebugEnabled())
 					log.debug(String.format("Evaluating queued message with id %d.", ByteUtilities.get(driverSettings.getByteOrder()).getLong(message, 0)));
-				handshakeValue = false;
+				handshakeBit = false;
 
-				// In delayed mode, evaluate next message after the given time
+				// In delayed mode, evaluate next message after 2 subscription cycles
 				if (queueMode == QueueMode.DELAYED && delayActive) {
-					delaySchedule=getDriverContext().executeOnce(new queueDelay(), subscriptionRate*2, TimeUnit.MILLISECONDS);
+					delayTimer = 2;
+				}
+
+				// In Handshake mode, set timeout
+				if (queueMode == QueueMode.HANDSHAKE) {
+					delayTimer = 5;
+					waitHandshake = true;
 				}
 			} else {
 				// No message queued
 				if (log.isDebugEnabled())
 					log.debug("Message queue empty. Set handshake true");
-				handshakeValue = true;
+				handshakeBit = true;
 			}
 		}
 
@@ -385,58 +394,95 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 	public void subscriptionChanged(final long rate, final Set<String> itemAddresses) {
 
 		// This method executes in the run() method of our SubscriptionUpdater
-		
+
 		if (log.isDebugEnabled())
 			log.debug(String.format("Subscription changed. New rate:%dms, items:%d", rate, itemAddresses.size()));
-		
+
 		subscriptionPresent = false;
 		if (itemAddresses.size() > 0) {
 			for (String itemAddress : itemAddresses) {
-				if (itemAddress.endsWith(MESSAGE_COUNT_TAG_NAME)) {
+				if (itemAddress.endsWith(MESSAGE_COUNT_TAG_NAME) || itemAddress.endsWith(HANDSHAKE_TAG_NAME)) {
 					subscriptionPresent = true;
 					break;
 				}
 			}
 		}
 
-		subscriptionRate = rate;
-		if (queueMode == QueueMode.DELAYED) {
+		if (queueMode == QueueMode.DELAYED || queueMode == QueueMode.HANDSHAKE) {
 			// Cancel the delayed task if there is no subscription any more
 			if (!subscriptionPresent && delayActive) {
 				delayActive = false;
-				if (delaySchedule != null && !delaySchedule.isDone()) {
-					delaySchedule.cancel(false);
-					delaySchedule = null;
-				}
+				cancelSchedule();
 				if (log.isDebugEnabled())
-					log.debug("Message has no subscriptions to _MessageCount. Delayed queue mode cancelled.");
+					log.debug("Message has no subscriptions to _MessageCount or _Handshake. Delayed queue mode cancelled.");
 			}
 			if (subscriptionPresent && !delayActive) {
 				if (log.isDebugEnabled())
-					log.debug("_MessageCount subscribed. Delayed queue mode activated.");
+					log.debug("_MessageCount or _Handshake subscribed. Delayed queue mode activated.");
 				delayActive = true;
 				evaluateQueuedMessage();
 			}
 		}
 	}
-
-	private class queueDelay implements Runnable {
-		@Override
-		public void run() {
-			// Remove the acknowledged message from queue and evaluate the next one
-			if (delayActive)
-				pollMessageFromQueue(true);
+	
+	@Override
+	public void beforeSubscriptionUpdate() {
+		if (delayTimer>0) {
+			delayTimer -= 1;
+			if (delayTimer == 0) {
+				// Timer expired - run action
+				if (queueMode == QueueMode.DELAYED && delayActive) {
+					// poll next message from queue
+					pollMessageFromQueue(true);
+				}
+				if (queueMode == QueueMode.HANDSHAKE && !handshakeBit && waitHandshake) {
+					// Set handshake to 0
+					if (log.isDebugEnabled()) {
+						log.debug("Handshake timeout expired. Setting _HandshakeTag to 0");
+					}
+					try {
+						tagLock.lock();
+						handshakeValue = new DataValue(new Variant(new UInt32(0)));
+					} finally {
+						tagLock.unlock();
+					}
+					delayTimer = 2;	// Reset handshake after 2 subscription cycles
+					waitHandshake = false;
+				} else if (!waitHandshake) {
+					try {
+						tagLock.lock();
+						if (log.isDebugEnabled()) {
+							log.debug(String.format("Setting _Handshake back to %d after handshake timeout", messageCount));
+						}
+						handshakeValue = new DataValue(new Variant(messageCount));
+					} finally {
+						tagLock.unlock();
+					}
+					delayTimer = 5;	// Reset handshake after 2 subscription cycles
+					waitHandshake = true;
+				}
+			}
 		}
+		
+	}
+	
+	/**
+	 * Cancel the scheduled actions
+	 */
+	private void cancelSchedule() {
+		delayTimer = 0;
+		waitHandshake = false;
 	}
 
 	/**
-	 * Evaluate the incoming message and update the tag values. Access to tag values is locked during the update. This
-	 * makes sure that subscription updates will not mix data from two messages.
+	 * Evaluate the incoming message and update the tag values. Access to tag values is locked during the update. This makes
+	 * sure that subscription updates will not mix data from two messages.
 	 * 
 	 * @param message
 	 *            The incoming message.<br/>
-	 *            Bytes 0-7 in the array are combination of receive timestamp and the index of messages received with the same timestamp.<br />
-	 *             timestamp << 16 + number<br />
+	 *            Bytes 0-7 in the array are combination of receive timestamp and the index of messages received with the
+	 *            same timestamp.<br />
+	 *            timestamp << 16 + number<br />
 	 *            Bytes 8-15 contain the header timestamp or 0 if no header is used
 	 */
 	protected void evaluateMessage(byte[] message) {
@@ -462,7 +508,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 					// MessageAge is configured - read it first
 					int pos = buffer.position();
 					buffer.position(pos + messageAgeOffset);
-					long messageAge = (buffer.getInt() & 0xffffffff) * (long)driverSettings.getTimestampFactor();
+					long messageAge = (buffer.getInt() & 0xffffffff) * (long) driverSettings.getTimestampFactor();
 					long calculatedAge = headerTimestamp - messageAge;
 					if (calculatedAge < 0) {
 						calculatedAge += driverSettings.getMaxTimestamp() + 1;
@@ -473,18 +519,15 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 						messageAgeTag.setValue(new Variant(new UInt32(calculatedAge)), timestampUtc);
 						if (log.isTraceEnabled()) {
 							log.trace(String.format(
-								"Evaluate message. Received: %s (%d) - Header timestamp: %d - Message Age: %d - Calculated: Message age: %dms - Timestamp: %s -  Timestamp factor: %d",
-								DateFormat.getDateTimeInstance().format(new Date(dataWrapper.getTimeReceived())), dataWrapper.getSequenceId(),
-								headerTimestamp, messageAge, calculatedAge, timestamp, driverSettings.getTimestampFactor()));
+									"Evaluate message. Received: %s (%d) - Header timestamp: %d - Message Age: %d - Calculated: Message age: %dms - Timestamp: %s -  Timestamp factor: %d",
+									DateFormat.getDateTimeInstance().format(new Date(dataWrapper.getTimeReceived())), dataWrapper.getSequenceId(), headerTimestamp, messageAge, calculatedAge,
+									timestamp, driverSettings.getTimestampFactor()));
 						}
 					} else {
 						calculatedAge = 0;
 						timestampUtc = UtcTime.fromJavaTime(timestamp);
-						messageAgeTag.setValue(new Variant(new UInt32(calculatedAge)), StatusCode.BAD_OUT_OF_RANGE,
-							timestampUtc);
-						log.error(String.format(
-							"Evaluated Message has an invalid age. Header timestamp: %d - messageAge: %d",
-							headerTimestamp, messageAge));
+						messageAgeTag.setValue(new Variant(new UInt32(calculatedAge)), StatusCode.BAD_OUT_OF_RANGE, timestampUtc);
+						log.error(String.format("Evaluated Message has an invalid age. Header timestamp: %d - messageAge: %d", headerTimestamp, messageAge));
 					}
 
 					// Restore buffer start position
@@ -542,6 +585,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 				else
 					messageCount = 0;
 				messageCountValue = new DataValue(new Variant(new UInt32(messageCount)));
+				handshakeValue = new DataValue(new Variant(new UInt32(messageCount)));
 
 			} catch (BufferUnderflowException ex) {
 				log.error(String.format("BufferUnderflowException while evaluating message with %d bytes of payload data.", message.length - 16));
@@ -563,6 +607,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 				else
 					messageCount = 0;
 				messageCountValue = new DataValue(new Variant(new UInt32(messageCount)));
+				handshakeValue = new DataValue(new Variant(new UInt32(messageCount)));
 			} finally {
 				tagLock.unlock();
 			}
@@ -571,11 +616,10 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 
 	/**
 	 * @param remainingBytes
-	 * 	Remaining bytes message buffer
+	 *            Remaining bytes message buffer
 	 * @param tag
-	 * 	The tag for which to get the read length.
-	 * @return
-	 * 	The tag size in bytes
+	 *            The tag for which to get the read length.
+	 * @return The tag size in bytes
 	 */
 	private int getTagReadSize(int remainingBytes, ReadableTcpDriverTag tag) {
 		if (tag == varLengthTag) {
@@ -584,7 +628,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 			return tag.getReadSize();
 		}
 	}
-	
+
 	/**
 	 * Returns the message length in bytes. Valid only after all var nodes have been added.
 	 * 
@@ -604,16 +648,15 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 	}
 
 	/**
-	 * Creates the DriverTag and the UANode for the given configuration. The UANode is added to the
-	 * NodeManager and to the drivers browseTree.
-	 * For tags within an array, this method is called recursively with arrayLength = -1, to
-	 * create the child tags.
+	 * Creates the DriverTag and the UANode for the given configuration. The UANode is added to the NodeManager and to the
+	 * drivers browseTree. For tags within an array, this method is called recursively with arrayLength = -1, to create the
+	 * child tags.
 	 * 
 	 * @param address
 	 * @param id
 	 * @param alias
 	 * @param index
-	 * 	Tag index for arrays, used in browseName and displayName. -1 if tag has no index.
+	 *            Tag index for arrays, used in browseName and displayName. -1 if tag has no index.
 	 * @param dataType
 	 * @param arraySize
 	 * @return
@@ -637,10 +680,10 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 			else
 				tag = new ReadableArrayTag(address, id, alias, index, dataType, arrayLength);
 
-			for (int i=0; i<arrayLength; i++) {
+			for (int i = 0; i < arrayLength; i++) {
 				String childAddress = String.format("%s[%d]", address, i);
 				ReadableTcpDriverTag childTag = createTag(childAddress, id, alias, i, dataType, -1);
-				((ReadableArrayTag)tag).addChild(childTag);
+				((ReadableArrayTag) tag).addChild(childTag);
 			}
 
 			// Add the new tag as an UANode after all childs have been added
@@ -653,20 +696,20 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 			// No array, but the DataType needs an array
 			tag = new ReadableArrayTag(address, id, alias, index, dataType, dataType.getArrayLength());
 
-			for (int i=0; i<dataType.getArrayLength(); i++) {
+			for (int i = 0; i < dataType.getArrayLength(); i++) {
 				String childAddress = String.format("%s[%d]", address, i);
 				ReadableTcpDriverTag childTag = new ReadableTcpDriverTag(childAddress, id, alias, i, dataType);
 				VariableNode childNode = buildAndAddNode(childTag);
 				childTag.setUaNode(childNode);
-				((ReadableArrayTag)tag).addChild(childTag);
+				((ReadableArrayTag) tag).addChild(childTag);
 			}
 
 			if (dataType.getUADataType() == DataType.Boolean) {
 				String childAddress = String.format("%s[raw]", address);
-				ReadableTcpDriverTag childTag = new ReadableTcpDriverTag(childAddress, id, alias+"_raw", -1, BinaryDataType.UInt16);
+				ReadableTcpDriverTag childTag = new ReadableTcpDriverTag(childAddress, id, alias + "_raw", -1, BinaryDataType.UInt16);
 				VariableNode childNode = buildAndAddNode(childTag);
 				childTag.setUaNode(childNode);
-				((ReadableArrayTag)tag).addChildRaw(childTag);
+				((ReadableArrayTag) tag).addChildRaw(childTag);
 			}
 
 			// Add the new tag as an UANode after all childs have been added
@@ -688,8 +731,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 	}
 
 	/**
-	 * Creates the configured tags for this message and adds them to the NodeManager and
-	 * the drivers browseTree.<br />
+	 * Creates the configured tags for this message and adds them to the NodeManager and the drivers browseTree.<br />
 	 * After calling this method, messageLength contains the correct length of this message in byte.
 	 * 
 	 * @param messageConfig
@@ -701,7 +743,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 		for (TagConfig config : messageConfig.tags) {
 			ReadableTcpDriverTag tag = createTag(folderName, config);
 			varTags.add(tag);
-			if (config.getDataType()==BinaryDataType.MessageAge) {
+			if (config.getDataType() == BinaryDataType.MessageAge) {
 				messageAgeOffset = messageLength;
 				messageAgeTag = tag;
 			}
@@ -713,8 +755,8 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 					if (config.getDataType().supportsVariableLength()) {
 						varLengthTag = tag;
 					} else {
-						log.warn(String.format("The tag '%s' is configured with variable length but data type %s does not support variable length. Tag uses fixed length instead.", 
-								config.getAlias(), config.getDataType()));
+						log.warn(String.format("The tag '%s' is configured with variable length but data type %s does not support variable length. Tag uses fixed length instead.", config.getAlias(),
+								config.getDataType()));
 					}
 				} else {
 					log.warn(String.format("More than one tag is configured with variable length. Tag '%s' uses fixed length instead.", config.getAlias()));
@@ -722,7 +764,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 			}
 			messageLength += config.getSize() * config.getDataType().getByteCount();
 		}
-		
+
 		messageBytesAfterVarTag = bytesAfterVarTag;
 	}
 
@@ -764,45 +806,41 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 		buildAndAddNode(driverTag).setValue(driverTag.getValue());
 
 		// Writable handshake tag
-		if (queueMode==QueueMode.HANDSHAKE) {
-			WritableTag handshakeTag = new WritableTag(folderName + HANDSHAKE_TAG_NAME, DataType.Boolean) {
+		if (queueMode == QueueMode.HANDSHAKE) {
+			WritableTag handshakeTag = new WritableTag(folderName + HANDSHAKE_TAG_NAME, DataType.Int64) {
 				@Override
 				public StatusCode setValue(DataValue paramDataValue) {
-					boolean newValue;
+					Long newValue;
 					try {
-						newValue = TypeUtilities.toBool(paramDataValue.getValue().getValue());
+						newValue = TypeUtilities.toLong(paramDataValue.getValue().getValue());
 					} catch (ClassCastException e) {
 						return StatusCode.BAD_VALUE;
 					}
 
-					if (!newValue) {
-						// Setting to false is not allowed - return an error
-						return StatusCode.BAD_OUT_OF_RANGE;
-					}
-
-					if (handshakeValue) {
-						// Handshake is already set - do nothing
-						return StatusCode.GOOD;
-					} 
-					
-					if(!getDriverContext().isActiveNode()) {
+					if (!getDriverContext().isActiveNode() && newValue != handshakeValue.getValue().getValue()) {
 						// Handshake is not accepted when this is not the active node
 						log.warn("Client tried to set Handshake on non active cluster node");
 						return StatusCode.BAD_NOT_WRITABLE;
 					}
 
-					if (log.isDebugEnabled())
-						log.debug(String.format("Handshake for message id %d set by client", getFolderId()));
+					handshakeValue = new DataValue(new Variant(new UInt32(newValue)));
 
-					// Remove the acknowledged message from queue and evaluate the next one
-					pollMessageFromQueue(true);
+					if (log.isDebugEnabled())
+						log.debug(String.format("Handshake for message id %d set by client. Value: %d - MassageCount: %d - Handshake State: %s", getFolderId(), newValue, messageCount, handshakeBit));
+
+					if (newValue == 0 && handshakeBit==false) {
+						// Remove the acknowledged message from queue and evaluate the next one
+						handshakeBit = true;
+						cancelSchedule();
+						pollMessageFromQueue(true);
+					}
 
 					return StatusCode.GOOD;
 				}
 
 				@Override
 				public DataValue getValue() {
-					return new DataValue(new Variant(handshakeValue));
+					return handshakeValue;
 				}
 
 			};
@@ -828,12 +866,12 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 	/**
 	 * 
 	 * @param evaluateNext
-	 * 	true - evaluate next message in queue
+	 *            true - evaluate next message in queue
 	 */
 	private void pollMessageFromQueue(boolean evaluate) {
 		// Remove message from queue
 		synchronized (queueLock) {
-			byte[] removed =queue.peek();
+			byte[] removed = queue.peek();
 			if (removed != null) {
 				removeMessageFromQueue(removed);
 				// Update queue on non-active node
@@ -841,7 +879,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 				getDriverContext().postRuntimeStateUpdate(stateUpdate);
 				// Store the first polled timestamp
 				if (firstPublishedTimestamp == 0)
-					firstPublishedTimestamp=ByteUtilities.get(driverSettings.getByteOrder()).getLong(removed, 0);
+					firstPublishedTimestamp = ByteUtilities.get(driverSettings.getByteOrder()).getLong(removed, 0);
 			} else {
 				log.error("Message queue inconsistent. Tried to remove message from empty queue");
 			}
@@ -859,8 +897,8 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 	}
 
 	/**
-	 * This method is called when this node receives a message from the device or when the redundant
-	 * peer posts a queue update.
+	 * This method is called when this node receives a message from the device or when the redundant peer posts a queue
+	 * update.
 	 * 
 	 * @param message
 	 */
@@ -870,15 +908,15 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 
 			queueSizeValue = new DataValue(new Variant(new UInt16(queue.size())));
 			if (log.isDebugEnabled())
-				log.debug(String.format("Message with id %d and %d bytes length added to queue. New queue size: %d",
-					ByteUtilities.get(driverSettings.getByteOrder()).getLong(message, 0), message.length, queue.size()));
+				log.debug(String.format("Message with id %d and %d bytes length added to queue. New queue size: %d", ByteUtilities.get(driverSettings.getByteOrder()).getLong(message, 0),
+						message.length, queue.size()));
 
-			if (handshakeValue && queueActive) {
+			if (handshakeBit && queueActive) {
 				// Evaluate message immediately if handshake is already set
 				if (log.isDebugEnabled()) {
 					log.debug("Handshake is true. Evaluate queued message without delay");
 				}
-				handshakeValue = false;
+				handshakeBit = false;
 				// Start asynchronous evaluation of queued message
 				getDriverContext().executeOnce(new Runnable() {
 					@Override
@@ -906,18 +944,16 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 					queueSizeValue = new DataValue(new Variant(new UInt16(queue.size())));
 
 					if (log.isDebugEnabled())
-						log.debug(String.format("Message with id %d polled from queue. New queue size: %d",
-							timestampToRemove, queue.size()));
+						log.debug(String.format("Message with id %d polled from queue. New queue size: %d", timestampToRemove, queue.size()));
 				} else {
-					log.warn(String.format(
-						"Message queue inconsistent. Id %d should be removed, but id of queue head was %d",
-						timestampToRemove, timestampQueue));
+					log.warn(String.format("Message queue inconsistent. Id %d should be removed, but id of queue head was %d", timestampToRemove, timestampQueue));
 					int discarded = 0;
-					while (queue.size()>0 && timestampQueue<=timestampToRemove) {
+					while (queue.size() > 0 && timestampQueue <= timestampToRemove) {
 						// Entry at queue head is older then entry that should be removed - try to catch up
 						queue.poll();
-						discarded ++;
-						if (queue.size() > 0) timestampQueue = ByteUtilities.get(driverSettings.getByteOrder()).getLong(queue.peek(), 0);
+						discarded++;
+						if (queue.size() > 0)
+							timestampQueue = ByteUtilities.get(driverSettings.getByteOrder()).getLong(queue.peek(), 0);
 					}
 					if (discarded > 0)
 						log.warn(String.format("Removed %d old entrys from message queue. New queue size is %d.", discarded, queue.size()));
@@ -929,18 +965,17 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 	}
 
 	/**
-	 * This method returns the current message queue by COPYING its content to a byte array.
-	 * This is a deep copy, there is no reference to the original ArrayDeque.
+	 * This method returns the current message queue by COPYING its content to a byte array. This is a deep copy, there is
+	 * no reference to the original ArrayDeque.
 	 * 
-	 * @return
-	 * 		A copy of the current message queue or an empty array if the queue is empty
+	 * @return A copy of the current message queue or an empty array if the queue is empty
 	 */
 	private byte[][] getQueueAsArray() {
 
 		if (queue == null) {
-			return new byte[][]{};
+			return new byte[][] {};
 		}
-		
+
 		byte[][] queueArray;
 		synchronized (queueLock) {
 			queueArray = queue.toArray(new byte[0][0]);
@@ -957,8 +992,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 	/**
 	 * Returns the first timestamp that has been published to clients by this message folder.
 	 * 
-	 * @return
-	 * 	The first published timestamp
+	 * @return The first published timestamp
 	 */
 	public long getFirstPublishedTimestamp() {
 		return firstPublishedTimestamp;
@@ -973,7 +1007,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 	 */
 	private void setMessageQueue(int messageConfigHash, long firstPublishedTimestamp, byte[][] newQueue) {
 
-		if (this.queue==null)
+		if (this.queue == null)
 			return;
 
 		// Check if the configuration has been changed
@@ -987,26 +1021,25 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 
 		ByteUtilities bu = ByteUtilities.get(driverSettings.getByteOrder());
 		long queueTailTimestamp = 0;
-		if (this.queue.size()>0) {
+		if (this.queue.size() > 0) {
 			queueTailTimestamp = bu.getLong(this.queue.peekLast(), 0);
 		}
 
 		if (log.isDebugEnabled()) {
-			log.debug(String.format(
-			"Received full queue update. First timestamp published by peer:%d, timestamp at current queue tail: %d. New queue size: %d.",
-			firstPublishedTimestamp, queueTailTimestamp, newQueue.length));
+			log.debug(String.format("Received full queue update. First timestamp published by peer:%d, timestamp at current queue tail: %d. New queue size: %d.", firstPublishedTimestamp,
+					queueTailTimestamp, newQueue.length));
 		}
 
 		synchronized (queueLock) {
-			byte[][] oldQueue=queue.toArray(new byte[0][0]);
+			byte[][] oldQueue = queue.toArray(new byte[0][0]);
 			this.queue.clear();
-			int saved=0;
-			for (byte[]msg : oldQueue) {
+			int saved = 0;
+			for (byte[] msg : oldQueue) {
 				// Restore all messages from the current queue thet has not been published by the peer
 				long id = bu.getLong(msg, 0);
-				if (id<firstPublishedTimestamp) {
+				if (id < firstPublishedTimestamp) {
 					queue.add(msg);
-					saved ++;
+					saved++;
 				}
 			}
 			if (log.isDebugEnabled()) {
@@ -1021,7 +1054,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 		FolderFullState fullState = new FolderFullState(getFolderId(), getConfigHash(), getFirstPublishedTimestamp(), getQueueAsArray());
 		return fullState;
 	}
-	
+
 	@Override
 	public void setFullState(StateUpdate stateUpdate) {
 		if (stateUpdate instanceof FolderFullState) {
@@ -1029,7 +1062,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 			setMessageQueue(fullState.getConfigHash(), fullState.getFirstPublishedTimestamp(), fullState.getQueue());
 		}
 	}
-	
+
 	@Override
 	public void updateRuntimeState(StateUpdate stateUpdate) {
 		if (stateUpdate instanceof FolderStateUpdate) {
@@ -1044,15 +1077,16 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 			} else {
 				addMessageToQueue(folderStateUpdate.getMessage());
 			}
-			
+
 			if (log.isTraceEnabled()) {
 				log.trace(String.format("'%s' received runtime state update.", FolderManager.folderIdAsString(getFolderId())));
 			}
 		}
 	}
-	
+
 	/**
 	 * This method should only be used by unit tests. Do not call!
+	 * 
 	 * @return
 	 */
 	public long getMessageCount() {
@@ -1081,48 +1115,45 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 		public byte[] getMessage() {
 			return message;
 		}
-		
+
 		/**
-		 * @return
-		 * 	<code>true</code> if this message should be removed from the queue.
+		 * @return <code>true</code> if this message should be removed from the queue.
 		 */
 		public boolean isRemoved() {
 			return message.length == 8;
 		}
 	}
-	
+
 	private static class FolderFullState extends StateUpdate {
 		private static final long serialVersionUID = 1L;
 		private final int configHash;
 		private final long firstPublishedTimestamp;
 		private final byte[][] queue;
-		
+
 		public FolderFullState(int folderId, int configHash, long firstPublishedTimestamp, byte[][] queue) {
 			super(folderId);
 			this.configHash = configHash;
 			this.firstPublishedTimestamp = firstPublishedTimestamp;
 			this.queue = queue;
 		}
-		
+
 		public byte[][] getQueue() {
 			return queue;
 		}
-		
+
 		/**
-		 * @return
-		 * 	Timestamp of the first message that has been published by this folder
+		 * @return Timestamp of the first message that has been published by this folder
 		 */
 		public long getFirstPublishedTimestamp() {
 			return firstPublishedTimestamp;
 		}
-		
+
 		/**
-		 * @return
-		 * 	The hash value of the message configuration. Used to detect configuration changes.
+		 * @return The hash value of the message configuration. Used to detect configuration changes.
 		 */
 		public int getConfigHash() {
 			return configHash;
 		}
 	}
-	
+
 }

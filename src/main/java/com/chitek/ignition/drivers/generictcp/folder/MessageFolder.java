@@ -212,6 +212,11 @@ public abstract class MessageFolder implements ISubscriptionChangeListener{
 		// Default implementation does nothing
 	}
 	
+	@Override
+	public void beforeSubscriptionUpdate() {
+		// Default implementation does nothing
+	}
+	
 	/**
 	 * Called when the device is connected or disconnected
 	 *

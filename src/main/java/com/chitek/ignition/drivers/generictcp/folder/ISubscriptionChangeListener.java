@@ -13,4 +13,9 @@ public interface ISubscriptionChangeListener {
 	 * 	The addresses of all subscribed items
 	 */
 	public void subscriptionChanged(long rate, Set<String> itemAdresses);
+	
+	/**
+	 * Called by the subscription updater before subscribed items are updated
+	 */
+	public void beforeSubscriptionUpdate();
 }

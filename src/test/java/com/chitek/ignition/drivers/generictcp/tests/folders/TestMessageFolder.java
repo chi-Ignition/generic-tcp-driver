@@ -380,16 +380,12 @@ public class TestMessageFolder {
 		// MessageCount should be 1
 		DataValue messageCount = FolderTestUtils.readValue(folder,"Alias1/_MessageCount");
 		assertEquals(new UInt32(1), messageCount.getValue().getValue());
-		// Handshake should be false
+		// Handshake should be 1
 		DataValue handshake = FolderTestUtils.readValue(folder,"Alias1/_Handshake");
-		assertEquals(false, handshake.getValue().getValue());		
+		assertEquals(new UInt32(1), handshake.getValue().getValue());		
 		
 		// Now set the Handshake
-		FolderTestUtils.writeValue(folder, "Alias1/_Handshake", new Variant(true));
-		
-		// Handshake should immediately reset as there is another message in the queue
-		handshake = FolderTestUtils.readValue(folder,"Alias1/_Handshake");
-		assertEquals(false, handshake.getValue().getValue());			
+		FolderTestUtils.writeValue(folder, "Alias1/_Handshake", new Variant(0));		
 		
 		// QueueSize should be 1 now
 		queueSize = FolderTestUtils.readValue(folder,"Alias1/_QueueSize");
@@ -406,18 +402,11 @@ public class TestMessageFolder {
 		assertEquals(new UInt32(2), messageCount.getValue().getValue());
 		
 		// Now set the Handshake again
-		FolderTestUtils.writeValue(folder, "Alias1/_Handshake", new Variant(true));
+		FolderTestUtils.writeValue(folder, "Alias1/_Handshake", new Variant(0));
 		
 		// Folder should try to evaluate another message
 		assertEquals(1, driverContext.getExecutor().getScheduledCount());
-		driverContext.getExecutor().runCommand();		
-		
-		// Handshake should be true
-		handshake = FolderTestUtils.readValue(folder,"Alias1/_Handshake");
-		assertEquals(true, handshake.getValue().getValue());	
-		
-		// Setting the Handshake again should have no effect
-		FolderTestUtils.writeValue(folder, "Alias1/_Handshake", new Variant(true));		
+		driverContext.getExecutor().runCommand();			
 	}
 	
 	@Test
@@ -446,7 +435,7 @@ public class TestMessageFolder {
 		assertEquals(1, driverContext.getExecutor().getScheduledCount());
 		driverContext.getExecutor().runCommand();
 		// Now set the Handshake
-		FolderTestUtils.writeValue(folder, "Alias1/_Handshake", new Variant(true));
+		FolderTestUtils.writeValue(folder, "Alias1/_Handshake", new Variant(false));
 		
 		// Folder should post a remove update
 		stateUpdate = driverContext.getLastStateUpdate();
