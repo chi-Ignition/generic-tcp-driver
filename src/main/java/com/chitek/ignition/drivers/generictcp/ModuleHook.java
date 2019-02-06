@@ -55,8 +55,8 @@ public class ModuleHook extends AbstractDriverModuleHook {
 		// Not a big problem, as the temp jar files won't be deleted until the JVM shuts down,
 		// but with this option the files can be deleted manually, if all classes are properly
 		// unloaded. This allows a quick test for memory leaks.
-		if (context.getWebApplication().getConfigurationType() == RuntimeConfigurationType.DEVELOPMENT) {
-			context.getWebApplication().getResourceSettings().getLocalizer().clearCache();
+		if (context.getWebResourceManager().getWebApplication().getConfigurationType() == RuntimeConfigurationType.DEVELOPMENT) {
+			context.getWebResourceManager().getWebApplication().getResourceSettings().getLocalizer().clearCache();
 			URLConnection con;
 			try {
 				con = new URLConnection(new URL("file://null")) {
@@ -76,10 +76,10 @@ public class ModuleHook extends AbstractDriverModuleHook {
 		
 		// Clear Wicket's markup cache. Actually this is only necessary when the module is upgraded to a new version, but there's
 		// no way to detect this situation.
-		if (context.getWebApplication().getMarkupSettings().getMarkupFactory().hasMarkupCache()) {
+		if (context.getWebResourceManager().getWebApplication().getMarkupSettings().getMarkupFactory().hasMarkupCache()) {
 			// When the gateway service is started, the is no markup cache yet.
-			context.getWebApplication().getResourceSettings().getPropertiesFactory().clearCache();
-			context.getWebApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().clear();
+			context.getWebResourceManager().getWebApplication().getResourceSettings().getPropertiesFactory().clearCache();
+			context.getWebResourceManager().getWebApplication().getMarkupSettings().getMarkupFactory().getMarkupCache().clear();
 		}
 		
 		super.setup(context);

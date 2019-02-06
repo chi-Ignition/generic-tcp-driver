@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2013 C. Hiesserich
+ * Copyright 2012-2019 C. Hiesserich
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,10 @@
  ******************************************************************************/
 package com.chitek.ignition.drivers.generictcp.folder;
 
+import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ubyte;
+import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.uint;
+
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,25 +27,26 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.Logger;
+import org.eclipse.milo.opcua.sdk.core.AccessLevel;
+import org.eclipse.milo.opcua.sdk.core.ValueRank;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode.UaVariableNodeBuilder;
+import org.eclipse.milo.opcua.stack.core.Identifiers;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
+import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
+import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
+import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
+import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
+import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
 import com.chitek.ignition.drivers.generictcp.IGenericTcpDriverContext;
 import com.chitek.ignition.drivers.generictcp.tags.ReadableArrayTag;
 import com.chitek.ignition.drivers.generictcp.tags.ReadableTcpDriverTag;
 import com.chitek.ignition.drivers.generictcp.tags.WritableTag;
-import com.inductiveautomation.opcua.nodes.Node;
-import com.inductiveautomation.opcua.nodes.VariableNode;
-import com.inductiveautomation.opcua.nodes.builders.ObjectNodeBuilder;
-import com.inductiveautomation.opcua.nodes.builders.VariableNodeBuilder;
-import com.inductiveautomation.opcua.types.AccessLevel;
-import com.inductiveautomation.opcua.types.DataValue;
-import com.inductiveautomation.opcua.types.LocalizedText;
-import com.inductiveautomation.opcua.types.NodeId;
-import com.inductiveautomation.opcua.types.QualifiedName;
-import com.inductiveautomation.opcua.types.StatusCode;
-import com.inductiveautomation.opcua.types.UInt32;
-import com.inductiveautomation.opcua.types.ValueRank;
-import com.inductiveautomation.opcua.types.Variant;
-import com.inductiveautomation.opcua.util.NodeIds;
+import com.google.common.collect.ImmutableSet;
 import com.inductiveautomation.xopc.driver.api.items.ReadItem;
 import com.inductiveautomation.xopc.driver.api.items.SubscriptionItem;
 import com.inductiveautomation.xopc.driver.api.items.WriteItem;
@@ -72,7 +75,7 @@ public abstract class MessageFolder implements ISubscriptionChangeListener{
 	/**
 	 * List of all Nodes that were added to the NodeManager
 	 */
-	private final List<Node> uaNodes;
+	private final List<UaNode> uaNodes;
 
 	private final IGenericTcpDriverContext driverContext;
 	private final int folderId;
@@ -103,7 +106,7 @@ public abstract class MessageFolder implements ISubscriptionChangeListener{
 		this.log = Logger.getLogger(String.format("%s.Folder[%s]", driverContext.getLoggerName(), folderAddress));
 		tagLock = new ReentrantLock();
 		addressTagMap = new HashMap<String, DynamicDriverTag>();
-		uaNodes = new ArrayList<Node>();
+		uaNodes = new ArrayList<UaNode>();
 	}
 
 	/**
@@ -146,7 +149,7 @@ public abstract class MessageFolder implements ISubscriptionChangeListener{
 					((WritableTag) tag).setValue(new DataValue(item.getWriteValue()))
 					);
 			} else {
-				item.setWriteStatus(StatusCode.BAD_NOT_WRITABLE);
+				item.setWriteStatus(StatusCode.BAD);
 			}
 		}
 	}
@@ -255,7 +258,7 @@ public abstract class MessageFolder implements ISubscriptionChangeListener{
 	 */
 	protected void removeNodes() {
 
-		for (Node uaNode : uaNodes) {
+		for (UaNode uaNode : uaNodes) {
 			getDriverContext().removeNode(uaNode);
 		}
 
@@ -270,10 +273,10 @@ public abstract class MessageFolder implements ISubscriptionChangeListener{
 	 * @param tag
 	 * @return The created Node
 	 */
-	protected VariableNode buildAndAddNode(DynamicDriverTag tag) {
+	protected UaVariableNode buildAndAddNode(DynamicDriverTag tag) {
 
 		// NodeId in the Ignition default format '[DEVICENAME]ADDRESS'. Namespace is always 1
-		NodeId nodeId = new NodeId(String.format("[%s]%s", getDeviceName(), tag.getAddress()), 1);
+		NodeId nodeId = new NodeId(1, String.format("[%s]%s", getDeviceName(), tag.getAddress()));
 		String displayName = tag instanceof ReadableTcpDriverTag
 			? ((ReadableTcpDriverTag) tag).getDisplayName()
 				: tag.getAddress().substring(tag.getAddress().lastIndexOf("/") + 1);
@@ -281,24 +284,25 @@ public abstract class MessageFolder implements ISubscriptionChangeListener{
 				? ((ReadableTcpDriverTag) tag).getBrowseName()
 					: displayName;
 
-				EnumSet<AccessLevel> accessLevel;
+				ImmutableSet<AccessLevel> accessLevel;
 				if (tag instanceof WritableTag)
 					accessLevel = ((WritableTag) tag).getAccessLevel();
 				else
-					accessLevel = EnumSet.of(AccessLevel.CurrentRead);
+					accessLevel = AccessLevel.READ_ONLY;
 
-				UInt32[] arrayDimensions;
+				UInteger[] arrayDimensions;
 				ValueRank valueRank;
 				if (tag instanceof ReadableArrayTag) {
-					arrayDimensions = new UInt32[1];
-					arrayDimensions[0] = new UInt32(((ReadableArrayTag) tag).getValueArrayLength());
+					arrayDimensions = new UInteger[1];
+					arrayDimensions[0] = uint(((ReadableArrayTag) tag).getValueArrayLength());
 					valueRank = ValueRank.OneDimension;
 				} else {
-					arrayDimensions = new UInt32[0];
+					arrayDimensions = new UInteger[0];
 					valueRank = ValueRank.Scalar;
 				}
-
-				VariableNodeBuilder nodeBuilder = getDriverContext().getVariableNodeBuilder();
+				
+				
+				UaVariableNodeBuilder nodeBuilder = getDriverContext().getVariableNodeBuilder();
 				nodeBuilder
 				.setNodeId(nodeId)
 				.setBrowseName(new QualifiedName(0, browseName))
@@ -306,11 +310,12 @@ public abstract class MessageFolder implements ISubscriptionChangeListener{
 				.setDescription(new LocalizedText(displayName))
 				.setDataType(tag.getDataType().getNodeId())
 				.setArrayDimensions(arrayDimensions)
-				.setValueRank(valueRank)
-				.setTypeDefinition(NodeIds.VariableNode_DataType.getNodeId())
-				.setAccessLevel(accessLevel)
-				.setUserAccessLevel(accessLevel);
-				VariableNode uaNode = getDriverContext().buildAndAddNode(nodeBuilder, tag.getAddress());
+				.setValueRank(valueRank.getValue())
+				.setTypeDefinition(Identifiers.BaseDataVariableType)
+				.setAccessLevel(ubyte(AccessLevel.getMask(accessLevel)))
+				.setUserAccessLevel(ubyte(AccessLevel.getMask(accessLevel)));
+				UaVariableNode uaNode = nodeBuilder.build();
+				getDriverContext().addNode(uaNode, tag.getAddress());
 
 				addressTagMap.put(tag.getAddress(), tag);
 				uaNodes.add(uaNode);
@@ -325,21 +330,18 @@ public abstract class MessageFolder implements ISubscriptionChangeListener{
 	 * @param tag
 	 * @return The created Node
 	 */
-	protected Node buildAndAddFolderNode(String address, String browseName) {
+	protected UaNode buildAndAddFolderNode(String address, String browseName) {
 
 		// NodeId in the Ignition default format '[DEVICENAME]ADDRESS'. Namespace is always 1
-		NodeId nodeId = new NodeId(String.format("[%s]%s", getDeviceName(), address), 1);
+		NodeId nodeId = new NodeId(1, String.format("[%s]%s", getDeviceName(), address));
 
-		ObjectNodeBuilder nodeBuilder = getDriverContext().getObjectNodeBuilder();
-		nodeBuilder
-		.setNodeId(nodeId)
-		.setBrowseName(new QualifiedName(1, browseName))
-		.setDisplayName(new LocalizedText(browseName))
-		.setTypeDefinition(NodeIds.FolderType_ObjectType.getNodeId());
-		Node uaNode = getDriverContext().buildAndAddNode(nodeBuilder, address);
+		UaFolderNode folderNode = new UaFolderNode(
+				getDriverContext().getNodeContext(), nodeId, new QualifiedName(1, browseName), new LocalizedText(browseName));
+		
+		getDriverContext().addNode(folderNode, address);
 
-		uaNodes.add(uaNode);
-		return uaNode;
+		uaNodes.add(folderNode);
+		return folderNode;
 	}
 
 }

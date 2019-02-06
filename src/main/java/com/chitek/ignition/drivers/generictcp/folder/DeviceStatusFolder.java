@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2013 C. Hiesserich
+ * Copyright 2012-2019 C. Hiesserich
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
  ******************************************************************************/
 package com.chitek.ignition.drivers.generictcp.folder;
 
+import org.eclipse.milo.opcua.stack.core.BuiltinDataType;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
+import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
+
 import com.chitek.ignition.drivers.generictcp.IGenericTcpDriverContext;
-import com.inductiveautomation.opcua.types.DataType;
-import com.inductiveautomation.opcua.types.DataValue;
-import com.inductiveautomation.opcua.types.Variant;
 import com.inductiveautomation.xopc.driver.api.tags.DynamicDriverTag;
 
 /**
@@ -70,7 +71,7 @@ public class DeviceStatusFolder extends MessageFolder {
 		buildAndAddFolderNode(folderName, FOLDER_NAME);
 
 		// Special tags
-		DynamicDriverTag driverTag = new DynamicDriverTag(folderName + "/Is Connected", DataType.Boolean) {
+		DynamicDriverTag driverTag = new DynamicDriverTag(folderName + "/Is Connected", BuiltinDataType.Boolean) {
 			@Override
 			public DataValue getValue() {
 				return isConnectedValue;

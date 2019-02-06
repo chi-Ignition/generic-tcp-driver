@@ -49,7 +49,7 @@
 			<plugin>
 				<groupId>com.inductiveautomation.ignitionsdk</groupId>
 				<artifactId>ignition-maven-plugin</artifactId>
-				<version>1.0.11</version>
+				<version>1.0.12</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
@@ -68,15 +68,15 @@
 		                    <moduleName>Generic Tcp Driver</moduleName>
 		                    <moduleDescription>A generic TCP client or server driver.</moduleDescription>
 		                    <moduleVersion>${project.version}.${git.commit.time}</moduleVersion>
-		                    <requiredIgnitionVersion>7.9.0</requiredIgnitionVersion>
-		                    <requiredFrameworkVersion>7</requiredFrameworkVersion>
+		                    <requiredIgnitionVersion>8.0.0</requiredIgnitionVersion>
+		                    <requiredFrameworkVersion>8</requiredFrameworkVersion>
 		                    <licenseFile>license.html</licenseFile>
 							<documentationFile>doc/manual-frame.html</documentationFile>
 								
 							<depends>
 								<depend>
 									<scope>G</scope>
-									<moduleId>xopc</moduleId>
+									<moduleId>com.inductiveautomation.opcua</moduleId>
 								</depend>
 							</depends>
 						

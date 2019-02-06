@@ -4,12 +4,13 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectNode.UaObjectNodeBuilder;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode.UaVariableNodeBuilder;
+
 import com.chitek.ignition.drivers.generictcp.redundancy.StateUpdate;
 import com.inductiveautomation.ignition.common.execution.SelfSchedulingRunnable;
-import com.inductiveautomation.opcua.nodes.Node;
-import com.inductiveautomation.opcua.nodes.builders.NodeBuilder;
-import com.inductiveautomation.opcua.nodes.builders.ObjectNodeBuilder;
-import com.inductiveautomation.opcua.nodes.builders.VariableNodeBuilder;
 
 /**
  * The GenericTcpDriverContext wraps all information that has to be passed
@@ -43,38 +44,44 @@ public interface IGenericTcpDriverContext {
 	 * @return
 	 * 	A new {@link VariableNodeBuilder}
 	 */
-	public VariableNodeBuilder getVariableNodeBuilder();
+	public UaVariableNodeBuilder getVariableNodeBuilder();
 
 	/**
 	 * @return
 	 * 	A new {@link VariableNodeBuilder}
 	 */
-	public ObjectNodeBuilder getObjectNodeBuilder();
+	public UaObjectNodeBuilder getObjectNodeBuilder();
 
 	/**
-	 * Wraps a call to {@link com.inductiveautomation.opcua.nodes.builders.NodeBuilder#buildAndAdd NodeBuilder.buildAndAdd}
+	 * @return
+	 * 	The {@link UaNodeContext}
+	 */
+	public UaNodeContext getNodeContext();
+	
+	/**
+	 * Adds the node to the NodeManager by calling {@link #UaNodeManager.addNode(node)}
 	 * and adds the given address to the drivers browse tree.
 	 *
-	 * @param nodeBuilder
-	 * 	A nodeBuilder obtained {@link #getVariableNodeBuilder()} or {@link #getObjectNodeBuilder()}
+	 * @param node
+	 * 	A UaNode obtained from {@link #getVariableNodeBuilder()} or {@link #getObjectNodeBuilder()}
 	 * @param address
 	 * 	The tag address to register for browsing.
 	 * @return
-	 * 	The created Node
+	 * 	The added node
 	 */
-	public <E extends Node> E buildAndAddNode(NodeBuilder<E> nodeBuilder, String address);
+	public UaNode addNode(UaNode node, String address);
 
 	/**
 	 * Remove a Node from the drivers NodeManager.
 	 *
 	 * @param node
 	 * 	The node to remove.
-	 * @see com.inductiveautomation.opcua.nodes.NodeManager#removeNode NodeManager.removeNode
+	 * @see org.eclipse.milo.opcua.sdk.server.UaNodeManager#removeNode(UaNode)
 	 */
-	public void removeNode(Node node);
+	public void removeNode(UaNode node);
 
 	/**
-	 * Exceute the given command in the drivers ExecutionManager.
+	 * Execute the given command in the drivers ExecutionManager.
 	 *
 	 * @param command
 	 * 	The Runnable to execute.

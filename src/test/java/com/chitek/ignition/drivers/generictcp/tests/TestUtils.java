@@ -12,7 +12,7 @@ import com.chitek.ignition.drivers.generictcp.meta.config.WritebackConfig;
 
 public class TestUtils {
 	public static MessageConfig readMessageConfig(String configName) throws Exception {
-		InputStream in = TestUtils.class.getClass().getResourceAsStream(configName);
+		InputStream in = TestUtils.class.getResourceAsStream(configName);
 		assertNotNull(String.format("Test ressource '%s' not accessible. Check test setup.", configName),in);
 		String xml = IOUtils.toString(in);
 		MessageConfig messageConfig = MessageConfig.fromXMLString(xml);
@@ -28,7 +28,7 @@ public class TestUtils {
 	}
 	
 	public static WritebackConfig readWritebackConfig(String configName) throws Exception {
-		InputStream in = TestUtils.class.getClass().getResourceAsStream(configName);
+		InputStream in = TestUtils.class.getResourceAsStream(configName);
 		assertNotNull(String.format("Test ressource '%s' not accessible. Check test setup.", configName),in);
 		String xml = IOUtils.toString(in);
 		WritebackConfig writebackConfig = WritebackConfig.fromXMLString(xml);

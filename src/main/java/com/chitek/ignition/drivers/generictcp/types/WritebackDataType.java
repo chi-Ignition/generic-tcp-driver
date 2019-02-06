@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2013 C. Hiesserich
+ * Copyright 2012-2019 C. Hiesserich
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +19,20 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
-import com.inductiveautomation.opcua.types.DataType;
+import org.eclipse.milo.opcua.stack.core.BuiltinDataType;
+
 
 public enum WritebackDataType implements Serializable {
-	UInt16(2, DataType.UInt16),
-	Int16(2, DataType.Int16),
-	UInt32(4,DataType.UInt32),
-	Int32(4, DataType.Int32),
-	ByteString(0, DataType.String);
+	UInt16(2, BuiltinDataType.UInt16),
+	Int16(2, BuiltinDataType.Int16),
+	UInt32(4,BuiltinDataType.UInt32),
+	Int32(4, BuiltinDataType.Int32),
+	ByteString(0, BuiltinDataType.String);
 	
 	private int byteSize;
-	private DataType uaDataType;
+	private BuiltinDataType uaDataType;
 	
-	private WritebackDataType(int byteSize, DataType dataType) {
+	private WritebackDataType(int byteSize, BuiltinDataType dataType) {
 		this.byteSize = byteSize;
 		this.uaDataType = dataType;
 	}
@@ -40,7 +41,7 @@ public enum WritebackDataType implements Serializable {
 		return byteSize;
 	}
 
-	public DataType getUADataType() {
+	public BuiltinDataType getUADataType() {
 		return uaDataType;
 	}
 	

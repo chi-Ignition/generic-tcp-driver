@@ -12,6 +12,14 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.milo.opcua.sdk.core.ValueRank;
+import org.eclipse.milo.opcua.sdk.core.ValueRanks;
+import org.eclipse.milo.opcua.sdk.server.api.nodes.VariableNode;
+import org.eclipse.milo.opcua.stack.core.BuiltinDataType;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
+import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
+import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
+import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -27,17 +35,11 @@ import com.chitek.ignition.drivers.generictcp.tests.TestUtils;
 import com.chitek.ignition.drivers.generictcp.types.OptionalDataType;
 import com.chitek.ignition.drivers.generictcp.types.QueueMode;
 import com.chitek.ignition.drivers.generictcp.util.VariantByteBuffer;
-import com.inductiveautomation.opcua.nodes.VariableNode;
-import com.inductiveautomation.opcua.types.DataType;
-import com.inductiveautomation.opcua.types.DataValue;
-import com.inductiveautomation.opcua.types.LocalizedText;
-import com.inductiveautomation.opcua.types.NodeId;
-import com.inductiveautomation.opcua.types.UInt16;
-import com.inductiveautomation.opcua.types.UInt32;
-import com.inductiveautomation.opcua.types.ValueRank;
-import com.inductiveautomation.opcua.types.Variant;
 import com.inductiveautomation.xopc.driver.api.items.ReadItem;
 import com.inductiveautomation.xopc.driver.util.TagTree.TagTreeNode;
+
+import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.uint;
+import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ushort;
 
 public class TestMessageFolder {
 
@@ -81,11 +83,11 @@ public class TestMessageFolder {
 		assertNotNull(driverContext.getBrowseTree().findTag("Alias1/_Timestamp"));
 
 		// Check the nodes
-		VariableNode nodeData1 = (VariableNode) driverContext.getNode(buildNodeId("Alias1/Data1"));
+		org.eclipse.milo.opcua.sdk.server.api.nodes.VariableNode nodeData1 = (VariableNode) driverContext.getNode(buildNodeId("Alias1/Data1"));
 		assertNotNull(nodeData1);
-		assertEquals(new LocalizedText("Data1"), nodeData1.getDisplayName());
-		assertEquals(DataType.String.getNodeId(), nodeData1.getDataTypeId());
-		assertEquals(ValueRank.Scalar, nodeData1.getValueRank());
+		assertEquals(new org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText("Data1"), nodeData1.getDisplayName());
+		assertEquals(BuiltinDataType.String.getNodeId(), nodeData1.getDataType());
+		assertEquals(new Integer(ValueRank.Scalar.getValue()), nodeData1.getValueRank());
 
 		// Test read
 		MockReadItem itemData1 = new MockReadItem("Alias1/Data1");
@@ -126,8 +128,8 @@ public class TestMessageFolder {
 		VariableNode nodeData1 = (VariableNode) driverContext.getNode(buildNodeId("Alias1/Data1"));
 		assertNotNull(nodeData1);
 		assertEquals(new LocalizedText("Data1"), nodeData1.getDisplayName());
-		assertEquals(DataType.String.getNodeId(), nodeData1.getDataTypeId());
-		assertEquals(ValueRank.Scalar, nodeData1.getValueRank());
+		assertEquals(BuiltinDataType.String.getNodeId(), nodeData1.getDataType());
+		assertEquals(new Integer(ValueRank.Scalar.getValue()), nodeData1.getValueRank());
 
 		// Test read
 		MockReadItem itemData1 = new MockReadItem("Alias1/Data1");
@@ -169,14 +171,14 @@ public class TestMessageFolder {
 		VariableNode nodeData1 = (VariableNode) driverContext.getNode(buildNodeId("Alias1/Data1"));
 		assertNotNull(nodeData1);
 		assertEquals(new LocalizedText("Data1"), nodeData1.getDisplayName());
-		assertEquals(DataType.Int16.getNodeId(), nodeData1.getDataTypeId());
-		assertEquals(ValueRank.Scalar, nodeData1.getValueRank());
+		assertEquals(BuiltinDataType.Int16.getNodeId(), nodeData1.getDataType());
+		assertEquals(new Integer(ValueRanks.Scalar), nodeData1.getValueRank());
 		
 		VariableNode nodeAge = (VariableNode) driverContext.getNode(buildNodeId("Alias1/_MessageAge"));
 		assertNotNull(nodeAge);
 		assertEquals(new LocalizedText("_MessageAge"), nodeAge.getDisplayName());
-		assertEquals(DataType.UInt32.getNodeId(), nodeAge.getDataTypeId());
-		assertEquals(ValueRank.Scalar, nodeAge.getValueRank());
+		assertEquals(BuiltinDataType.UInt32.getNodeId(), nodeAge.getDataType());
+		assertEquals(new Integer(ValueRanks.Scalar), nodeAge.getValueRank());
 
 		// Test read
 		MockReadItem itemData1 = new MockReadItem("Alias1/Data1");
@@ -202,7 +204,7 @@ public class TestMessageFolder {
 		folder.readItems(items);
 		DataValue ageValue = itemAge.getValue();
 		assertNotNull(ageValue);
-		assertEquals("Message Age", new UInt32(10), ageValue.getValue().getValue());
+		assertEquals("Message Age", uint(10), ageValue.getValue().getValue());
 	}
 
 	@Test
@@ -234,7 +236,7 @@ public class TestMessageFolder {
 		folder.readItems(items);
 		DataValue ageValue = itemAge.getValue();
 		assertNotNull(ageValue);
-		assertEquals("Message Age", new UInt32(20), ageValue.getValue().getValue());
+		assertEquals("Message Age", uint(20), ageValue.getValue().getValue());
 	}
 	
 	@Test
@@ -266,7 +268,7 @@ public class TestMessageFolder {
 		folder.readItems(items);
 		DataValue ageValue = itemAge.getValue();
 		assertNotNull(ageValue);
-		assertEquals("Message Age", new UInt32(11), ageValue.getValue().getValue());
+		assertEquals("Message Age", uint(11), ageValue.getValue().getValue());
 		
 		folder.messageArrived(new byte[]{0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,10, 0,1,0,2, 0,0,0,0}, null); // Data1=1, Data2=2, Age=20ms
 
@@ -278,7 +280,7 @@ public class TestMessageFolder {
 		folder.readItems(items);
 		ageValue = itemAge.getValue();
 		assertNotNull(ageValue);
-		assertEquals("Message Age", new UInt32(10), ageValue.getValue().getValue());
+		assertEquals("Message Age", uint(10), ageValue.getValue().getValue());
 		
 		folder.messageArrived(new byte[]{0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,1,0,2, (byte) 0x7f,(byte) 0xff,(byte) 0xff,(byte) 0xff}, null); // Data1=1, Data2=2, Age=20ms
 
@@ -290,7 +292,7 @@ public class TestMessageFolder {
 		folder.readItems(items);
 		ageValue = itemAge.getValue();
 		assertNotNull(ageValue);
-		assertEquals("Message Age", new UInt32(1), ageValue.getValue().getValue());
+		assertEquals("Message Age", uint(1), ageValue.getValue().getValue());
 		
 		folder.messageArrived(new byte[]{0,0,0,0,0,0,0,0, 0,0,0,0,(byte) 0x7f,(byte) 0xff,(byte) 0xff,(byte) 0xf0, 0,1,0,2, (byte) 0x7f,(byte) 0xff,(byte) 0xff,(byte) 0xe0}, null); // Data1=1, Data2=2, Age=20ms
 
@@ -302,7 +304,7 @@ public class TestMessageFolder {
 		folder.readItems(items);
 		ageValue = itemAge.getValue();
 		assertNotNull(ageValue);
-		assertEquals("Message Age", new UInt32(16), ageValue.getValue().getValue());
+		assertEquals("Message Age", uint(16), ageValue.getValue().getValue());
 	}
 	
 	@Test
@@ -366,7 +368,7 @@ public class TestMessageFolder {
 		
 		// QueueSize should be 2 now
 		DataValue queueSize = FolderTestUtils.readValue(folder,"Alias1/_QueueSize");
-		assertEquals(new UInt16(2), queueSize.getValue().getValue());
+		assertEquals(ushort(2), queueSize.getValue().getValue());
 		
 		// Now activate the folder
 		folder.activityLevelChanged(true);
@@ -379,17 +381,17 @@ public class TestMessageFolder {
 			
 		// MessageCount should be 1
 		DataValue messageCount = FolderTestUtils.readValue(folder,"Alias1/_MessageCount");
-		assertEquals(new UInt32(1), messageCount.getValue().getValue());
+		assertEquals(uint(1), messageCount.getValue().getValue());
 		// Handshake should be 1
 		DataValue handshake = FolderTestUtils.readValue(folder,"Alias1/_Handshake");
-		assertEquals(new UInt32(1), handshake.getValue().getValue());		
+		assertEquals(uint(1), handshake.getValue().getValue());		
 		
 		// Now set the Handshake
 		FolderTestUtils.writeValue(folder, "Alias1/_Handshake", new Variant(0));		
 		
 		// QueueSize should be 1 now
 		queueSize = FolderTestUtils.readValue(folder,"Alias1/_QueueSize");
-		assertEquals(new UInt16(1), queueSize.getValue().getValue());
+		assertEquals(ushort(1), queueSize.getValue().getValue());
 		
 		// The folder should evaluate the next queued message
 		assertEquals(1, driverContext.getExecutor().getScheduledCount());
@@ -399,7 +401,7 @@ public class TestMessageFolder {
 
 		// MessageCount should be 2
 		messageCount = FolderTestUtils.readValue(folder,"Alias1/_MessageCount");
-		assertEquals(new UInt32(2), messageCount.getValue().getValue());
+		assertEquals(uint(2), messageCount.getValue().getValue());
 		
 		// Now set the Handshake again
 		FolderTestUtils.writeValue(folder, "Alias1/_Handshake", new Variant(0));
@@ -608,7 +610,7 @@ public class TestMessageFolder {
 	}	
 	
 	private NodeId buildNodeId(String address) {
-		return new NodeId(String.format("[%s]%s", DEVICE_NAME, address), 1);
+		return new NodeId(1, String.format("[%s]%s", DEVICE_NAME, address));
 	}
 		
 	/**

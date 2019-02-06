@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import org.apache.log4j.Logger;
+import org.eclipse.milo.opcua.stack.core.StatusCodes;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.inductiveautomation.ignition.common.execution.SchedulingController;
 import com.inductiveautomation.ignition.common.execution.SelfSchedulingRunnable;
-import com.inductiveautomation.opcua.types.DataValue;
-import com.inductiveautomation.opcua.types.StatusCode;
 import com.inductiveautomation.xopc.driver.api.AggregateSubscriptionItem;
 import com.inductiveautomation.xopc.driver.api.items.SubscriptionItem;
 import com.inductiveautomation.xopc.driver.api.tags.DriverTag;
@@ -27,7 +27,7 @@ public class SubscriptionUpdater implements SelfSchedulingRunnable {
 	public final static int RESCHEDULE_RATE = 250;
 	/** Delay for updating special items subscription **/
 	public final static int SUBSCRIPTION_DELAY = 25;
-	private final static DataValue DATAVALUE_ERROR = new DataValue(StatusCode.BAD_INTERNAL_ERROR);
+	private final static DataValue DATAVALUE_ERROR = new DataValue(StatusCodes.Bad_InternalError);
 
 	private final Logger log;
 

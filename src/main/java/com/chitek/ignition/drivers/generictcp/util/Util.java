@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2013 C. Hiesserich
+ * Copyright 2012-2019 C. Hiesserich
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,19 @@ import java.nio.ByteOrder;
 import java.text.ParseException;
 import java.util.Formatter;
 import java.util.StringTokenizer;
+
+import org.eclipse.milo.opcua.stack.core.BuiltinDataType;
+import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
+
+import com.inductiveautomation.xopc.driver.util.ByteUtilities;
+
 import java.util.Map;
 
-import com.inductiveautomation.opcua.types.DataType;
-import com.inductiveautomation.opcua.types.UByte;
-import com.inductiveautomation.opcua.types.UInt16;
-import com.inductiveautomation.opcua.types.UInt32;
-import com.inductiveautomation.opcua.types.Variant;
-import com.inductiveautomation.opcua.util.ByteUtilities;
+import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ubyte;
+import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.uint;
+import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ushort;
+
 
 public class Util {
 	
@@ -70,13 +75,13 @@ public class Util {
 				Number val=values.get(token);
 				if ( val != null && val instanceof Integer) {
 					try {
-						buffer.write(ByteUtilities.getInt4(val.intValue(), order));
+						buffer.write(ByteUtilities.get(order).fromInt(val.intValue()));
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
 				} else if ( val != null && val instanceof Short) {
 					try {
-						buffer.write(ByteUtilities.getInt2(val.shortValue(), order));
+						buffer.write(ByteUtilities.get(order).fromShort(val.shortValue()));
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -128,18 +133,18 @@ public class Util {
 	 * @param dataType
 	 * @return
 	 */
-	public static Variant makeVariant(Object value, DataType dataType) {
+	public static Variant makeVariant(Object value, BuiltinDataType dataType) {
 		if (value instanceof String)
 			if (((String)value).isEmpty()) 
 				value = null;
-			else if(dataType.isNumeric())
+			else if(isNumericDataType(dataType))
 				try {
 					value = Long.parseLong((String)value);
 				} catch (NumberFormatException e) {
 					throw new IllegalArgumentException(String.format("Cannot coerce String '%s' to DataType %s",
 						value, dataType.name() ));
 				}
-		if (dataType.isNumeric()) {
+		if (isNumericDataType(dataType)) {
 			if (value==null) 
 				return makeVariant(0, dataType);
 			else
@@ -174,25 +179,43 @@ public class Util {
 	 * @return
 	 * 		A new Variant wrapping the dataType
 	 */
-	public static Variant makeVariant(long value, DataType dataType) {
+	public static Variant makeVariant(long value, BuiltinDataType dataType) {
 		switch (dataType) {
-		case UByte:
+		case Byte:
 			if (value<0)
 				throw new IllegalArgumentException("Cannot set value of UByte to a number smaller than 0."); 
 			if (value>255)
 				throw new IllegalArgumentException("Cannot set value of UByte to a number larger than 255.");
-			UByte bVal = new UByte((byte) value);
+			UByte bVal = ubyte((byte) value);
 			return new Variant(bVal);
 		case UInt16:
-			return new Variant(new UInt16((int)value));
+			return new Variant(ushort((int)value));
 		case Int16:
 			return new Variant((short)value);
 		case UInt32:
-			return new Variant(new UInt32(value));
+			return new Variant(uint(value));
 		case Int32:
 			return new Variant((int)value);
 		default:
 			throw new IllegalArgumentException(String.format("Unsupported DataType %s", dataType.name() ));	
 		}
+	}
+	
+	public static boolean isNumericDataType(BuiltinDataType dataType) {
+		switch (dataType) {
+		case Byte:
+		case Double:
+		case Float:
+		case Int16:
+		case Int32:
+		case Int64:
+		case UInt16:
+		case UInt32:
+		case UInt64:
+			return true;
+		default:
+			return false;
+		}
+		
 	}
 }

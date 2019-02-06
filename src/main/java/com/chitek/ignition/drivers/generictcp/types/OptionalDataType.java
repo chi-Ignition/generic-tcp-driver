@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2013 C. Hiesserich
+ * Copyright 2012-2019 C. Hiesserich
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,10 @@ package com.chitek.ignition.drivers.generictcp.types;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.milo.opcua.stack.core.BuiltinDataType;
+
 import com.chitek.ignition.drivers.generictcp.ModuleHook;
 import com.inductiveautomation.ignition.common.BundleUtil;
-import com.inductiveautomation.opcua.types.DataType;
 
 public enum OptionalDataType {
 	None, UByte, UInt16;
@@ -49,13 +50,13 @@ public enum OptionalDataType {
 		}
 	}
 
-	public DataType getUADataType() {
+	public BuiltinDataType getUADataType() {
 		switch (this) {
 		case None:
 		case UByte:
-			return DataType.UByte;
+			return BuiltinDataType.Byte;
 		case UInt16:
-			return DataType.UInt16;
+			return BuiltinDataType.UInt16;
 		}
 		return null;
 	}

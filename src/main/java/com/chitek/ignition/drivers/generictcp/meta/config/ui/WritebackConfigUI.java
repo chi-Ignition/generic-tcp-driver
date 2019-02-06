@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2013 C. Hiesserich
+ * Copyright 2012-2019 C. Hiesserich
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,14 +34,14 @@ import org.apache.wicket.markup.html.form.validation.AbstractFormValidator;
 import org.apache.wicket.model.StringResourceModel;
 import org.apache.wicket.util.string.Strings;
 import org.apache.wicket.validation.ValidationError;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UShort;
 
 import com.chitek.ignition.drivers.generictcp.meta.config.WritebackConfig;
 import com.chitek.ignition.drivers.generictcp.types.OptionalDataType;
 import com.chitek.ignition.drivers.generictcp.types.WritebackDataType;
 import com.chitek.ignition.drivers.generictcp.util.Util;
 import com.chitek.wicket.FeedbackTextField;
-import com.inductiveautomation.opcua.types.UInt16;
-import com.inductiveautomation.opcua.types.UInt32;
 
 @SuppressWarnings("serial")
 public class WritebackConfigUI extends AbstractConfigUI<WritebackConfig> {
@@ -275,13 +275,13 @@ public class WritebackConfigUI extends AbstractConfigUI<WritebackConfig> {
 						boolean rangeError = false;
 						switch (dataType) {
 						case UInt16:
-							rangeError = lValue < UInt16.MIN_VALUE || lValue > UInt16.MAX_VALUE;
+							rangeError = lValue < UShort.MIN_VALUE || lValue > UShort.MAX_VALUE;
 							break;
 						case Int16:
 							rangeError = lValue < Short.MIN_VALUE || lValue > Short.MAX_VALUE;
 							break;
 						case UInt32:
-							rangeError = lValue < UInt32.MIN_VALUE || lValue > UInt32.MAX_VALUE;
+							rangeError = lValue < UInteger.MIN_VALUE || lValue > UInteger.MAX_VALUE;
 							break;
 						case Int32:
 							rangeError = lValue < Integer.MIN_VALUE || lValue > Integer.MAX_VALUE;
@@ -308,7 +308,7 @@ public class WritebackConfigUI extends AbstractConfigUI<WritebackConfig> {
 						rangeError = initialId < 0 || initialId > 255;
 						break;
 					case UInt16:
-						rangeError = initialId < UInt16.MIN_VALUE || initialId > UInt16.MAX_VALUE;
+						rangeError = initialId < UShort.MIN_VALUE || initialId > UShort.MAX_VALUE;
 						break;
 					default:
 						break;

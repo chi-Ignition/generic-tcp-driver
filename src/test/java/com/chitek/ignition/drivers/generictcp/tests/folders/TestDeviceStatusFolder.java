@@ -7,14 +7,14 @@ import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
+import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
+import org.eclipse.milo.opcua.stack.core.types.enumerated.NodeClass;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.chitek.ignition.drivers.generictcp.folder.DeviceStatusFolder;
 import com.chitek.ignition.drivers.generictcp.tests.MockDriverContext;
-import com.inductiveautomation.opcua.nodes.Node;
-import com.inductiveautomation.opcua.types.NodeClass;
-import com.inductiveautomation.opcua.types.NodeId;
 import com.inductiveautomation.xopc.driver.util.TagTree.TagTreeNode;
 
 public class TestDeviceStatusFolder {
@@ -55,13 +55,13 @@ public class TestDeviceStatusFolder {
 	public void testNodeId() throws Exception {
 		new DeviceStatusFolder(driverContext, 1, "Device1");
 		
-		NodeId nodeId = new NodeId(String.format("[%s]%s", DEVICE_NAME, "Device1/[Status]"), 1);
-		Node folderNode = driverContext.getNode(nodeId);
+		NodeId nodeId = new NodeId(1, String.format("[%s]%s", DEVICE_NAME, "Device1/[Status]"));
+		UaNode folderNode = driverContext.getNode(nodeId);
 		assertEquals(NodeClass.Object, folderNode.getNodeClass());
 		assertEquals("[Status]", folderNode.getBrowseName().getName());
 		
-		nodeId = new NodeId(String.format("[%s]%s", DEVICE_NAME, "Device1/[Status]/Is Connected"), 1);
-		Node dataNode = driverContext.getNode(nodeId);
+		nodeId = new NodeId(1, String.format("[%s]%s", DEVICE_NAME, "Device1/[Status]/Is Connected"));
+		UaNode dataNode = driverContext.getNode(nodeId);
 		assertEquals(NodeClass.Variable, dataNode.getNodeClass());
 		assertEquals("Is Connected", dataNode.getBrowseName().getName());
 	}

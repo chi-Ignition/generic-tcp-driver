@@ -2,13 +2,12 @@ package com.chitek.ignition.drivers.generictcp.configuration.settings;
 
 import org.apache.wicket.validation.validator.RangeValidator;
 
-import simpleorm.dataset.SFieldFlags;
-
 import com.chitek.ignition.drivers.generictcp.meta.config.DriverConfig;
 import com.chitek.ignition.drivers.generictcp.meta.config.DriverSettings;
 import com.chitek.ignition.drivers.generictcp.meta.config.HeaderConfig;
 import com.chitek.ignition.drivers.generictcp.meta.config.WritebackConfig;
 import com.chitek.ignition.drivers.generictcp.types.OptionalDataType;
+import com.inductiveautomation.ignition.common.Base64;
 import com.inductiveautomation.ignition.common.BundleUtil;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.BlobField;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.BooleanField;
@@ -19,13 +18,15 @@ import com.inductiveautomation.ignition.gateway.localdb.persistence.PersistentRe
 import com.inductiveautomation.ignition.gateway.localdb.persistence.RecordMeta;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.ReferenceField;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.StringField;
-import com.inductiveautomation.opcua.types.UInt32;
-import com.inductiveautomation.opcua.util.Base64;
-import com.inductiveautomation.xopc.driver.api.configuration.DeviceSettingsRecord;
+import com.inductiveautomation.ignition.gateway.opcua.server.api.DeviceSettingsRecord;
+
+import simpleorm.dataset.SFieldFlags;
 
 @SuppressWarnings("serial")
 public class GenericTcpClientDriverSettings extends PersistentRecord implements IGenericTcpDriverSettings {
 
+	static final long MAX_TIMESTAMP = 0xfffffffL;
+	
 	public static final RecordMeta<GenericTcpClientDriverSettings> META = new RecordMeta<GenericTcpClientDriverSettings>(
 		GenericTcpClientDriverSettings.class, "GenTcpClientDriverSettings");
 
@@ -72,8 +73,8 @@ public class GenericTcpClientDriverSettings extends PersistentRecord implements 
 		ReverseByteOrder.setDefault(false);
 		TimestampFactor.setDefault(1);
 		TimestampFactor.addValidator(new RangeValidator<Integer>(1, 1000));
-		MaxTimestamp.setDefault(UInt32.MAX_VALUE);
-		MaxTimestamp.getFormMeta().addValidator(new RangeValidator<Long>((long)128, UInt32.MAX_VALUE));
+		MaxTimestamp.setDefault(MAX_TIMESTAMP);
+		MaxTimestamp.getFormMeta().addValidator(new RangeValidator<Long>((long)128, MAX_TIMESTAMP));
 
 		MessageConfig.setDefault(new byte[0]);
 		HeaderConfig.setDefault(new byte[0]);

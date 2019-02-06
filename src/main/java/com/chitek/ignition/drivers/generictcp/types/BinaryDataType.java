@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2013 C. Hiesserich
+ * Copyright 2012-2019 C. Hiesserich
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,41 +19,41 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
-import com.inductiveautomation.opcua.types.DataType;
+import org.eclipse.milo.opcua.stack.core.BuiltinDataType;
 
 public enum BinaryDataType implements Serializable {
 	
-	Dummy("Dummy",1,1,DataType.Byte, true, -1, true, true),
-	UByte("Unsigned Byte",1,1, DataType.UByte),
-	Byte("Signed Byte",1,1, DataType.Byte),
-	Bool8("Boolean 8Bit", 1, 8, DataType.Boolean),
-	Bool16("Boolean 16Bit", 2, 16, DataType.Boolean),
-	UInt16("Unsigned Int 16Bit", 2, 1, DataType.UInt16),
-	Int16("Integer 16Bit", 2, 1, DataType.Int16),
-	UInt32("Unsigned Int 32Bit", 4, 1, DataType.UInt32),
-	Int32("Integer 32Bit", 4, 1, DataType.Int32),
-	Float("Float", 4, 1,DataType.Float),
-	String("String", 1, 1, DataType.String),
-	RawString("RawString", 1, 1, DataType.String),
-	MessageAge("Message Age", 4, 1, DataType.UInt32, true, 0, false, false);
+	Dummy("Dummy",1,1,BuiltinDataType.Byte, true, -1, true, true),
+	UByte("Unsigned Byte",1,1, BuiltinDataType.Byte),
+	Byte("Signed Byte",1,1, BuiltinDataType.SByte),
+	Bool8("Boolean 8Bit", 1, 8, BuiltinDataType.Boolean),
+	Bool16("Boolean 16Bit", 2, 16, BuiltinDataType.Boolean),
+	UInt16("Unsigned Int 16Bit", 2, 1, BuiltinDataType.UInt16),
+	Int16("Integer 16Bit", 2, 1, BuiltinDataType.Int16),
+	UInt32("Unsigned Int 32Bit", 4, 1, BuiltinDataType.UInt32),
+	Int32("Integer 32Bit", 4, 1, BuiltinDataType.Int32),
+	Float("Float", 4, 1,BuiltinDataType.Float),
+	String("String", 1, 1, BuiltinDataType.String),
+	RawString("RawString", 1, 1, BuiltinDataType.String),
+	MessageAge("Message Age", 4, 1, BuiltinDataType.UInt32, true, 0, false, false);
 	
 	private String displayString;
 	private int byteCount;
 	private int arrayLength;
-	private DataType dataType;
+	private BuiltinDataType dataType;
 	private boolean special;
 	private int specialId;		// Id's <=0 are reserved for special tags
 	private boolean hidden;		// Hidden items will not be added as OPC-Nodes
 	private boolean arrayAllowed;
 	
 	private BinaryDataType(String displayString, int byteSize, int arraySize
-		, DataType dataType) {
+		, BuiltinDataType dataType) {
 		
 		this(displayString, byteSize, arraySize, dataType, false, 0, false, true);
 	}
 
 	private BinaryDataType(String displayString, int byteSize, int arraySize
-		, DataType dataType, boolean special, int specialId, boolean hidden, boolean arrayAllowed) {
+		, BuiltinDataType dataType, boolean special, int specialId, boolean hidden, boolean arrayAllowed) {
 		
 		this.displayString = displayString;
 		this.byteCount = byteSize;
@@ -110,7 +110,7 @@ public enum BinaryDataType implements Serializable {
 		return specialId;
 	}
 	
-	public DataType getUADataType() {
+	public BuiltinDataType getUADataType() {
 		return dataType;
 	}
 	

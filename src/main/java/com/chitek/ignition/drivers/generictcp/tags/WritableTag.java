@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2013 C. Hiesserich
+ * Copyright 2012-2019 C. Hiesserich
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,23 +15,23 @@
  ******************************************************************************/
 package com.chitek.ignition.drivers.generictcp.tags;
 
-import java.util.EnumSet;
+import org.eclipse.milo.opcua.sdk.core.AccessLevel;
+import org.eclipse.milo.opcua.stack.core.BuiltinDataType;
 
-import com.inductiveautomation.opcua.types.AccessLevel;
-import com.inductiveautomation.opcua.types.DataType;
+import com.google.common.collect.ImmutableSet;
 import com.inductiveautomation.xopc.driver.api.tags.DynamicDriverTag;
 import com.inductiveautomation.xopc.driver.api.tags.WritableDriverTag;
 
 public abstract class WritableTag extends DynamicDriverTag
 		implements WritableDriverTag {
 
-	public WritableTag(String address, DataType dataType)
+	public WritableTag(String address, BuiltinDataType dataType)
 	{
 		super(address, dataType);
 	}
 
-	public EnumSet<AccessLevel> getAccessLevel() {
-		return EnumSet.of(AccessLevel.CurrentRead, AccessLevel.CurrentWrite);
+	public ImmutableSet<AccessLevel> getAccessLevel() {
+		return (AccessLevel.READ_WRITE);
 	}
 	
 }

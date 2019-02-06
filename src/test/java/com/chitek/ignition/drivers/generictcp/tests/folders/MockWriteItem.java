@@ -1,8 +1,9 @@
 package com.chitek.ignition.drivers.generictcp.tests.folders;
 
-import com.inductiveautomation.opcua.types.NodeId;
-import com.inductiveautomation.opcua.types.StatusCode;
-import com.inductiveautomation.opcua.types.Variant;
+import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
+import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
+import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
+
 import com.inductiveautomation.xopc.driver.api.items.WriteItem;
 
 public class MockWriteItem implements WriteItem {

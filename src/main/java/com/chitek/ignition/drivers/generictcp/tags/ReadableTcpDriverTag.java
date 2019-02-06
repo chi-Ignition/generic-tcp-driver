@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2013 C. Hiesserich
+ * Copyright 2012-2019 C. Hiesserich
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
  ******************************************************************************/
 package com.chitek.ignition.drivers.generictcp.tags;
 
+import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
+import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
+import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
+
 import com.chitek.ignition.drivers.generictcp.types.BinaryDataType;
-import com.inductiveautomation.opcua.nodes.VariableNode;
-import com.inductiveautomation.opcua.types.DataValue;
-import com.inductiveautomation.opcua.types.StatusCode;
-import com.inductiveautomation.opcua.types.UtcTime;
-import com.inductiveautomation.opcua.types.Variant;
 import com.inductiveautomation.xopc.driver.api.tags.DynamicDriverTag;
 
 /**
@@ -36,10 +37,10 @@ public class ReadableTcpDriverTag extends DynamicDriverTag {
 	private final String alias;
 	private final int id;
 	private final int index;
-	protected VariableNode uaNode;
+	protected UaVariableNode uaNode;
 	protected int readSize;
 	
-	protected static final DataValue initialValue = new DataValue(StatusCode.BAD_VALUE);
+	protected static final DataValue initialValue = new DataValue(StatusCode.BAD);
 
 	public ReadableTcpDriverTag(String address, int id, String alias, BinaryDataType dataType)
 	{
@@ -78,13 +79,20 @@ public class ReadableTcpDriverTag extends DynamicDriverTag {
 		this.value = new DataValue(statusCode);
 	}
 	
-	public void setValue(Variant newValue, UtcTime timestamp) {
+	public void setValue(long statusCode) {
+		this.value = new DataValue(statusCode);
+	}
+	
+	public void setValue(Variant newValue, DateTime timestamp) {
 		setValue(newValue, StatusCode.GOOD, timestamp);
 	}
 
-	public void setValue(Variant newValue, StatusCode statusCode, UtcTime timestamp) {
-		this.value = new DataValue(newValue, statusCode, timestamp,
-				this.value.getServerTimestamp());
+	public void setValue(Variant newValue, long statusCode, DateTime timestamp) {
+		this.value = new DataValue(newValue, new StatusCode(statusCode), timestamp,	this.value.getServerTime());
+	}
+	
+	public void setValue(Variant newValue, StatusCode statusCode, DateTime timestamp) {
+		this.value = new DataValue(newValue, statusCode, timestamp,	this.value.getServerTime());
 	}
 
 	/**
@@ -95,11 +103,11 @@ public class ReadableTcpDriverTag extends DynamicDriverTag {
 			uaNode.setValue(value);
 	}
 
-	public void setUaNode(VariableNode node) {
+	public void setUaNode(UaVariableNode node) {
 		this.uaNode = node;
 	}
 
-	public VariableNode getUaNode() {
+	public UaVariableNode getUaNode() {
 		return uaNode;
 	}
 

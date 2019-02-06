@@ -15,7 +15,7 @@ import com.inductiveautomation.ignition.gateway.web.components.ConfigPanel;
 import com.inductiveautomation.ignition.gateway.web.pages.IConfigPage;
 import com.inductiveautomation.xopc.driver.api.Driver;
 import com.inductiveautomation.xopc.driver.api.DriverContext;
-import com.inductiveautomation.xopc.driver.api.configuration.DeviceSettingsRecord;
+import com.inductiveautomation.ignition.gateway.opcua.server.api.DeviceSettingsRecord;
 import com.inductiveautomation.xopc.driver.api.configuration.DriverType;
 import com.inductiveautomation.xopc.driver.api.configuration.links.ConfigurationUILink;
 import com.inductiveautomation.xopc.driver.api.configuration.links.LinkEntry;

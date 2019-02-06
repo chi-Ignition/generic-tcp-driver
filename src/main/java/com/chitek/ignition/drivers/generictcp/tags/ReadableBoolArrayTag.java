@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2013 C. Hiesserich
+ * Copyright 2012-2019 C. Hiesserich
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
  ******************************************************************************/
 package com.chitek.ignition.drivers.generictcp.tags;
 
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
+import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
+import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
+import org.eclipse.milo.opcua.stack.core.util.ArrayUtil;
+
 import com.chitek.ignition.drivers.generictcp.types.BinaryDataType;
-import com.inductiveautomation.opcua.types.DataValue;
-import com.inductiveautomation.opcua.types.StatusCode;
-import com.inductiveautomation.opcua.types.UtcTime;
-import com.inductiveautomation.opcua.types.Variant;
 
 /**
  * A readable tag for Boolean Arrays. In difference to other ArrayTags, Boolean tags have a
@@ -55,12 +57,12 @@ public class ReadableBoolArrayTag extends ReadableArrayTag {
 	}
 	
 	@Override
-	public void setValue(Variant newValue, StatusCode statusCode, UtcTime timestamp) {
+	public void setValue(Variant newValue, StatusCode statusCode, DateTime timestamp) {
 		
-		if (newValue.getArrayLength() != this.valueArrayLength) {
+		if (newValue.getValue().getClass().isArray() && ArrayUtil.getDimensions(newValue.getValue())[0] != valueArrayLength) {
 			throw new IllegalArgumentException(
 				String.format("SetValue in ReadableBoolArray '%s' expects an Variant with array size %d. Argument has array size %d."
-					,getAddress(), this.valueArrayLength, newValue.getArrayLength() ));
+					,getAddress(), this.valueArrayLength, ArrayUtil.getDimensions(newValue.getValue())[0] ));
 		}
 		this.value = new DataValue(newValue, statusCode, timestamp, timestamp);
 		

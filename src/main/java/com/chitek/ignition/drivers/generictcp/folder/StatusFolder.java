@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2013 C. Hiesserich
+ * Copyright 2012-2019 C. Hiesserich
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,19 @@
  ******************************************************************************/
 package com.chitek.ignition.drivers.generictcp.folder;
 
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
+import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
+import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
+
 import com.chitek.ignition.drivers.generictcp.GenericTcpClientDriver;
 import com.chitek.ignition.drivers.generictcp.tags.WritableTag;
 import com.inductiveautomation.ignition.common.TypeUtilities;
-import com.inductiveautomation.opcua.types.DataType;
-import com.inductiveautomation.opcua.types.DataValue;
-import com.inductiveautomation.opcua.types.StatusCode;
-import com.inductiveautomation.opcua.types.UInt16;
-import com.inductiveautomation.opcua.types.Variant;
 import com.inductiveautomation.xopc.driver.api.tags.DynamicDriverTag;
+
+import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ushort;
+
+import org.eclipse.milo.opcua.stack.core.BuiltinDataType;
+import org.eclipse.milo.opcua.stack.core.StatusCodes;
 
 /**
  * Status folder for the Client mode (active) driver type.
@@ -50,7 +54,7 @@ public class StatusFolder extends MessageFolder {
 		deviceNameValue = new DataValue(new Variant(getDeviceName()));
 		connectedHostValue = new DataValue(new Variant(""));
 		hostnameValue = new DataValue(new Variant(driver.getHostname()));
-		portValue = new DataValue(new Variant(new UInt16(driver.getPort())));
+		portValue = new DataValue(new Variant(ushort(driver.getPort())));
 		connectValue = new DataValue(new Variant(driver.isConnectionEnabled()));
 		isConnectedValue = new DataValue(new Variant(false));
 
@@ -81,7 +85,7 @@ public class StatusFolder extends MessageFolder {
 	public void updateStatus(boolean connectionEnabled, String hostname, int port) {
 		connectValue = new DataValue(new Variant(connectionEnabled));
 		hostnameValue = new DataValue(new Variant(hostname));
-		portValue = new DataValue(new Variant(new UInt16(port)));
+		portValue = new DataValue(new Variant(ushort(port)));
 	}
 
 	/**
@@ -94,7 +98,7 @@ public class StatusFolder extends MessageFolder {
 		buildAndAddFolderNode( getFolderAddress(), FOLDER_NAME);
 
 		// Special tags
-		DynamicDriverTag driverTag = new DynamicDriverTag(getFolderAddress() + "/Is Connected", DataType.Boolean) {
+		DynamicDriverTag driverTag = new DynamicDriverTag(getFolderAddress() + "/Is Connected", BuiltinDataType.Boolean) {
 			@Override
 			public DataValue getValue() {
 				return isConnectedValue;
@@ -102,7 +106,7 @@ public class StatusFolder extends MessageFolder {
 		};
 		buildAndAddNode(driverTag).setValue(new DataValue(new Variant(false)));
 
-		driverTag = new DynamicDriverTag(getFolderAddress() + "/Connected Host", DataType.String) {
+		driverTag = new DynamicDriverTag(getFolderAddress() + "/Connected Host", BuiltinDataType.String) {
 			@Override
 			public DataValue getValue() {
 				return connectedHostValue;
@@ -110,7 +114,7 @@ public class StatusFolder extends MessageFolder {
 		};
 		buildAndAddNode(driverTag).setValue(driverTag.getValue());
 
-		driverTag = new DynamicDriverTag(getFolderAddress() + "/Device Name", DataType.String) {
+		driverTag = new DynamicDriverTag(getFolderAddress() + "/Device Name", BuiltinDataType.String) {
 			@Override
 			public DataValue getValue() {
 				return deviceNameValue;
@@ -118,7 +122,7 @@ public class StatusFolder extends MessageFolder {
 		};
 		buildAndAddNode(driverTag).setValue(driverTag.getValue());
 
-		WritableTag writableTag = new WritableTag(getFolderAddress() + "/Hostname", DataType.String) {
+		WritableTag writableTag = new WritableTag(getFolderAddress() + "/Hostname", BuiltinDataType.String) {
 			@Override
 			public StatusCode setValue(DataValue paramDataValue) {
 				String newHostname = TypeUtilities.toString(paramDataValue.getValue().getValue());
@@ -137,19 +141,19 @@ public class StatusFolder extends MessageFolder {
 		};
 		buildAndAddNode(writableTag).setValue(writableTag.getValue());
 
-		writableTag = new WritableTag(getFolderAddress() + "/Port", DataType.UInt16) {
+		writableTag = new WritableTag(getFolderAddress() + "/Port", BuiltinDataType.UInt16) {
 			@Override
 			public StatusCode setValue(DataValue paramDataValue) {
 				int newPort;
 				try {
 					newPort = TypeUtilities.toInteger(paramDataValue.getValue().getValue());
 				} catch (ClassCastException e) {
-					return StatusCode.BAD_VALUE;
+					return new StatusCode(StatusCodes.Bad_InvalidArgument);
 				}
 
 				log.info(String.format("Client set Port to %d", newPort));
 				driver.updateStatus(null, null, newPort);
-				portValue = new DataValue(new Variant(new UInt16(newPort)));
+				portValue = new DataValue(new Variant(ushort(newPort)));
 
 				return StatusCode.GOOD;
 			}
@@ -161,14 +165,14 @@ public class StatusFolder extends MessageFolder {
 		};
 		buildAndAddNode(writableTag).setValue(writableTag.getValue());
 
-		WritableTag connectTag = new WritableTag(getFolderAddress() + "/Connect", DataType.Boolean) {
+		WritableTag connectTag = new WritableTag(getFolderAddress() + "/Connect", BuiltinDataType.Boolean) {
 			@Override
 			public StatusCode setValue(DataValue paramDataValue) {
 				boolean newValue;
 				try {
 					newValue = TypeUtilities.toBool(paramDataValue.getValue().getValue());
 				} catch (ClassCastException e) {
-					return StatusCode.BAD_VALUE;
+					return new StatusCode(StatusCodes.Bad_InvalidArgument);
 				}
 
 				connectValue = new DataValue(new Variant(newValue));

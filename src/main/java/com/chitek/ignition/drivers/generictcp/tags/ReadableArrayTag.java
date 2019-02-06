@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2013 C. Hiesserich
+ * Copyright 2012-2019 C. Hiesserich
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,16 @@
  ******************************************************************************/
 package com.chitek.ignition.drivers.generictcp.tags;
 
+import org.eclipse.milo.opcua.stack.core.util.ArrayUtil;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
+import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
+import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
+
 import com.chitek.ignition.drivers.generictcp.types.BinaryDataType;
-import com.inductiveautomation.opcua.types.DataValue;
-import com.inductiveautomation.opcua.types.StatusCode;
-import com.inductiveautomation.opcua.types.UInt16;
-import com.inductiveautomation.opcua.types.UtcTime;
-import com.inductiveautomation.opcua.types.Variant;
+import com.chitek.ignition.drivers.generictcp.util.Util;
+
+import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ushort;
 
 /**
  * A readable tag with an array as its value. The child tags contain the individual array elements.
@@ -46,12 +50,12 @@ public class ReadableArrayTag extends ReadableTcpDriverTag {
 	}
 	
 	@Override
-	public void setValue(Variant newValue, StatusCode statusCode, UtcTime timestamp) {
+	public void setValue(Variant newValue, StatusCode statusCode, DateTime timestamp) {
 		
-		if (newValue.getArrayLength() != valueArrayLength) {
+		if (newValue.getValue().getClass().isArray() && ArrayUtil.getDimensions(newValue.getValue())[0] != valueArrayLength) {
 			throw new IllegalArgumentException(
 				String.format("SetValue in ReadableArray '%s' expects an Variant with array size %d. Argument has array size %d."
-					,getAddress(), valueArrayLength, newValue.getArrayLength() ));
+					,getAddress(), valueArrayLength, ArrayUtil.getDimensions(newValue.getValue())[0] ));
 		}
 		this.value = new DataValue(newValue, statusCode, timestamp, timestamp);
 		
@@ -61,17 +65,13 @@ public class ReadableArrayTag extends ReadableTcpDriverTag {
 		// A simple for loop is used here, because it performs better with arrays than a (for x : childTags)
 		int rawValue=0;
 		for (int i = 0; i < childCount; i++) {
-			// Set the correct array dimensions for the Variant
-			int childArraySize = childTags[i].getValueArrayLength();
-			int[] dimensions = childArraySize > 1 ? new int[] { childArraySize } : null;
-
-			Variant childValue = new Variant(value[i], this.getDataType(), childArraySize, dimensions);
+			Variant childValue = Util.makeVariant(value[i], this.getDataType());
 			childTags[i].setValue(childValue, statusCode, timestamp);
 			if ( childRaw!=null && (Boolean)value[i]) rawValue += 1<<i;
 		}
 		
 		if (childRaw != null)
-			childRaw.setValue(new Variant(new UInt16(rawValue) ), statusCode, timestamp);
+			childRaw.setValue(new Variant(ushort(rawValue) ), statusCode, timestamp);
 	}
 	
 	@Override

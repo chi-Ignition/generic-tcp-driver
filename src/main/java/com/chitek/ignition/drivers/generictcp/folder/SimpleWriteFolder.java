@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2013 C. Hiesserich
+ * Copyright 2012-2019 C. Hiesserich
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -18,6 +18,13 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.milo.opcua.stack.core.BuiltinDataType;
+import org.eclipse.milo.opcua.stack.core.StatusCodes;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
+import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
+import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UShort;
+
 import com.chitek.ignition.drivers.generictcp.IGenericTcpDriverContext;
 import com.chitek.ignition.drivers.generictcp.meta.config.IDriverSettings;
 import com.chitek.ignition.drivers.generictcp.meta.config.WritebackConfig;
@@ -28,11 +35,6 @@ import com.chitek.ignition.drivers.generictcp.types.OptionalDataType;
 import com.chitek.ignition.drivers.generictcp.types.WritebackDataType;
 import com.chitek.ignition.drivers.generictcp.util.Util;
 import com.inductiveautomation.ignition.common.TypeUtilities;
-import com.inductiveautomation.opcua.types.DataType;
-import com.inductiveautomation.opcua.types.DataValue;
-import com.inductiveautomation.opcua.types.StatusCode;
-import com.inductiveautomation.opcua.types.UInt16;
-import com.inductiveautomation.opcua.types.Variant;
 import com.inductiveautomation.xopc.driver.util.ByteUtilities;
 
 public class SimpleWriteFolder extends MessageFolder implements FolderStateProvider {
@@ -92,7 +94,7 @@ public class SimpleWriteFolder extends MessageFolder implements FolderStateProvi
 
 		// HexString size is dynamic
 		if (config.getDataType() != WritebackDataType.ByteString)
-			fixedLength += config.getDataType().getUADataType().getNumBytes();
+			fixedLength += config.getDataType().getByteSize();
 
 		// The maximum length depends on use of the message length field
 		maxLength = config.getPrefix().contains("lenb") ? 255 : 65535;
@@ -114,9 +116,9 @@ public class SimpleWriteFolder extends MessageFolder implements FolderStateProvi
 				});
 			}
 		} else {
-			writeValue = new DataValue(writeValue.getValue(), StatusCode.BAD_NOT_CONNECTED);
-			idValue = new DataValue(idValue.getValue(), StatusCode.BAD_NOT_CONNECTED);
-			valueValue = new DataValue(valueValue.getValue(), StatusCode.BAD_NOT_CONNECTED);
+			writeValue = new DataValue(writeValue.getValue(), new StatusCode(StatusCodes.Bad_NotConnected));
+			idValue = new DataValue(idValue.getValue(), new StatusCode(StatusCodes.Bad_NotConnected));
+			valueValue = new DataValue(valueValue.getValue(), new StatusCode(StatusCodes.Bad_NotConnected));
 		}
 
 		this.isConnected = isConnected;
@@ -171,9 +173,9 @@ public class SimpleWriteFolder extends MessageFolder implements FolderStateProvi
 		initialNumValue = numValue;
 		messageId = initialMessageId = config.getInitialId();
 		
-		valueValue = new DataValue(valueValue.getValue(), StatusCode.BAD_NOT_CONNECTED);
-		idValue = new DataValue(Util.makeVariant(messageId, config.getMessageIdType().getUADataType()), StatusCode.BAD_NOT_CONNECTED);
-		writeValue = new DataValue(new Variant(false), StatusCode.BAD_NOT_CONNECTED);
+		valueValue = new DataValue(valueValue.getValue(), new StatusCode(StatusCodes.Bad_NotConnected));
+		idValue = new DataValue(Util.makeVariant(messageId, config.getMessageIdType().getUADataType()), new StatusCode(StatusCodes.Bad_NotConnected));
+		writeValue = new DataValue(new Variant(false), new StatusCode(StatusCodes.Bad_NotConnected));
 	}
 
 	private ByteBuffer buildMessage(boolean initialValues) {
@@ -276,18 +278,18 @@ public class SimpleWriteFolder extends MessageFolder implements FolderStateProvi
 		buildAndAddFolderNode(getFolderAddress(), FOLDER_NAME);
 
 		// Write - writing 'true' will send the message. The value to read will always be false.
-		WritableTag writeTag = new WritableTag(getFolderAddress() + "/Write", DataType.Boolean) {
+		WritableTag writeTag = new WritableTag(getFolderAddress() + "/Write", BuiltinDataType.Boolean) {
 			@Override
 			public StatusCode setValue(DataValue paramDataValue) {
 
 				if (!isConnected || !isActiveNode)
-					return StatusCode.BAD_NOT_CONNECTED;
+					return new StatusCode(StatusCodes.Bad_NotConnected);
 
 				boolean newValue;
 				try {
 					newValue = TypeUtilities.toBool(paramDataValue.getValue().getValue());
 				} catch (ClassCastException e) {
-					return StatusCode.BAD_VALUE;
+					return new StatusCode(StatusCodes.Bad_InvalidArgument);
 				}
 				
 				if (newValue) {
@@ -333,17 +335,17 @@ public class SimpleWriteFolder extends MessageFolder implements FolderStateProvi
 						switch (config.getMessageIdType()) {
 						case UByte:
 							if (newValue < 0 || newValue > 255)
-								return StatusCode.BAD_OUT_OF_RANGE;
+								return new StatusCode(StatusCodes.Bad_OutOfRange);
 							break;
 						case UInt16:
-							if (newValue < UInt16.MIN_VALUE || newValue > UInt16.MAX_VALUE)
-								return StatusCode.BAD_OUT_OF_RANGE;
+							if (newValue < UShort.MIN_VALUE || newValue > UShort.MAX_VALUE)
+								return new StatusCode(StatusCodes.Bad_OutOfRange);
 							break;
 						case None:
 							break;
 						}
 					} catch (ClassCastException e) {
-						return StatusCode.BAD_OUT_OF_RANGE;
+						return new StatusCode(StatusCodes.Bad_OutOfRange);
 					}
 
 					tagLock.lock();
@@ -375,7 +377,7 @@ public class SimpleWriteFolder extends MessageFolder implements FolderStateProvi
 				}
 
 				if (!isConnected && config.getSendOnValueChange())
-					return StatusCode.BAD_NOT_CONNECTED;
+					return new StatusCode(StatusCodes.Bad_NotConnected);
 
 				tagLock.lock();
 				try {
@@ -385,12 +387,12 @@ public class SimpleWriteFolder extends MessageFolder implements FolderStateProvi
 							val = Util.hexString2ByteArray((String) paramDataValue.getValue().getValue());
 						} catch (ParseException e) {
 							log.error("Client input can not be parsed as HexString. " + e.getMessage());
-							return StatusCode.BAD_OUT_OF_RANGE;
+							return new StatusCode(StatusCodes.Bad_OutOfRange);
 						}
 						// Check the message length
 						if (fixedLength + val.length > maxLength) {
 							log.warn("HexString exceeds maximum message length.");
-							return StatusCode.BAD_OUT_OF_RANGE;
+							return new StatusCode(StatusCodes.Bad_OutOfRange);
 						}
 						byteValue = val;
 					} else {

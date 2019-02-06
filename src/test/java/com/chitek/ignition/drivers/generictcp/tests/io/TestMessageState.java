@@ -28,7 +28,7 @@ import com.chitek.ignition.drivers.generictcp.tests.MockExecutionManager;
 import com.chitek.ignition.drivers.generictcp.tests.TestUtils;
 import com.chitek.ignition.drivers.generictcp.types.OptionalDataType;
 import com.chitek.ignition.drivers.generictcp.util.VariantByteBuffer;
-import com.inductiveautomation.opcua.util.ByteUtilities;
+import com.inductiveautomation.xopc.driver.util.ByteUtilities;
 
 public class TestMessageState {
 

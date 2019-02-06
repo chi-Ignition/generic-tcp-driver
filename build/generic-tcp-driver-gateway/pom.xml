@@ -24,18 +24,17 @@
 					<exclude>**/*.java</exclude>
 				</excludes>
 			</resource>
-</resources>
+		</resources>
 		<testResources>
 			<testResource><directory>../../src/test/resources</directory></testResource>
 		</testResources>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
+				<version>3.8.0</version>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
+        			<maven.compiler.release>10</maven.compiler.release>
+    			</configuration>
 			</plugin>
 			<!-- git plugin extracts build number and date -->
 			<plugin>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2018 C. Hiesserich
+ * Copyright 2012-2019 C. Hiesserich
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
+import org.eclipse.milo.opcua.stack.core.BuiltinDataType;
+import org.eclipse.milo.opcua.stack.core.StatusCodes;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
+import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
+import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
+
 import com.chitek.ignition.drivers.generictcp.IGenericTcpDriverContext;
 import com.chitek.ignition.drivers.generictcp.meta.config.IDriverSettings;
 import com.chitek.ignition.drivers.generictcp.meta.config.MessageConfig;
@@ -43,16 +52,11 @@ import com.chitek.ignition.drivers.generictcp.types.TagLengthType;
 import com.chitek.ignition.drivers.generictcp.util.VariantByteBuffer;
 import com.chitek.util.PersistentQueue;
 import com.inductiveautomation.ignition.common.TypeUtilities;
-import com.inductiveautomation.opcua.nodes.VariableNode;
-import com.inductiveautomation.opcua.types.DataType;
-import com.inductiveautomation.opcua.types.DataValue;
-import com.inductiveautomation.opcua.types.StatusCode;
-import com.inductiveautomation.opcua.types.UInt16;
-import com.inductiveautomation.opcua.types.UInt32;
-import com.inductiveautomation.opcua.types.UtcTime;
-import com.inductiveautomation.opcua.types.Variant;
 import com.inductiveautomation.xopc.driver.api.tags.DynamicDriverTag;
 import com.inductiveautomation.xopc.driver.util.ByteUtilities;
+
+import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.uint;
+import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ushort;
 
 /**
  * The message folder is the implementation of a configured message. It handles incoming messages and subscriptions.
@@ -140,9 +144,9 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 	private void init(MessageConfig messageConfig, String folderAddress) {
 		createFolder(messageConfig);
 
-		timestampValue = new DataValue(StatusCode.BAD_WAITING_FOR_INITIAL_DATA);
-		messageCountValue = new DataValue(new Variant(new UInt32(0)));
-		handshakeValue = new DataValue(new Variant(new UInt32(0)));
+		timestampValue = new DataValue(StatusCodes.Bad_WaitingForInitialData);
+		messageCountValue = new DataValue(new Variant(uint(0)));
+		handshakeValue = new DataValue(new Variant(uint(0)));
 
 		this.handshakeBit = true;
 		this.subscriptionPresent = false;
@@ -157,7 +161,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 			try {
 				// The persistent queue loads content from disk on initialization
 				queue = new PersistentQueue<byte[]>(path, configHash, messageConfig.isUsePersistance(), log);
-				queueSizeValue = new DataValue(new Variant(new UInt16(queue.size())));
+				queueSizeValue = new DataValue(new Variant(ushort(queue.size())));
 				queueActive = false;
 			} catch (IOException e) {
 				log.error(String.format("Error enabling handshake mode for Message ID%d. Can not create persitent queue in path %s:%s", getFolderId(), path, e.toString()));
@@ -185,7 +189,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 		}
 
 		// Update tag qualities
-		StatusCode statusCode = isConnected ? StatusCode.BAD_WAITING_FOR_INITIAL_DATA : StatusCode.BAD_NOT_CONNECTED;
+		StatusCode statusCode = new StatusCode(isConnected ? StatusCodes.Bad_WaitingForInitialData : StatusCodes.Bad_NotConnected);
 		setTagQuality(statusCode);
 	}
 
@@ -197,7 +201,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 			return;
 		}
 
-		StatusCode statusCode = (isActive) ? StatusCode.BAD_WAITING_FOR_INITIAL_DATA : StatusCode.BAD_NOT_CONNECTED;
+		StatusCode statusCode = new StatusCode((isActive) ? StatusCodes.Bad_WaitingForInitialData : StatusCodes.Bad_NotConnected);
 		setTagQuality(statusCode);
 
 		// Active -> Not active
@@ -236,7 +240,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 				log.debug(String.format("'%s' update driver state -> Active with Queue.", FolderManager.folderIdAsString(getFolderId())));
 			}
 
-			queueSizeValue = new DataValue(new Variant(new UInt16(queue.size())));
+			queueSizeValue = new DataValue(new Variant(ushort(queue.size())));
 			queueActive = true;
 			// Start asynchronous evaluation of queued message
 			getDriverContext().executeOnce(new Runnable() {
@@ -442,7 +446,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 					}
 					try {
 						tagLock.lock();
-						handshakeValue = new DataValue(new Variant(new UInt32(0)));
+						handshakeValue = new DataValue(new Variant(uint(0)));
 					} finally {
 						tagLock.unlock();
 					}
@@ -498,7 +502,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 			dataWrapper.evaluateData(buffer);
 
 			long timestamp = dataWrapper.getTimeReceived();
-			UtcTime timestampUtc = UtcTime.fromJavaTime(timestamp);
+			DateTime timestampUtc = new DateTime(timestamp);
 
 			long headerTimestamp = dataWrapper.getHeaderTimestamp();
 
@@ -515,8 +519,8 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 					}
 					if (calculatedAge >= 0) {
 						timestamp -= calculatedAge;
-						timestampUtc = UtcTime.fromJavaTime(timestamp);
-						messageAgeTag.setValue(new Variant(new UInt32(calculatedAge)), timestampUtc);
+						timestampUtc = new DateTime(timestamp);
+						messageAgeTag.setValue(new Variant(uint(calculatedAge)), timestampUtc);
 						if (log.isTraceEnabled()) {
 							log.trace(String.format(
 									"Evaluate message. Received: %s (%d) - Header timestamp: %d - Message Age: %d - Calculated: Message age: %dms - Timestamp: %s -  Timestamp factor: %d",
@@ -525,8 +529,8 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 						}
 					} else {
 						calculatedAge = 0;
-						timestampUtc = UtcTime.fromJavaTime(timestamp);
-						messageAgeTag.setValue(new Variant(new UInt32(calculatedAge)), StatusCode.BAD_OUT_OF_RANGE, timestampUtc);
+						timestampUtc = new DateTime(timestamp);
+						messageAgeTag.setValue(new Variant(uint(calculatedAge)), StatusCodes.Bad_OutOfRange, timestampUtc);
 						log.error(String.format("Evaluated Message has an invalid age. Header timestamp: %d - messageAge: %d", headerTimestamp, messageAge));
 					}
 
@@ -580,12 +584,12 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 
 				timestampValue = new DataValue(new Variant(timestamp));
 
-				if (messageCount < UInt32.MAX_VALUE)
+				if (messageCount < UInteger.MAX_VALUE)
 					messageCount++;
 				else
 					messageCount = 0;
-				messageCountValue = new DataValue(new Variant(new UInt32(messageCount)));
-				handshakeValue = new DataValue(new Variant(new UInt32(messageCount)));
+				messageCountValue = new DataValue(new Variant(uint(messageCount)));
+				handshakeValue = new DataValue(new Variant(uint(messageCount)));
 
 			} catch (BufferUnderflowException ex) {
 				log.error(String.format("BufferUnderflowException while evaluating message with %d bytes of payload data.", message.length - 16));
@@ -602,12 +606,12 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 			// Increase the message count even if something went wrong
 			tagLock.lock();
 			try {
-				if (messageCount < UInt32.MAX_VALUE)
+				if (messageCount < UInteger.MAX_VALUE)
 					messageCount++;
 				else
 					messageCount = 0;
-				messageCountValue = new DataValue(new Variant(new UInt32(messageCount)));
-				handshakeValue = new DataValue(new Variant(new UInt32(messageCount)));
+				messageCountValue = new DataValue(new Variant(uint(messageCount)));
+				handshakeValue = new DataValue(new Variant(uint(messageCount)));
 			} finally {
 				tagLock.unlock();
 			}
@@ -669,13 +673,13 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 			// Strings can not be arrays, array length is used as string length here
 			tag = new ReadableStringTag(address, id, alias, dataType, arrayLength);
 			if (!tag.getDriverDataType().isHidden()) {
-				VariableNode uaNode = buildAndAddNode(tag);
+				UaVariableNode uaNode = buildAndAddNode(tag);
 				tag.setUaNode(uaNode);
 			}
 		} else if (arrayLength > 1) {
 			// Size > 1 - create an array
 			// This method is called recursively to create the tags in the array
-			if (dataType.getUADataType() == DataType.Boolean)
+			if (dataType.getUADataType() == BuiltinDataType.Boolean)
 				tag = new ReadableBoolArrayTag(address, id, alias, dataType, arrayLength);
 			else
 				tag = new ReadableArrayTag(address, id, alias, index, dataType, arrayLength);
@@ -688,7 +692,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 
 			// Add the new tag as an UANode after all childs have been added
 			if (!tag.getDriverDataType().isHidden()) {
-				VariableNode uaNode = buildAndAddNode(tag);
+				UaVariableNode uaNode = buildAndAddNode(tag);
 				tag.setUaNode(uaNode);
 			}
 
@@ -699,22 +703,22 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 			for (int i = 0; i < dataType.getArrayLength(); i++) {
 				String childAddress = String.format("%s[%d]", address, i);
 				ReadableTcpDriverTag childTag = new ReadableTcpDriverTag(childAddress, id, alias, i, dataType);
-				VariableNode childNode = buildAndAddNode(childTag);
+				UaVariableNode childNode = buildAndAddNode(childTag);
 				childTag.setUaNode(childNode);
 				((ReadableArrayTag) tag).addChild(childTag);
 			}
 
-			if (dataType.getUADataType() == DataType.Boolean) {
+			if (dataType.getUADataType() == BuiltinDataType.Boolean) {
 				String childAddress = String.format("%s[raw]", address);
 				ReadableTcpDriverTag childTag = new ReadableTcpDriverTag(childAddress, id, alias + "_raw", -1, BinaryDataType.UInt16);
-				VariableNode childNode = buildAndAddNode(childTag);
+				UaVariableNode childNode = buildAndAddNode(childTag);
 				childTag.setUaNode(childNode);
 				((ReadableArrayTag) tag).addChildRaw(childTag);
 			}
 
 			// Add the new tag as an UANode after all childs have been added
 			if (!tag.getDriverDataType().isHidden()) {
-				VariableNode uaNode = buildAndAddNode(tag);
+				UaVariableNode uaNode = buildAndAddNode(tag);
 				tag.setUaNode(uaNode);
 			}
 
@@ -722,7 +726,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 			// No array - create a simple tag
 			tag = new ReadableTcpDriverTag(address, id, alias, index, dataType);
 			if (!tag.getDriverDataType().isHidden()) {
-				VariableNode uaNode = buildAndAddNode(tag);
+				UaVariableNode uaNode = buildAndAddNode(tag);
 				tag.setUaNode(uaNode);
 			}
 		}
@@ -788,7 +792,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 	protected void addDefaultTags(String folderName) {
 
 		// Special tags
-		DynamicDriverTag driverTag = new DynamicDriverTag(folderName + TIMESTAMP_TAG_NAME, DataType.DateTime) {
+		DynamicDriverTag driverTag = new DynamicDriverTag(folderName + TIMESTAMP_TAG_NAME, BuiltinDataType.DateTime) {
 			@Override
 			public DataValue getValue() {
 				return timestampValue;
@@ -797,7 +801,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 		buildAndAddNode(driverTag).setValue(driverTag.getValue());
 
 		// MessageCount
-		driverTag = new DynamicDriverTag(folderName + MESSAGE_COUNT_TAG_NAME, DataType.UInt32) {
+		driverTag = new DynamicDriverTag(folderName + MESSAGE_COUNT_TAG_NAME, BuiltinDataType.UInt32) {
 			@Override
 			public DataValue getValue() {
 				return messageCountValue;
@@ -807,23 +811,23 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 
 		// Writable handshake tag
 		if (queueMode == QueueMode.HANDSHAKE) {
-			WritableTag handshakeTag = new WritableTag(folderName + HANDSHAKE_TAG_NAME, DataType.Int64) {
+			WritableTag handshakeTag = new WritableTag(folderName + HANDSHAKE_TAG_NAME, BuiltinDataType.Int64) {
 				@Override
 				public StatusCode setValue(DataValue paramDataValue) {
 					Long newValue;
 					try {
 						newValue = TypeUtilities.toLong(paramDataValue.getValue().getValue());
 					} catch (ClassCastException e) {
-						return StatusCode.BAD_VALUE;
+						return new StatusCode(StatusCodes.Bad_InvalidArgument);
 					}
 
 					if (!getDriverContext().isActiveNode() && newValue != handshakeValue.getValue().getValue()) {
 						// Handshake is not accepted when this is not the active node
 						log.warn("Client tried to set Handshake on non active cluster node");
-						return StatusCode.BAD_NOT_WRITABLE;
+						return new StatusCode(StatusCodes.Bad_NotWritable);
 					}
 
-					handshakeValue = new DataValue(new Variant(new UInt32(newValue)));
+					handshakeValue = new DataValue(new Variant(uint(newValue)));
 
 					if (log.isDebugEnabled())
 						log.debug(String.format("Handshake for message id %d set by client. Value: %d - MassageCount: %d - Handshake State: %s", getFolderId(), newValue, messageCount, handshakeBit));
@@ -849,7 +853,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 
 		if (queueMode != QueueMode.NONE) {
 			// QueueSize
-			driverTag = new DynamicDriverTag(folderName + QUEUE_SIZE_TAG_NAME, DataType.UInt32) {
+			driverTag = new DynamicDriverTag(folderName + QUEUE_SIZE_TAG_NAME, BuiltinDataType.UInt32) {
 				@Override
 				public DataValue getValue() {
 					return queueSizeValue;
@@ -906,7 +910,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 		synchronized (queueLock) {
 			queue.add(message);
 
-			queueSizeValue = new DataValue(new Variant(new UInt16(queue.size())));
+			queueSizeValue = new DataValue(new Variant(ushort(queue.size())));
 			if (log.isDebugEnabled())
 				log.debug(String.format("Message with id %d and %d bytes length added to queue. New queue size: %d", ByteUtilities.get(driverSettings.getByteOrder()).getLong(message, 0),
 						message.length, queue.size()));
@@ -941,7 +945,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 
 				if (timestampQueue == timestampToRemove) {
 					queue.poll();
-					queueSizeValue = new DataValue(new Variant(new UInt16(queue.size())));
+					queueSizeValue = new DataValue(new Variant(ushort(queue.size())));
 
 					if (log.isDebugEnabled())
 						log.debug(String.format("Message with id %d polled from queue. New queue size: %d", timestampToRemove, queue.size()));

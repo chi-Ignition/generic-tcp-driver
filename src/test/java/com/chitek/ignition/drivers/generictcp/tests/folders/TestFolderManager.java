@@ -6,6 +6,9 @@ import static org.junit.Assert.assertNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.milo.opcua.stack.core.StatusCodes;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
+import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -22,8 +25,6 @@ import com.chitek.ignition.drivers.generictcp.tests.DriverTestSuite;
 import com.chitek.ignition.drivers.generictcp.tests.MockDriverContext;
 import com.chitek.ignition.drivers.generictcp.tests.TestUtils;
 import com.chitek.ignition.drivers.generictcp.types.OptionalDataType;
-import com.inductiveautomation.opcua.types.DataValue;
-import com.inductiveautomation.opcua.types.StatusCode;
 import com.inductiveautomation.xopc.driver.api.items.SubscriptionItem;
 
 public class TestFolderManager {
@@ -106,9 +107,9 @@ public class TestFolderManager {
 		fm.updateConnectionState(1, false);
 		
 		DataValue value = FolderTestUtils.readValue(msgFolder,"device1/Alias1/Data1");
-		assertEquals(StatusCode.BAD_NOT_CONNECTED, value.getStatusCode());
+		assertEquals(StatusCodes.Bad_NotConnected, value.getStatusCode().getValue());
 		value = FolderTestUtils.readValue(writeFolder, "device1/[Writeback]/Value");
-		assertEquals(StatusCode.BAD_NOT_CONNECTED, value.getStatusCode());
+		assertEquals(StatusCodes.Bad_NotConnected, value.getStatusCode().getValue());
 		value = FolderTestUtils.readValue(statusFolder, "device1/[Status]/Is Connected");
 		assertEquals(StatusCode.GOOD, value.getStatusCode());
 		assertEquals(false, value.getValue().getValue());
@@ -117,7 +118,7 @@ public class TestFolderManager {
 		fm.updateConnectionState(1, true);
 		
 		value = FolderTestUtils.readValue(msgFolder,"device1/Alias1/Data1");
-		assertEquals(StatusCode.BAD_WAITING_FOR_INITIAL_DATA, value.getStatusCode());
+		assertEquals(StatusCodes.Bad_WaitingForInitialData, value.getStatusCode().getValue());
 		value = FolderTestUtils.readValue(writeFolder, "device1/[Writeback]/Value");
 		assertEquals(StatusCode.GOOD, value.getStatusCode());	
 		value = FolderTestUtils.readValue(statusFolder, "device1/[Status]/Is Connected");

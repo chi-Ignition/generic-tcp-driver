@@ -1,7 +1,8 @@
 package com.chitek.ignition.drivers.generictcp.tests.folders;
 
-import com.inductiveautomation.opcua.types.DataValue;
-import com.inductiveautomation.opcua.types.NodeId;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
+import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
+
 import com.inductiveautomation.xopc.driver.api.items.ReadItem;
 
 public class MockReadItem implements ReadItem {

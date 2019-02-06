@@ -81,6 +81,7 @@ public class ConfigUiTabs extends ConfigPanel {
 	private void addComponents(boolean showWriteback) {
 		
 		boolean enableSubmit = true;
+
 		if (((GatewayContext) this.getApplication()).getRedundancyManager().getCurrentState().getRole() == NodeRole.Backup) {
 			info(BundleUtil.get().getStringLenient(ModuleHook.BUNDLE_PREFIX + "ConfigUI.Error.BackupNode"));
 			enableSubmit = false;

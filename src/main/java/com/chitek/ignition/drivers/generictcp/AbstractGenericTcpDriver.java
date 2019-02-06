@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2012-2019 C. Hiesserich
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package com.chitek.ignition.drivers.generictcp;
 
 import java.io.File;
@@ -5,6 +20,7 @@ import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -24,13 +40,16 @@ import com.inductiveautomation.ignition.gateway.redundancy.types.ActivityLevel;
 import com.inductiveautomation.ignition.gateway.redundancy.types.RedundancyState;
 import com.inductiveautomation.ignition.gateway.redundancy.types.RedundancyStateAdapter;
 import com.inductiveautomation.ignition.gateway.redundancy.types.RuntimeStateProvider;
-import com.inductiveautomation.opcua.nodes.Node;
-import com.inductiveautomation.opcua.nodes.builders.NodeBuilder;
-import com.inductiveautomation.opcua.nodes.builders.ObjectNodeBuilder;
-import com.inductiveautomation.opcua.nodes.builders.VariableNodeBuilder;
-import com.inductiveautomation.opcua.types.Guid;
-import com.inductiveautomation.opcua.types.NodeId;
-import com.inductiveautomation.opcua.types.StatusCode;
+
+import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectNode.UaObjectNodeBuilder;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode.UaVariableNodeBuilder;
+import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
+import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
+
 import com.inductiveautomation.xopc.driver.api.BrowseOperation;
 import com.inductiveautomation.xopc.driver.api.Driver;
 import com.inductiveautomation.xopc.driver.api.DriverContext;
@@ -173,7 +192,7 @@ public abstract class AbstractGenericTcpDriver
 			}
 		}
 
-		browseOperation.browseDone(StatusCode.GOOD, browseNodes, new Guid());
+		browseOperation.browseDone(StatusCode.GOOD, browseNodes, UUID.randomUUID());
 	}
 
 	/**
@@ -273,19 +292,26 @@ public abstract class AbstractGenericTcpDriver
 	}
 	
 	@Override
-	public VariableNodeBuilder getVariableNodeBuilder() {
-		return driverContext.getNodeBuilderFactory().newVariableNodeBuilder();
+	public UaVariableNodeBuilder getVariableNodeBuilder() {
+		return UaVariableNode.builder(getDriverContext().getNodeContext());
 	}
 
 	@Override
-	public ObjectNodeBuilder getObjectNodeBuilder() {
-		return driverContext.getNodeBuilderFactory().newObjectNodeBuilder();
+	public UaObjectNodeBuilder getObjectNodeBuilder() {
+		return UaObjectNode.builder(getDriverContext().getNodeContext());
 	}
 
 	@Override
-	public <E extends Node> E buildAndAddNode(NodeBuilder<E> nodeBuilder, String address) {
+	public UaNodeContext getNodeContext() {
+		return getDriverContext().getNodeContext();
+	}
+	
+	@Override
+	public UaNode addNode(UaNode node, String address) {
 		browseTree.addTag(address);
-		return nodeBuilder.buildAndAdd(driverContext.getNodeManager());
+		
+		driverContext.getNodeContext().getNodeManager().addNode(node);
+		return node;
 	}
 	
 	@Override
@@ -294,8 +320,8 @@ public abstract class AbstractGenericTcpDriver
 	}
 
 	@Override
-	public void removeNode(Node node) {
-		driverContext.getNodeManager().removeNode(node);
+	public void removeNode(UaNode node) {
+		driverContext.getNodeContext().getNodeManager().removeNode(node);
 	}
 
 	@Override

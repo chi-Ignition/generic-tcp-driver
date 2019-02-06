@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2013 C. Hiesserich
+ * Copyright 2012-2019 C. Hiesserich
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,14 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 
-import com.inductiveautomation.opcua.types.DataType;
-import com.inductiveautomation.opcua.types.UByte;
-import com.inductiveautomation.opcua.types.UInt16;
-import com.inductiveautomation.opcua.types.UInt32;
-import com.inductiveautomation.opcua.types.Variant;
+import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UShort;
+
+import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ubyte;
+import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ushort;
+import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.uint;
 
 /**
  * This class wraps a ByteBuffer and adds methods to read the buffers content as
@@ -135,18 +138,18 @@ public class VariantByteBuffer  {
 			value[i] = buffer.get();
 		}
 
-		return new Variant(value, DataType.Byte);
+		return new Variant(value);
 
 	}
 
 	public Variant readUByte(int size) {
 
 		if (size <= 1)
-			return new Variant(new UByte(buffer.get()) );
+			return new Variant(ubyte(buffer.get()) );
 
 		UByte[] value = new UByte[size];
 		for (int i = 0; i < size; i++) {
-			value[i] = new UByte(buffer.get());
+			value[i] = ubyte(buffer.get());
 		}
 
 		return new Variant(value);
@@ -195,11 +198,11 @@ public class VariantByteBuffer  {
 	public Variant readUInt16(int size) {
 
 		if (size <= 1)
-			return new Variant(new UInt16(buffer.getShort() & 0xffff));
+			return new Variant(ushort(buffer.getShort() & 0xffff));
 
-		UInt16[] value = new UInt16[size];
+		UShort[] value = new UShort[size];
 		for (int i = 0; i < size; i++) {
-			value[i] = new UInt16(buffer.getShort() & 0xffff);
+			value[i] = ushort(buffer.getShort() & 0xffff);
 		}
 
 		return new Variant(value);
@@ -220,9 +223,9 @@ public class VariantByteBuffer  {
 
 	public Variant readUInt32(int size) {
 
-		UInt32[] value = new UInt32[size];
+		UInteger[] value = new UInteger[size];
 		for (int i = 0; i < size; i++) {
-			value[i] = new UInt32(buffer.getInt() & 0xffffffff);
+			value[i] = uint(buffer.getInt() & 0xffffffff);
 		}
 
 		if (size > 1)

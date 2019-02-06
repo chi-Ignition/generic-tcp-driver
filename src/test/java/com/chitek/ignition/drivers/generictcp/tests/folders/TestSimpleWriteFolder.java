@@ -9,6 +9,11 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.milo.opcua.stack.core.StatusCodes;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
+import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
+import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,10 +25,6 @@ import com.chitek.ignition.drivers.generictcp.tests.MockDriverContext;
 import com.chitek.ignition.drivers.generictcp.tests.TestUtils;
 import com.chitek.ignition.drivers.generictcp.types.OptionalDataType;
 import com.chitek.ignition.drivers.generictcp.types.WritebackDataType;
-import com.inductiveautomation.opcua.types.DataValue;
-import com.inductiveautomation.opcua.types.StatusCode;
-import com.inductiveautomation.opcua.types.UByte;
-import com.inductiveautomation.opcua.types.Variant;
 import com.inductiveautomation.xopc.driver.util.TagTree.TagTreeNode;
 
 public class TestSimpleWriteFolder {
@@ -67,7 +68,7 @@ public class TestSimpleWriteFolder {
 		// Not connected - read should response with the initial value but state 'not connected'
 		DataValue value = FolderTestUtils.readValue(folder, "device1/[Writeback]/Value");
 		assertEquals(new Variant("0x38,0x39"), value.getValue());
-		assertEquals(StatusCode.BAD_NOT_CONNECTED, value.getStatusCode());
+		assertEquals(StatusCodes.Bad_NotConnected, value.getStatusCode().getValue());
 				
 		// Connect
 		folder.connectionStateChanged(true);
@@ -92,7 +93,7 @@ public class TestSimpleWriteFolder {
 		// Now send a message by setting the Write tag
 		StatusCode statusCode = FolderTestUtils.writeValue(folder, "device1/[Writeback]/Write", new Variant(true));
 		// That should fail because we are not connected
-		assertEquals(StatusCode.BAD_NOT_CONNECTED, statusCode);
+		assertEquals(StatusCodes.Bad_NotConnected, statusCode.getValue());
 		
 		// Connect
 		folder.activityLevelChanged(true);
@@ -249,7 +250,7 @@ public class TestSimpleWriteFolder {
 			backupFolder.updateRuntimeState(state);
 		}
 		
-		assertEquals(new Variant(new UByte((byte) 77)), FolderTestUtils.readValue(backupFolder, "device1/[Writeback]/ID").getValue());
+		assertEquals(new Variant(UByte.valueOf((byte)77)), FolderTestUtils.readValue(backupFolder, "device1/[Writeback]/ID").getValue());
 		assertEquals(new Variant("65,66"), FolderTestUtils.readValue(backupFolder, "device1/[Writeback]/Value").getValue());
 	}
 	
@@ -270,7 +271,7 @@ public class TestSimpleWriteFolder {
 		SimpleWriteFolder backupFolder = new SimpleWriteFolder(driverContext, driverSettings, 1, "device1", writebackConfig);
 		backupFolder.setFullState(folderState);
 		
-		assertEquals(new Variant(new UByte((byte) 1)), FolderTestUtils.readValue(backupFolder, "device1/[Writeback]/ID").getValue());
+		assertEquals(new Variant(UByte.valueOf((byte)1)), FolderTestUtils.readValue(backupFolder, "device1/[Writeback]/ID").getValue());
 		assertEquals(new Variant("65,66"), FolderTestUtils.readValue(backupFolder, "device1/[Writeback]/Value").getValue());
 	}
 	
@@ -300,7 +301,7 @@ public class TestSimpleWriteFolder {
 		
 		// Writes should not be executed
 		StatusCode statusCode = FolderTestUtils.writeValue(folder, "device1/[Writeback]/Write", new Variant(true));
-		assertEquals(StatusCode.BAD_NOT_CONNECTED, statusCode);
+		assertEquals(StatusCodes.Bad_NotConnected, statusCode.getValue());
 		assertEquals(0, driverContext.getExecutor().getScheduledCount());
 	}
 	
