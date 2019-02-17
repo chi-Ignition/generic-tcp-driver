@@ -185,6 +185,19 @@
 						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">When 
 						this option is set, the driver listens on an UDP port instead of 
 						TCP.</simpara>
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"></simpara>
+					</listitem>
+				</varlistentry>
+				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+					<term xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">Accept All</term>
+					<listitem xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">When 
+						this option is set, the driver ignores the 'Devices' list and accepts all incoming connections.</simpara>
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">In this 
+						case, all incoming messages are send to one single message folder. If multiple devices are connected,
+						only the last received data is visible to the OPC-UA client.</simpara>
+						<simpara xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">The Writeback Mode
+						is disabled when 'Accept All' is selected.</simpara>
 					</listitem>
 				</varlistentry>
 				<varlistentry xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">

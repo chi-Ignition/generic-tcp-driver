@@ -43,6 +43,7 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 	public static IntField ServerPort = new IntField(META, "ServerPort", SFieldFlags.SMANDATORY);
 	public static IntField Timeout = new IntField(META, "Timeout");
 	public static BooleanField UseUdp = new BooleanField(META, "UseUdp");
+	public static BooleanField AcceptAll = new BooleanField(META, "AcceptAll");
 	public static StringField Devices = new StringField(META, "Devices");
 
 	/* Message Handling */
@@ -58,7 +59,7 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 
 	/* Categories */
 	public static final Category Connectivity = new Category("GenericTcpServerDriverSettings.Category.Connectivity", 1001)
-	.include(ServerHostname, ServerPort, UseUdp, Timeout, Devices);
+	.include(ServerHostname, ServerPort, UseUdp, Timeout, AcceptAll, Devices);
 	public static Category MessageHandling = new Category("GenericTcpServerDriverSettings.Category.MessageHandling", 1002)
 	.include(PacketTimeout, ReverseByteOrder, TimestampFactor, MaxTimestamp);
 
@@ -72,6 +73,7 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 		Timeout.setDefault(7200);
 		Timeout.addValidator(new RangeValidator<Integer>(0,864000));
 		UseUdp.setDefault(false);
+		AcceptAll.setDefault(false);
 		PacketTimeout.setDefault(1000);
 		PacketTimeout.addValidator(new RangeValidator<Integer>(50, 10000));
 		ReverseByteOrder.setDefault(false);
@@ -106,6 +108,7 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 			getServerPort(),
 			getTimeout(),
 			getUseUdp(),
+			getAcceptAll(),
 			getDevices(),
 			getPacketTimeout(),
 			getReverseByteOrder(),
@@ -130,6 +133,10 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 		return getBoolean(UseUdp);
 	}
 	
+	public boolean getAcceptAll() {
+		return getBoolean(AcceptAll);
+	}
+	
 	public int getPacketTimeout() {
 		return getInt(PacketTimeout);
 	}
@@ -147,19 +154,27 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 	}
 	
 	public List<RemoteDevice> getDevices() {
-		String rawValue = getString(Devices);
-		if (rawValue == null) {
-			return new ArrayList<RemoteDevice>(0);
-		}
-		StringTokenizer st = new StringTokenizer(rawValue,"\n\r");
-		List<RemoteDevice>deviceList = new ArrayList<RemoteDevice>(st.countTokens());
-		while (st.hasMoreTokens()) {
-			String entry = st.nextToken();
-			int comma = entry.indexOf(",");
-			String hostname = entry.substring(0, comma).toLowerCase().trim();
-			String alias = entry.substring(comma+1, entry.length()).trim();
-			alias.replaceAll("\\s+",""); // Remove whitespace from alias
-			deviceList.add(new RemoteDevice(hostname, alias));
+		
+		List<RemoteDevice> deviceList;
+		if (getAcceptAll()) {
+			// If 'AccpedAll' is configured, there is only one device for all incoming connections
+			deviceList = new ArrayList<RemoteDevice>(1);
+			deviceList.add(0, new RemoteDevice("Device", "Device"));
+		} else {
+			String rawValue = getString(Devices);
+			if (rawValue == null) {
+				return new ArrayList<RemoteDevice>(0);
+			}
+			StringTokenizer st = new StringTokenizer(rawValue, "\n\r");
+			deviceList = new ArrayList<RemoteDevice>(st.countTokens());
+			while (st.hasMoreTokens()) {
+				String entry = st.nextToken();
+				int comma = entry.indexOf(",");
+				String hostname = entry.substring(0, comma).toLowerCase().trim();
+				String alias = entry.substring(comma + 1, entry.length()).trim();
+				alias.replaceAll("\\s+", ""); // Remove whitespace from alias
+				deviceList.add(new RemoteDevice(hostname, alias));
+			}
 		}
 		return deviceList;
 	}
@@ -293,4 +308,9 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 		return this;
 	}
 
+	@Override
+	public boolean isWritebackEnabled() {
+		// With acceptAll there is only one device for all incoming connections. Writeback is not possible in this case.
+		return !getAcceptAll();
+	}
 }

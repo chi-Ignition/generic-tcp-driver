@@ -75,10 +75,10 @@ public class ConfigUiTabs extends ConfigPanel {
 			config = null;
 		}
 		
-		addComponents();
+		addComponents(((IGenericTcpDriverSettings) settingsRecord).isWritebackEnabled());
 	}
 	
-	private void addComponents() {
+	private void addComponents(boolean showWriteback) {
 		
 		boolean enableSubmit = true;
 		if (((GatewayContext) this.getApplication()).getRedundancyManager().getCurrentState().getRole() == NodeRole.Backup) {
@@ -121,15 +121,18 @@ public class ConfigUiTabs extends ConfigPanel {
 				return panel;
 			}
 		});
-		tabs.add(new AbstractTabWithForm("WritebackConfig", "GenericTcpDriver.writebackTab") {
-			@Override
-			public Panel getPanel(String panelId) {
-				if (panel == null) {
-					panel = new WritebackConfigUI(panelId, config.getWritebackConfig());
+		
+		if (showWriteback) {
+			tabs.add(new AbstractTabWithForm("WritebackConfig", "GenericTcpDriver.writebackTab") {
+				@Override
+				public Panel getPanel(String panelId) {
+					if (panel == null) {
+						panel = new WritebackConfigUI(panelId, config.getWritebackConfig());
+					}
+					return panel;
 				}
-				return panel;
-			}
-		});
+			});
+		}
 		
 		tabbedPanel = new TabbedPanel<AbstractTabWithForm>("tabs",tabs) {
 			@Override

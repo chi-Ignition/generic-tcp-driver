@@ -16,6 +16,7 @@ public class DriverSettingsPassive implements IDriverSettings {
 	private final int serverPort;
 	private final int timeout;
 	private final boolean useUdp;
+	private final boolean acceptAll;
 	private final List<RemoteDevice> devices;
 	private final int messageTimeout;
 	private final ByteOrder byteOrder;
@@ -28,6 +29,7 @@ public class DriverSettingsPassive implements IDriverSettings {
 		int serverPort,
 		int timeout,
 		boolean useUdp,
+		boolean acceptAll,
 		List<RemoteDevice> devices,
 		int packetTimeout,
 		boolean reverseByteOrder,
@@ -39,6 +41,7 @@ public class DriverSettingsPassive implements IDriverSettings {
 		this.serverPort = serverPort;
 		this.timeout=timeout;
 		this.useUdp = useUdp;
+		this.acceptAll = acceptAll;
 		this.devices = devices;
 		this.messageTimeout = packetTimeout;
 		this.byteOrder = reverseByteOrder ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN;
@@ -67,6 +70,14 @@ public class DriverSettingsPassive implements IDriverSettings {
 	
 	public boolean getUseUdp() {
 		return useUdp;
+	}
+	
+	/**
+	 * @return
+	 * 	true if this device should ignore the devices list and accept all incoming connections
+	 */
+	public boolean getAcceptAll() {
+		return acceptAll;
 	}
 
 	public List<RemoteDevice> getDevices() {

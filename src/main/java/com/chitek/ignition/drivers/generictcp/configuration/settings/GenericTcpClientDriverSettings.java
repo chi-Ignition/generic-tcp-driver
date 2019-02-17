@@ -271,4 +271,8 @@ public class GenericTcpClientDriverSettings extends PersistentRecord implements 
 		return this;
 	}
 
+	@Override
+	public boolean isWritebackEnabled() {
+		return true;
+	}
 }

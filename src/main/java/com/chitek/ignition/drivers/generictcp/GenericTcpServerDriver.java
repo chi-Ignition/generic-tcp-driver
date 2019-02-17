@@ -116,8 +116,8 @@ implements IMessageHandler {
 			log.error("Driver could not be initialized - No remote devices configured in driver settings.");
 			return;
 		}
-
-		initializeMessageFolders(driverSettings.getDevices());
+		
+		initializeMessageFolders(remoteDevices);
 
 		super.initialize();
 		
@@ -326,8 +326,9 @@ implements IMessageHandler {
 
 	@Override
 	public void messageReceived(InetSocketAddress socket, int messageId, byte[] messageData, byte[] handshakeMessage) {
-
+	
 		Integer deviceId = deviceAddressIdMap.get(socket.getAddress());
+		
 		if (deviceId == null) {
 			log.error(String.format("MessageHandler received message from unknown device %s.", socket.toString()));
 			return;
@@ -356,25 +357,35 @@ implements IMessageHandler {
 	@Override
 	public boolean clientConnected(InetSocketAddress remoteSocket) {
 		
-		// Try to find the connecting device in our configuration
-		// Try host address first, in this case we don't need to lookup the hostname
-		for (RemoteDevice device : driverSettings.getDevices()) {
-			if (device.getInetAddress().equals(remoteSocket.getAddress())) {
-				if (log.isDebugEnabled()) {
-					log.debug(String.format("Remote device %s connected, identified by ip-address.", remoteSocket.getAddress().getHostAddress()));
-				}
-				processClientConnected(device, remoteSocket);
-				return true;
+		if (driverSettings.getAcceptAll()) {
+			// If 'AcceptAll' is configured, we accept all incoming connections
+			if (log.isDebugEnabled()) {
+				log.debug(String.format("Remote device %s connected.", remoteSocket.getAddress().getHostAddress()));
 			}
-		}
-
-		for (RemoteDevice device : driverSettings.getDevices()) {
-			if (device.getHostname().equalsIgnoreCase(remoteSocket.getHostName())) {
-				if (log.isDebugEnabled()) {
-					log.debug(String.format("Remote device %s connected, identified by hostname.", remoteSocket.getAddress().getHostAddress()));
+			RemoteDevice device = deviceMap.get(0);
+			processClientConnected(device, remoteSocket);
+			return true;
+		} else {
+			// Try to find the connecting device in our configuration
+			// Try host address first, in this case we don't need to lookup the hostname
+			for (RemoteDevice device : deviceMap.values()) {
+				if (device.getInetAddress().equals(remoteSocket.getAddress())) {
+					if (log.isDebugEnabled()) {
+						log.debug(String.format("Remote device %s connected, identified by ip-address.", remoteSocket.getAddress().getHostAddress()));
+					}
+					processClientConnected(device, remoteSocket);
+					return true;
 				}
-				processClientConnected(device, remoteSocket);
-				return true;
+			}
+
+			for (RemoteDevice device : deviceMap.values()) {
+				if (device.getHostname().equalsIgnoreCase(remoteSocket.getHostName())) {
+					if (log.isDebugEnabled()) {
+						log.debug(String.format("Remote device %s connected, identified by hostname.", remoteSocket.getAddress().getHostAddress()));
+					}
+					processClientConnected(device, remoteSocket);
+					return true;
+				}
 			}
 		}
 
@@ -398,7 +409,9 @@ implements IMessageHandler {
 			return;
 		}
 
-		getFolderManager().updateConnectionState(deviceId, false);
+		if (!driverSettings.getAcceptAll() || deviceAddressIdMap.isEmpty()) {
+			getFolderManager().updateConnectionState(deviceId, false);
+		}
 	}
 	
 	@Override

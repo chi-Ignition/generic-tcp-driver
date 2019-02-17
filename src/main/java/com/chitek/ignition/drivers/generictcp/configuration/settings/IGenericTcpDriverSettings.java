@@ -32,5 +32,11 @@ public interface IGenericTcpDriverSettings extends Serializable {
 	public void setHeaderConfig(byte[] headerConfig);
 
 	public void setWritebackConfig(byte[] writebackConfig);
+	
+	/**
+	 * @return
+	 * 	true if writeback config page should be shown
+	 */
+	public boolean isWritebackEnabled();
 
 }
