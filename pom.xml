@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.chitek.ignition</groupId>
 	<artifactId>generic-tcp-driver</artifactId>
-	<version>2.9.5</version>
+	<version>3.0.0</version>
 	<name>generic-tcp-driver-parent</name>
 	<packaging>pom</packaging>
 	
