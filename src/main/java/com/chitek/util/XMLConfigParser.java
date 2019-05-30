@@ -58,7 +58,7 @@ public class XMLConfigParser {
 	 * @throws Exception
 	 */
 	public Object parseXML(Class<?> clazz, String typeName, String configXML) throws Exception {
-		Object config = clazz.newInstance();
+		Object config = clazz.getDeclaredConstructor().newInstance();
 
 		try {
 			XMLReader reader = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
@@ -142,7 +142,7 @@ public class XMLConfigParser {
 						// All subsequent settings will be applied to the new element
 						Class<?> param = method.getParameterTypes()[0];
 						try {
-							currentElement = new StackElement(param.newInstance(), typeAttr);
+							currentElement = new StackElement(param.getDeclaredConstructor().newInstance(), typeAttr);
 						} catch (Exception e) {
 							throw new SAXException("Instance of Class %s could not be created", e);
 						}

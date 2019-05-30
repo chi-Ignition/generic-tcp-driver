@@ -233,14 +233,14 @@ public class TestSimpleWriteFolder {
 		FolderTestUtils.writeValue(folder, "device1/[Writeback]/ID", new Variant((byte)77));
 		// folder should have posted a state update
 		StateUpdate stateUpdate = driverContext.getLastStateUpdate();
-		assertEquals(new Integer(77), (Integer) getFolderUpdateStateField(stateUpdate, "messageId"));
+		assertEquals(Integer.valueOf(77), (Integer) getFolderUpdateStateField(stateUpdate, "messageId"));
 		assertEquals("0x38,0x39", (String) getFolderUpdateStateField(stateUpdate, "value"));
 		stateUpdates.add(stateUpdate);
 		
 		FolderTestUtils.writeValue(folder, "device1/[Writeback]/Value", new Variant("65,66"));
 		// folder should have posted another state update
 		stateUpdate = driverContext.getLastStateUpdate();
-		assertEquals(new Integer(77), (Integer) getFolderUpdateStateField(stateUpdate, "messageId"));
+		assertEquals(Integer.valueOf(77), (Integer) getFolderUpdateStateField(stateUpdate, "messageId"));
 		assertEquals("65,66", (String) getFolderUpdateStateField(stateUpdate, "value"));
 		stateUpdates.add(stateUpdate);
 		

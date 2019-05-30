@@ -87,7 +87,7 @@ public class TestMessageFolder {
 		assertNotNull(nodeData1);
 		assertEquals(new org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText("Data1"), nodeData1.getDisplayName());
 		assertEquals(BuiltinDataType.String.getNodeId(), nodeData1.getDataType());
-		assertEquals(new Integer(ValueRank.Scalar.getValue()), nodeData1.getValueRank());
+		assertEquals(Integer.valueOf(ValueRank.Scalar.getValue()), nodeData1.getValueRank());
 
 		// Test read
 		MockReadItem itemData1 = new MockReadItem("Alias1/Data1");
@@ -129,7 +129,7 @@ public class TestMessageFolder {
 		assertNotNull(nodeData1);
 		assertEquals(new LocalizedText("Data1"), nodeData1.getDisplayName());
 		assertEquals(BuiltinDataType.String.getNodeId(), nodeData1.getDataType());
-		assertEquals(new Integer(ValueRank.Scalar.getValue()), nodeData1.getValueRank());
+		assertEquals(Integer.valueOf(ValueRank.Scalar.getValue()), nodeData1.getValueRank());
 
 		// Test read
 		MockReadItem itemData1 = new MockReadItem("Alias1/Data1");
@@ -172,13 +172,13 @@ public class TestMessageFolder {
 		assertNotNull(nodeData1);
 		assertEquals(new LocalizedText("Data1"), nodeData1.getDisplayName());
 		assertEquals(BuiltinDataType.Int16.getNodeId(), nodeData1.getDataType());
-		assertEquals(new Integer(ValueRanks.Scalar), nodeData1.getValueRank());
+		assertEquals(Integer.valueOf(ValueRanks.Scalar), nodeData1.getValueRank());
 		
 		VariableNode nodeAge = (VariableNode) driverContext.getNode(buildNodeId("Alias1/_MessageAge"));
 		assertNotNull(nodeAge);
 		assertEquals(new LocalizedText("_MessageAge"), nodeAge.getDisplayName());
 		assertEquals(BuiltinDataType.UInt32.getNodeId(), nodeAge.getDataType());
-		assertEquals(new Integer(ValueRanks.Scalar), nodeAge.getValueRank());
+		assertEquals(Integer.valueOf(ValueRanks.Scalar), nodeAge.getValueRank());
 
 		// Test read
 		MockReadItem itemData1 = new MockReadItem("Alias1/Data1");

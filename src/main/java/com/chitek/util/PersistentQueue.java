@@ -393,7 +393,7 @@ public class PersistentQueue<E extends Serializable> implements Queue<E> {
 			OutputStream fos = new FileOutputStream(tempFile);
 			OutputStream buffer = new BufferedOutputStream(fos);
 			oos = new ObjectOutputStream(buffer);
-			oos.writeObject(new Integer(contentHash));
+			oos.writeObject(Integer.valueOf(contentHash));
 			if (!list.isEmpty()) {
 				for (Serializable entry : list) {
 					oos.writeObject(entry);
@@ -418,7 +418,7 @@ public class PersistentQueue<E extends Serializable> implements Queue<E> {
             tempFile.delete();
         } else {
         	// Everything ok, file hash has been written
-        	fileHash=new Integer(contentHash);
+        	fileHash=Integer.valueOf(contentHash);
         }
              
         try {
@@ -426,7 +426,7 @@ public class PersistentQueue<E extends Serializable> implements Queue<E> {
         	objectOutput = new AppendableObjectOutputStream(fos);
         	// Store the content hash if necessary
         	if (fileHash==null || !fileHash.equals(contentHash)) {
-        		fileHash=new Integer(contentHash);
+        		fileHash=Integer.valueOf(contentHash);
         		objectOutput.writeObject(fileHash);
         	}
         	objectOutput.reset();
