@@ -16,6 +16,8 @@
 package com.chitek.util;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -107,23 +109,7 @@ public class PersistentQueue<E extends Serializable> implements Queue<E> {
 			} catch (Exception e) {}
 		objectOutput = null;
 	}
-	
-	/**
-	 * OutputStream is closed before GarbageCollection happened. This should prevent ressource leaks if this
-	 * queue is deleted without closing it.
-	 */
-	@Override
-	protected void finalize() throws Throwable {
-		log.debug("Queue finalized");
-		if (objectOutput != null)
-			try {
-				log.debug("Closing ObjectOutputStream");
-				objectOutput.close();
-			} catch (Exception e) {}
-		objectOutput = null;
-		super.finalize();
-	}
-	
+		
 	@Override
 	public boolean addAll(Collection<? extends E> c) {
 		boolean result = list.addAll(c);
@@ -289,7 +275,7 @@ public class PersistentQueue<E extends Serializable> implements Queue<E> {
 		int discarded = 0;
 		
 		try {
-			FileInputStream fis = new FileInputStream(queueFile);
+			InputStream fis = Files.newInputStream(queueFile.toPath());
 			ois = new ObjectInputStream(fis);
 
 			try {
@@ -390,7 +376,7 @@ public class PersistentQueue<E extends Serializable> implements Queue<E> {
         File tempFile = new File(tempFilename);
 		ObjectOutputStream oos = null;
 		try {
-			OutputStream fos = new FileOutputStream(tempFile);
+			OutputStream fos = Files.newOutputStream(tempFile.toPath());
 			OutputStream buffer = new BufferedOutputStream(fos);
 			oos = new ObjectOutputStream(buffer);
 			oos.writeObject(Integer.valueOf(contentHash));
@@ -422,7 +408,7 @@ public class PersistentQueue<E extends Serializable> implements Queue<E> {
         }
              
         try {
-        	OutputStream  fos = new FileOutputStream(queueFile, true);
+        	OutputStream  fos = Files.newOutputStream(queueFile.toPath(), StandardOpenOption.APPEND);
         	objectOutput = new AppendableObjectOutputStream(fos);
         	// Store the content hash if necessary
         	if (fileHash==null || !fileHash.equals(contentHash)) {

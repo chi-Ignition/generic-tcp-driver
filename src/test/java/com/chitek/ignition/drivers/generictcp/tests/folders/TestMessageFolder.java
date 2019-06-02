@@ -3,10 +3,14 @@ package com.chitek.ignition.drivers.generictcp.tests.folders;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -322,6 +326,8 @@ public class TestMessageFolder {
 		folder.messageArrived(new byte[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,65,67}, handshakeMessage); // 65,67 == 'AC'
 
 		assertArrayEquals(handshakeMessage, driverContext.getLastWrittenMessage());
+		
+		folder.shutdown();
 	}
 	
 	@Test
@@ -408,7 +414,97 @@ public class TestMessageFolder {
 		
 		// Folder should try to evaluate another message
 		assertEquals(1, driverContext.getExecutor().getScheduledCount());
-		driverContext.getExecutor().runCommand();			
+		driverContext.getExecutor().runCommand();
+		
+		folder.shutdown();
+	}
+	
+	@Test
+	public void testQueueModePersistant() throws Exception {
+		
+		// Create settings with message id type = None
+		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);
+		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigPersistant.xml");
+
+		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
+		
+		VariableNode nodeQueueSize = (VariableNode) driverContext.getNode(buildNodeId("Alias1/_QueueSize"));
+		assertNotNull("Folder in Queue mode should have a _QueueSize tag", nodeQueueSize);
+		
+		byte[] message = new byte[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,65,66};
+		folder.messageArrived(message, null); // 65,66 == 'AB'
+		
+		// The folder is not active, so it should not have tried to evaluate the message
+		assertEquals(0, driverContext.getExecutor().getScheduledCount());
+		
+		// The file should exist
+		String path = driverContext.getDiskPath() + String.format("%s%d%s", IndexMessageFolder.QUEUE_FILE_PREFIX, folder.getFolderId(), IndexMessageFolder.QUEUE_FILE_EXTENSION);
+
+		Path file = Paths.get(path);
+		assertTrue("Queue file has not been created",Files.exists(file));
+		assertEquals(124,Files.size(file));
+		
+		// Add a second message
+		message = new byte[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,67,68};
+		folder.messageArrived(message, null); // 67,68 == 'CD'
+		
+		// QueueSize should be 2 now
+		DataValue queueSize = FolderTestUtils.readValue(folder,"Alias1/_QueueSize");
+		assertEquals(ushort(2), queueSize.getValue().getValue());
+		
+		assertEquals(166,Files.size(file));
+		
+		// Shutdown the folder
+		folder.shutdown();
+		
+		// Reinitialize the folder - messages should be read from queue file
+		folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
+		
+		// QueueSize should be 2 now
+		queueSize = FolderTestUtils.readValue(folder,"Alias1/_QueueSize");
+		assertEquals("Wrong message count read from queue file",ushort(2), queueSize.getValue().getValue());
+		
+		// Now activate the folder
+		folder.activityLevelChanged(true);
+		
+		// The folder should evaluate the first queued message
+		assertEquals(1, driverContext.getExecutor().getScheduledCount());
+		driverContext.getExecutor().runCommand();
+		DataValue value = FolderTestUtils.readValue(folder,"Alias1/Data1");
+		assertEquals("AB", value.getValue().getValue());
+			
+		// MessageCount should be 1
+		DataValue messageCount = FolderTestUtils.readValue(folder,"Alias1/_MessageCount");
+		assertEquals(uint(1), messageCount.getValue().getValue());
+		// Handshake should be 1
+		DataValue handshake = FolderTestUtils.readValue(folder,"Alias1/_Handshake");
+		assertEquals(uint(1), handshake.getValue().getValue());		
+		
+		// Now set the Handshake
+		FolderTestUtils.writeValue(folder, "Alias1/_Handshake", new Variant(0));		
+		
+		// QueueSize should be 1 now
+		queueSize = FolderTestUtils.readValue(folder,"Alias1/_QueueSize");
+		assertEquals(ushort(1), queueSize.getValue().getValue());
+		
+		// The folder should evaluate the next queued message
+		assertEquals(1, driverContext.getExecutor().getScheduledCount());
+		driverContext.getExecutor().runCommand();
+		value = FolderTestUtils.readValue(folder,"Alias1/Data1");
+		assertEquals("CD", value.getValue().getValue());
+
+		// MessageCount should be 2
+		messageCount = FolderTestUtils.readValue(folder,"Alias1/_MessageCount");
+		assertEquals(uint(2), messageCount.getValue().getValue());
+		
+		// Now set the Handshake again
+		FolderTestUtils.writeValue(folder, "Alias1/_Handshake", new Variant(0));
+		
+		// Folder should try to evaluate another message
+		assertEquals(1, driverContext.getExecutor().getScheduledCount());
+		driverContext.getExecutor().runCommand();
+		
+		folder.shutdown();
 	}
 	
 	@Test
@@ -470,6 +566,8 @@ public class TestMessageFolder {
 		// We acknowledged the first message, so the backup should start with the second message
 		DataValue value = FolderTestUtils.readValue(backupFolder,"Alias1/Data1");
 		assertEquals("CD", value.getValue().getValue());
+		
+		folder.shutdown();
 	}
 	
 	@Test
@@ -499,6 +597,8 @@ public class TestMessageFolder {
 		// We acknowledged the first message, so the backup should start with the second message
 		DataValue value = FolderTestUtils.readValue(backupFolder,"Alias1/Data1");
 		assertEquals("AB", value.getValue().getValue());
+		
+		folder.shutdown();
 	}
 	
 	@Test
@@ -506,7 +606,7 @@ public class TestMessageFolder {
 		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);
 		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigSimple.xml");
 		messageConfig.setQueueMode(QueueMode.HANDSHAKE);
-		new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
+		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
 	
 		TagTreeNode<String> rootNode = driverContext.getBrowseTree().findTag("Alias1");
 		assertNotNull(rootNode);
@@ -522,6 +622,8 @@ public class TestMessageFolder {
 			System.out.println("BrowseNode: " + childNode.getAddress() + " Tag:" + childNode.getTag());
 		}
 		assertArrayEquals(expectedNodes, browseNodes.toArray());
+		
+		folder.shutdown();
 	}
 	
 	@Test
@@ -536,6 +638,8 @@ public class TestMessageFolder {
 		// The folder should have added a schedule to evaluate the message
 		assertEquals(1, driverContext.getExecutor().getScheduledCount());
 		driverContext.getExecutor().runCommand();
+		
+		folder.shutdown();
 	}
 	
 	@Test
@@ -565,6 +669,8 @@ public class TestMessageFolder {
 		char[] charvalue = new char[5];
 		((String)value2.getValue().getValue()).getChars(0,5,charvalue,0);
 		assertArrayEquals(new char[]{1,2,0,254,255}, charvalue);
+		
+		folder.shutdown();
 	}
 	
 	@Test
@@ -586,6 +692,8 @@ public class TestMessageFolder {
 		assertEquals((short)257, value.getValue().getValue());
 		DataValue value2 = FolderTestUtils.readValue(folder,"Alias1/Data2");
 		assertEquals("abc", value2.getValue().getValue());
+		
+		folder.shutdown();
 	}	
 	
 	@Test
@@ -607,6 +715,8 @@ public class TestMessageFolder {
 		assertEquals((short)257, value.getValue().getValue());
 		DataValue value2 = FolderTestUtils.readValue(folder,"Alias1/Data2");
 		assertEquals("abcde", value2.getValue().getValue());
+		
+		folder.shutdown();
 	}	
 	
 	private NodeId buildNodeId(String address) {

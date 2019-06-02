@@ -1,0 +1,12 @@
+<config type="MessageConfig">
+	<config type="TagConfig">
+		<setting name="Alias">Data1</setting>
+		<setting name="Id">1</setting>
+		<setting name="DataType">String</setting>
+		<setting name="Size">2</setting>
+	</config>
+	<setting name="MessageAlias">Alias1</setting>
+	<setting name="MessageId">0</setting>
+	<setting name="UsePersistance">true</setting>
+	<setting name="QueueMode">HANDSHAKE</setting>
+</config>
