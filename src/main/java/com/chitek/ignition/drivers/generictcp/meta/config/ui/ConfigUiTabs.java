@@ -23,6 +23,7 @@ import com.inductiveautomation.ignition.common.Base64;
 import com.inductiveautomation.ignition.common.BundleUtil;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.PersistentRecord;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
+import com.inductiveautomation.ignition.gateway.model.IgnitionWebApp;
 import com.inductiveautomation.ignition.gateway.redundancy.types.NodeRole;
 import com.inductiveautomation.ignition.gateway.web.components.AbstractNamedTab;
 import com.inductiveautomation.ignition.gateway.web.components.ConfigPanel;
@@ -82,7 +83,9 @@ public class ConfigUiTabs extends ConfigPanel {
 		
 		boolean enableSubmit = true;
 
-		if (((GatewayContext) this.getApplication()).getRedundancyManager().getCurrentState().getRole() == NodeRole.Backup) {
+		GatewayContext context = ((IgnitionWebApp) this.getApplication()).getContext();
+		
+		if (context.getRedundancyManager().getCurrentState().getRole() == NodeRole.Backup) {
 			info(BundleUtil.get().getStringLenient(ModuleHook.BUNDLE_PREFIX + "ConfigUI.Error.BackupNode"));
 			enableSubmit = false;
 		}
@@ -162,7 +165,8 @@ public class ConfigUiTabs extends ConfigPanel {
 	 * Save the driver configuration
 	 */
 	private void saveConfiguration() {
-		if (((GatewayContext) this.getApplication()).getRedundancyManager().getCurrentState().getRole() == NodeRole.Backup) {
+		GatewayContext context = ((IgnitionWebApp) this.getApplication()).getContext();
+		if (context.getRedundancyManager().getCurrentState().getRole() == NodeRole.Backup) {
 			error(BundleUtil.get().getStringLenient(ModuleHook.BUNDLE_PREFIX + "ConfigUI.Error.BackupNodeSave"));
 			return;
 		}
