@@ -86,15 +86,22 @@ implements IMessageHandler {
 			log.error(e.getMessage());
 		}
 
-		driverSettings = settings.getDriverSettings();
+		try {
+			driverSettings = settings.getDriverSettings();
+		} catch (Exception e) {
+			driverSettings = null;
+			log.error(e.getMessage());
+		}
 	}
 
 	private void initialize(GenericTcpServerDriverSettings deviceSettings) {
 
-		// Create the disk folder for message queues
-		File folder = new File(getDiskPath());
-		folder.mkdir();		// is mkdir atomic? may fail if multiple devices start up at the same time
-
+		if (driverSettings == null) {
+			setDriverState(DriverState.ConfigError);
+			log.error("Driver could not be initialized - Configuration invalid");
+			return;
+		}
+		
 		// There is no configuration, if the user never clicked 'save' in the config page
 		if (messageConfig == null || messageConfig.messages.size() == 0) {
 			setDriverState(DriverState.ConfigError);
@@ -116,6 +123,10 @@ implements IMessageHandler {
 			log.error("Driver could not be initialized - No remote devices configured in driver settings.");
 			return;
 		}
+		
+		// Create the disk folder for message queues
+		File folder = new File(getDiskPath());
+		folder.mkdir();		// is mkdir atomic? may fail if multiple devices start up at the same time
 		
 		initializeMessageFolders(remoteDevices);
 

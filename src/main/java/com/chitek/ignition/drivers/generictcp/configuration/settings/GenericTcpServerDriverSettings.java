@@ -95,7 +95,7 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 		return META;
 	}
 
-	public DriverSettingsPassive getDriverSettings() {
+	public DriverSettingsPassive getDriverSettings() throws Exception {
 
 		OptionalDataType messageIdType;
 		try {
@@ -154,7 +154,7 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 		return getLong(MaxTimestamp);
 	}
 	
-	public List<RemoteDevice> getDevices() {
+	public List<RemoteDevice> getDevices() throws Exception {
 		
 		List<RemoteDevice> deviceList;
 		if (getAcceptAll()) {
@@ -170,11 +170,18 @@ public class GenericTcpServerDriverSettings extends PersistentRecord implements 
 			deviceList = new ArrayList<RemoteDevice>(st.countTokens());
 			while (st.hasMoreTokens()) {
 				String entry = st.nextToken();
-				int comma = entry.indexOf(",");
-				String hostname = entry.substring(0, comma).toLowerCase().trim();
-				String alias = entry.substring(comma + 1, entry.length()).trim();
-				alias.replaceAll("\\s+", ""); // Remove whitespace from alias
-				deviceList.add(new RemoteDevice(hostname, alias));
+				try {
+					int comma = entry.indexOf(",");
+					if (comma == 0) {
+						throw new Exception(BundleUtil.i18n("GenericTcpDriver.error.invalidDevice", entry));
+					}
+					String hostname = entry.substring(0, comma).toLowerCase().trim();
+					String alias = entry.substring(comma + 1, entry.length()).trim();
+					alias.replaceAll("\\s+", ""); // Remove whitespace from alias
+					deviceList.add(new RemoteDevice(hostname, alias));
+				} catch (Exception e) {
+					throw new Exception(BundleUtil.i18n("GenericTcpDriver.error.invalidDevice", entry));
+				}
 			}
 		}
 		return deviceList;
