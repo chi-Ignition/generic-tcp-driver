@@ -25,7 +25,7 @@ import simpleorm.dataset.SFieldFlags;
 @SuppressWarnings("serial")
 public class GenericTcpClientDriverSettings extends PersistentRecord implements IGenericTcpDriverSettings {
 
-	static final long MAX_TIMESTAMP = 0xfffffffL;
+	static final long MAX_TIMESTAMP = 0xffffffffL;
 	
 	public static final RecordMeta<GenericTcpClientDriverSettings> META = new RecordMeta<GenericTcpClientDriverSettings>(
 		GenericTcpClientDriverSettings.class, "GenTcpClientDriverSettings");
