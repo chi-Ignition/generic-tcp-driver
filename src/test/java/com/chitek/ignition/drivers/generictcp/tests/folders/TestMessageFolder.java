@@ -649,10 +649,13 @@ public class TestMessageFolder {
 		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigTypes.xml");
 		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
 		
+		assertEquals("Expected Message length",12,folder.getMessageLength());
+		
 		ByteBuffer buffer = ByteBuffer.allocate(100);
 		buffer.put(new byte[]{0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0});	// Timestamps
 		buffer.put(" bcde".getBytes()); 	// Data 1 - String
 		buffer.put(new byte[]{1,2,0,(byte)254,(byte)255});	// Data 2 - ByteString
+		buffer.put(new byte[]{(byte)170,(byte)255});	// Data 3 - Bool16
 		
 		buffer.flip();
 		byte[]data = new byte[buffer.remaining()];
@@ -669,7 +672,10 @@ public class TestMessageFolder {
 		char[] charvalue = new char[5];
 		((String)value2.getValue().getValue()).getChars(0,5,charvalue,0);
 		assertArrayEquals(new char[]{1,2,0,254,255}, charvalue);
+		DataValue value3 = FolderTestUtils.readValue(folder,"Alias1/Data3");
+		Boolean[] data3 = (Boolean[]) value3.getValue().getValue();
 		
+		assertArrayEquals(java.util.Arrays.toString(data3), new Boolean[]{true,true,true,true,true,true,true,true,false,true,false,true,false,true,false,true}, data3);
 		folder.shutdown();
 	}
 	

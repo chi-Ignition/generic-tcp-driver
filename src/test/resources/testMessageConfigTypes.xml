@@ -11,6 +11,12 @@
 		<setting name="DataType">RawString</setting>
 		<setting name="Size">5</setting>
 	</config>
+	<config type="TagConfig">
+		<setting name="Alias">Data3</setting>
+		<setting name="Id">3</setting>
+		<setting name="DataType">Bool16</setting>
+		<setting name="Size">1</setting>
+	</config>
 	<setting name="MessageAlias">Alias1</setting>
 	<setting name="MessageId">1</setting>
 	<setting name="UsePersistance">false</setting>

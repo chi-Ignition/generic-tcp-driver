@@ -155,6 +155,12 @@ public class Util {
 						value.getClass().getSimpleName(), dataType.name() ));
 		} else {
 			switch (dataType) {
+			case Boolean:
+				if (value instanceof Number) 
+					return makeVariant(((Number)value).longValue(), dataType);
+				if (value instanceof Boolean)
+					return new Variant(value);
+				break;
 			case String:
 				if (value==null)
 					return new Variant("");
@@ -181,6 +187,8 @@ public class Util {
 	 */
 	public static Variant makeVariant(long value, BuiltinDataType dataType) {
 		switch (dataType) {
+		case Boolean:	
+			return new Variant(value==0?false:true);
 		case Byte:
 			if (value<0)
 				throw new IllegalArgumentException("Cannot set value of UByte to a number smaller than 0."); 
