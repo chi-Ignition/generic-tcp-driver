@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.chitek.ignition</groupId>
 	<artifactId>generic-tcp-driver</artifactId>
-	<version>3.0.0</version>
+	<version>3.0.1</version>
 	<name>generic-tcp-driver-parent</name>
 	<packaging>pom</packaging>
 	
@@ -159,6 +159,6 @@
     </pluginRepositories>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<local-gateway-url>http://10.224.10.32:8088</local-gateway-url>
+		<local-gateway-url>http://10.224.11.101:8088</local-gateway-url>
 	</properties>
 </project>
