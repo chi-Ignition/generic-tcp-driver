@@ -52,6 +52,7 @@ import com.chitek.ignition.drivers.generictcp.types.TagLengthType;
 import com.chitek.ignition.drivers.generictcp.util.VariantByteBuffer;
 import com.chitek.util.PersistentQueue;
 import com.inductiveautomation.ignition.common.TypeUtilities;
+import com.inductiveautomation.xopc.driver.api.items.ReadItem;
 import com.inductiveautomation.xopc.driver.api.tags.DynamicDriverTag;
 import com.inductiveautomation.xopc.driver.util.ByteUtilities;
 
@@ -412,7 +413,7 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 			}
 		}
 
-		if (queueMode == QueueMode.DELAYED || queueMode == QueueMode.HANDSHAKE) {
+		if (queueMode == QueueMode.DELAYED) {
 			// Cancel the delayed task if there is no subscription any more
 			if (!subscriptionPresent && delayActive) {
 				delayActive = false;
@@ -462,12 +463,27 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 					} finally {
 						tagLock.unlock();
 					}
-					delayTimer = 5;	// Reset handshake after 2 subscription cycles
+					delayTimer = 5;	// Reset handshake after 5 subscription cycles
 					waitHandshake = true;
 				}
 			}
 		}
 		
+	}
+
+	@Override
+	public void readItems(List<? extends ReadItem> list) {
+		
+		if (queueMode == QueueMode.HANDSHAKE && delayTimer>0) {
+			for (ReadItem item : list) {
+				if (item.getAddress().endsWith(HANDSHAKE_TAG_NAME)) {
+					// Handshake tag has been read. Check timer to toggle handshake
+					beforeSubscriptionUpdate();
+				}
+			}
+		}
+		
+		super.readItems(list);
 	}
 	
 	/**

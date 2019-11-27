@@ -948,10 +948,10 @@ barcodescanner1.company.com,Device3</programlisting>
 						client, the _Handshake tag is set to the value of the 
 						_MessageCount tag. The clients sets _Handshake to 0 to confirm 
 						that the data has been processed.</simpara>
-						<simpara>If _Handshake or _MessageCount are subscribed, the 
+						<simpara>If _Handshake or _MessageCount are subscribed or if _Handshake is read, the 
 						driver will toggle the _Handshake tag to 0 after 5 subscription 
-						cycles if the client does not do so. After another 2 subscription 
-						cycles, the value is set back to the message count. This 
+						cycles or reads if the client does not do so. After another 2 subscription 
+						cycles or reads, the value is set back to the message count. This 
 						mechanism makes sure that an &apos;on-change&apos; in the 
 						connected client will not get stuck.</simpara>
 						<simpara>With Ignition transaction groups, it is recommended to 
