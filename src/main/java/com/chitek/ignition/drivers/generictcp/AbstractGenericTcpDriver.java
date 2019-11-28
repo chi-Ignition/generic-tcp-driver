@@ -16,7 +16,6 @@
 package com.chitek.ignition.drivers.generictcp;
 
 import java.io.File;
-import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,9 +28,6 @@ import org.apache.log4j.Logger;
 import com.chitek.ignition.drivers.generictcp.folder.BrowseTree;
 import com.chitek.ignition.drivers.generictcp.folder.FolderManager;
 import com.chitek.ignition.drivers.generictcp.folder.MessageFolder;
-import com.chitek.ignition.drivers.generictcp.redundancy.FullUpdateMessage;
-import com.chitek.ignition.drivers.generictcp.redundancy.StateUpdate;
-import com.chitek.ignition.drivers.generictcp.redundancy.StatusUpdateMessage;
 import com.chitek.ignition.drivers.generictcp.types.DriverState;
 import com.inductiveautomation.ignition.common.execution.ExecutionManager;
 import com.inductiveautomation.ignition.common.execution.SelfSchedulingRunnable;
@@ -39,8 +35,6 @@ import com.inductiveautomation.ignition.gateway.redundancy.RedundancyManager;
 import com.inductiveautomation.ignition.gateway.redundancy.types.ActivityLevel;
 import com.inductiveautomation.ignition.gateway.redundancy.types.RedundancyState;
 import com.inductiveautomation.ignition.gateway.redundancy.types.RedundancyStateAdapter;
-import com.inductiveautomation.ignition.gateway.redundancy.types.RuntimeStateProvider;
-
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectNode;
@@ -61,10 +55,8 @@ import com.inductiveautomation.xopc.driver.util.AddressNotFoundException;
 import com.inductiveautomation.xopc.driver.util.TagTree.TagTreeNode;
 
 public abstract class AbstractGenericTcpDriver
-	implements Driver, ModelChangeListener, IGenericTcpDriverContext, RuntimeStateProvider {
+	implements Driver, ModelChangeListener, IGenericTcpDriverContext {
 
-	private static final String RUNTIME_STATE_ID = "TcpBinMsgQueue%s";
-	
 	private final String deviceName;
 	private final DriverContext driverContext;
 
@@ -81,7 +73,6 @@ public abstract class AbstractGenericTcpDriver
 	// Redundancy
 	private RedundancyListener redundancyListener;
 	private boolean redundancyEnabled=false;
-	private final String runtimeStateId;
 
 	// TagTree is used to simplify browsing. No tag reference needed, so the address is as key and value tag
 	private final BrowseTree browseTree = new BrowseTree();
@@ -91,7 +82,6 @@ public abstract class AbstractGenericTcpDriver
 	protected AbstractGenericTcpDriver(DriverContext driverContext) {
 		this.deviceName = driverContext.getDeviceName();
 		this.driverContext = driverContext;
-		runtimeStateId = String.format(RUNTIME_STATE_ID, deviceName);
 
 		this.log = Logger.getLogger(getLoggerName());
 		log.debug("Initalize");
@@ -115,8 +105,6 @@ public abstract class AbstractGenericTcpDriver
 		
 		// Initialize redundancy
 		RedundancyManager rm = getDriverContext().getGatewayContext().getRedundancyManager();
-		
-		rm.getRuntimeStateManager().registerRuntimeProvider(this);
 
 		redundancyListener = new RedundancyListener();
 		rm.addRedundancyStateListener(redundancyListener);
@@ -128,7 +116,7 @@ public abstract class AbstractGenericTcpDriver
 	public void shutdown() {
 		// Unregister listeners
 		getDriverContext().getSubscriptionModel().removeModelChangeListener(this);
-		getRedundancyManager().getRuntimeStateManager().unregisterRuntimeProvider(this);
+
 		if (redundancyListener != null) {
 			getRedundancyManager().removeRedundancyStateListener(redundancyListener);
 		}
@@ -343,12 +331,7 @@ public abstract class AbstractGenericTcpDriver
 	public void unregisterScheduledRunnable(String owner, String name) {
 		executionManager.unRegister(owner, name);
 	}
-	
-	@Override
-	public void postRuntimeStateUpdate(StateUpdate stateUpdate) {
-		getRedundancyManager().getRuntimeStateManager().postRuntimeUpdate(getId(), stateUpdate);		
-	}
-	
+
 	@Override
 	public abstract void writeToRemoteDevice(ByteBuffer message, int deviceId);
 
@@ -366,78 +349,6 @@ public abstract class AbstractGenericTcpDriver
 		return shutdown;
 	}
 
-	////////////////////////////////////////////////////////////////////////////////
-	// RuntimeStateProvider
-	////////////////////////////////////////////////////////////////////////////////
-	@Override
-	public String getId() {
-		return runtimeStateId;
-	}
-	
-	/**
-	 * Send the complete message queue to the other node.
-	 * All queues, including empty ones, will be sent.
-	 */
-	@Override
-	public Serializable getFullState() {
-		log.info("Sending full runtime state update.");
-
-		StatusUpdateMessage status = getStatusUpdate();
-		
-		List<StateUpdate>folderStates = getFolderManager().getFullRuntimeState();
-		
-		FullUpdateMessage stateObj = new FullUpdateMessage(status, folderStates);
-		return stateObj;
-	}
-	
-	@Override
-	public void setFullState(Serializable stateObj) {
-		log.info("Received full runtime state update.");
-		try {
-			if (stateObj instanceof FullUpdateMessage) {
-
-				// Update connection status
-				updateState(((FullUpdateMessage) stateObj).getStatus());
-
-				// Update folder states
-				getFolderManager().setFullRuntimeState(((FullUpdateMessage) stateObj).getFolderStates());
-			}
-		} catch (Exception e) {
-			// An exception will stop the whole RuntimeState system, so it has to be caught here.
-			if (log.isDebugEnabled()) {
-				log.debug("Exception evaluating RuntimeState update:", e);
-			} else {
-				log.error("Exception evaluating RuntimeState update: " + e.toString());
-			}
-		}
-	}
-	
-	@Override
-	public void updateState(Serializable stateObj) {
-		
-		if (stateObj instanceof StateUpdate) {
-			getFolderManager().updateRuntimeState((StateUpdate)stateObj);
-		}
-		
-		if (stateObj instanceof StatusUpdateMessage) {
-			setStatusUpdate((StatusUpdateMessage) stateObj);
-		}
-	}
-	
-	/**
-	 * @return
-	 * 	A StatusUpdateMessage to be used in a full update for a redundant configuration.
-	 */
-	protected abstract StatusUpdateMessage getStatusUpdate();
-	
-	/**
-	 * Update the driver status in a redundant configuration. 
-	 *
-	 * @param statusUpdate
-	 * 	The driver status as received from the redundant peer.
-	 */
-	protected abstract void setStatusUpdate(StatusUpdateMessage statusUpdate);
-	
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	private class RedundancyListener extends RedundancyStateAdapter {

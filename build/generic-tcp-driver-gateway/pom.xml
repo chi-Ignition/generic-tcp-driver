@@ -5,7 +5,7 @@
 		<groupId>com.chitek.ignition</groupId>
 		<artifactId>generic-tcp-driver</artifactId>
 		<relativePath>../../pom.xml</relativePath>
-		<version>3.0.1</version>
+		<version>3.0.2</version>
 	</parent>
 	
 	<artifactId>generic-tcp-driver-gateway</artifactId>

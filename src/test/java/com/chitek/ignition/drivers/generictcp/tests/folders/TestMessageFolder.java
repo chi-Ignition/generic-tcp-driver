@@ -5,15 +5,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.milo.opcua.sdk.core.ValueRank;
@@ -33,7 +30,6 @@ import com.chitek.ignition.drivers.generictcp.folder.IndexMessageFolder;
 import com.chitek.ignition.drivers.generictcp.folder.MessageDataWrapper;
 import com.chitek.ignition.drivers.generictcp.meta.config.DriverSettings;
 import com.chitek.ignition.drivers.generictcp.meta.config.MessageConfig;
-import com.chitek.ignition.drivers.generictcp.redundancy.StateUpdate;
 import com.chitek.ignition.drivers.generictcp.tests.MockDriverContext;
 import com.chitek.ignition.drivers.generictcp.tests.TestUtils;
 import com.chitek.ignition.drivers.generictcp.types.OptionalDataType;
@@ -506,101 +502,7 @@ public class TestMessageFolder {
 		
 		folder.shutdown();
 	}
-	
-	@Test
-	public void testRedundancy() throws Exception {
-		// Create settings with message id type = None
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);
-		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigQueue.xml");
-		List<StateUpdate> stateUpdates = new LinkedList<StateUpdate>();
 
-		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
-		folder.activityLevelChanged(true);
-		// Changing activity level starts a queue evaluation
-		assertEquals(1, driverContext.getExecutor().getScheduledCount());
-		driverContext.getExecutor().runCommand();		
-		
-		byte[] message = new byte[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,65,66};
-		folder.messageArrived(message, null); // 65,66 == 'AB'
-		
-		// folder should have posted a state update
-		StateUpdate stateUpdate = driverContext.getLastStateUpdate();
-		byte[] msg = (byte[]) getFolderUpdateStateField(stateUpdate, "message");
-		assertArrayEquals(message, msg);
-		stateUpdates.add(stateUpdate);
-		
-		// Evaluate the message
-		assertEquals(1, driverContext.getExecutor().getScheduledCount());
-		driverContext.getExecutor().runCommand();
-		// Now set the Handshake
-		FolderTestUtils.writeValue(folder, "Alias1/_Handshake", new Variant(false));
-		
-		// Folder should post a remove update
-		stateUpdate = driverContext.getLastStateUpdate();
-		msg = (byte[]) getFolderUpdateStateField(stateUpdate, "message");
-		assertArrayEquals(Arrays.copyOf(message, 8), msg);
-		stateUpdates.add(stateUpdate);		
-		
-		// A second message
-		message = new byte[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,67,68};
-		folder.messageArrived(message, null);
-		
-		// folder should have posted another state update
-		stateUpdate = driverContext.getLastStateUpdate();
-		msg = (byte[]) getFolderUpdateStateField(stateUpdate, "message");
-		assertArrayEquals(message, msg);
-		stateUpdates.add(stateUpdate);
-		
-		// Create a new folder and transfer the states back
-		driverContext.getExecutor().clear(); // There's still 1 command pending - remove it
-		IndexMessageFolder backupFolder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
-		for (StateUpdate state : stateUpdates) {
-			backupFolder.updateRuntimeState(state);
-		}
-		
-		// Now make the backup folder active
-		backupFolder.activityLevelChanged(true);
-		assertEquals(1, driverContext.getExecutor().getScheduledCount());
-		driverContext.getExecutor().runCommand();
-		
-		// We acknowledged the first message, so the backup should start with the second message
-		DataValue value = FolderTestUtils.readValue(backupFolder,"Alias1/Data1");
-		assertEquals("CD", value.getValue().getValue());
-		
-		folder.shutdown();
-	}
-	
-	@Test
-	public void testFullStateTransfer() throws Exception {
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);
-		MessageConfig messageConfig = TestUtils.readMessageConfig("/testMessageConfigQueue.xml");
-
-		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
-		folder.activityLevelChanged(true);
-		
-		folder.messageArrived(new byte[]{0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,65,66}, null); // 65,66 == 'AB'
-		folder.messageArrived(new byte[]{0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,67,68}, null); // 'CD'
-		folder.messageArrived(new byte[]{0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,67,68}, null); // 'EF'
-		
-		StateUpdate fullState = folder.getFullState();
-		
-		// Create a new folder and set the full state
-		driverContext.getExecutor().clear(); // There's still commands pending - remove them
-		IndexMessageFolder backupFolder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
-		backupFolder.setFullState(fullState);
-		
-		// Now make the backup folder active
-		backupFolder.activityLevelChanged(true);
-		assertEquals(1, driverContext.getExecutor().getScheduledCount());
-		driverContext.getExecutor().runCommand();
-		
-		// We acknowledged the first message, so the backup should start with the second message
-		DataValue value = FolderTestUtils.readValue(backupFolder,"Alias1/Data1");
-		assertEquals("AB", value.getValue().getValue());
-		
-		folder.shutdown();
-	}
-	
 	@Test
 	public void testBrowseTree() throws Exception {
 		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);
@@ -727,24 +629,5 @@ public class TestMessageFolder {
 	
 	private NodeId buildNodeId(String address) {
 		return new NodeId(1, String.format("[%s]%s", DEVICE_NAME, address));
-	}
-		
-	/**
-	 * FolderUpdateState is a private class, we have to acces the fields using refelction.
-	 *
-	 * @param stateUpdate
-	 * @param fieldName
-	 * @return
-	 * @throws Exception
-	 */
-	private Object getFolderUpdateStateField(StateUpdate stateUpdate, String fieldName) throws Exception {
-
-			Field field = stateUpdate.getClass().getDeclaredField(fieldName);
-			if (field != null) {
-				field.setAccessible(true);
-				return field.get(stateUpdate);
-			}
-		
-		return null;
 	}
 }

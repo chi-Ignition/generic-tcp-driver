@@ -28,8 +28,6 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UShort;
 import com.chitek.ignition.drivers.generictcp.IGenericTcpDriverContext;
 import com.chitek.ignition.drivers.generictcp.meta.config.IDriverSettings;
 import com.chitek.ignition.drivers.generictcp.meta.config.WritebackConfig;
-import com.chitek.ignition.drivers.generictcp.redundancy.FolderStateProvider;
-import com.chitek.ignition.drivers.generictcp.redundancy.StateUpdate;
 import com.chitek.ignition.drivers.generictcp.tags.WritableTag;
 import com.chitek.ignition.drivers.generictcp.types.OptionalDataType;
 import com.chitek.ignition.drivers.generictcp.types.WritebackDataType;
@@ -37,7 +35,7 @@ import com.chitek.ignition.drivers.generictcp.util.Util;
 import com.inductiveautomation.ignition.common.TypeUtilities;
 import com.inductiveautomation.xopc.driver.util.ByteUtilities;
 
-public class SimpleWriteFolder extends MessageFolder implements FolderStateProvider {
+public class SimpleWriteFolder extends MessageFolder {
 
 	public static final String FOLDER_NAME = "[Writeback]";
 
@@ -353,9 +351,6 @@ public class SimpleWriteFolder extends MessageFolder implements FolderStateProvi
 					idValue = paramDataValue;
 					tagLock.unlock();
 
-					// Post the updated value to the redundant backup
-					postRedundancyUpdate();
-
 					return StatusCode.GOOD;
 				}
 
@@ -404,9 +399,6 @@ public class SimpleWriteFolder extends MessageFolder implements FolderStateProvi
 					tagLock.unlock();
 				}
 
-				// Post the updated value to the redundant backup
-				postRedundancyUpdate();
-
 				if (config.getSendOnValueChange()) {
 					getDriverContext().executeOnce(new Runnable() {
 						@Override
@@ -426,89 +418,4 @@ public class SimpleWriteFolder extends MessageFolder implements FolderStateProvi
 		};
 		buildAndAddNode(valueTag).setValue(valueTag.getValue());
 	}
-
-	/**
-	 * Post updated MessageId and Value to the redundant backup, if this gateway is the master.
-	 */
-	private void postRedundancyUpdate() {
-		if (isActiveNode) {
-			log.debug("Posting redundancy status update.");
-			getDriverContext().postRuntimeStateUpdate(new FolderStateUpdate(getFolderId(), messageId, valueValue.getValue().getValue().toString()));
-		}
-	}
-
-	/**
-	 * Receive status updates from the active gateway if redundancy is enabled. Only the backup driver in a redundant
-	 * configuration will receive this message to update messageId and Value.
-	 */
-	@Override
-	public void updateRuntimeState(StateUpdate stateUpdate) {
-		if (stateUpdate instanceof FolderStateUpdate) {
-			FolderStateUpdate folderStateUpdate = (FolderStateUpdate) stateUpdate;
-			try {
-				tagLock.lock();
-				if (config.getDataType() == WritebackDataType.ByteString) {
-					byte[] val;
-					try {
-						val = Util.hexString2ByteArray(folderStateUpdate.getValue());
-					} catch (ParseException e) {
-						log.error("Value in writeback redundancy update can not be parsed as ByteString.");
-						return;
-					}
-					byteValue = val;
-					valueValue = new DataValue(Util.makeVariant(folderStateUpdate.getValue(), config.getDataType().getUADataType()));
-				} else {
-					numValue = TypeUtilities.toLong(folderStateUpdate.getValue());
-					valueValue = new DataValue(Util.makeVariant(numValue, config.getDataType().getUADataType()));
-				}
-
-				messageId = folderStateUpdate.getMessageId();
-				idValue = new DataValue(Util.makeVariant(messageId, config.getMessageIdType().getUADataType()), idValue.getStatusCode());
-			} finally {
-				tagLock.unlock();
-			}
-
-			if (log.isDebugEnabled()) {
-				log.debug(String.format("'%s' received writeback update from redundant Master. message id: %s, value: %s",
-						FolderManager.folderIdAsString(getFolderId()), messageId, folderStateUpdate.getValue()));
-			}
-		}
-	}
-	
-	@Override
-	public StateUpdate getFullState() {
-		return new FolderStateUpdate(getFolderId(), messageId, valueValue.getValue().getValue().toString());
-	}
-
-	@Override
-	public void setFullState(StateUpdate stateUpdate) {
-		if (stateUpdate instanceof FolderStateUpdate) {
-			updateRuntimeState(stateUpdate);
-		}
-	}
-	
-	/**
-	 * Message for the redundancy system.
-	 * 
-	 */
-	private static class FolderStateUpdate extends StateUpdate {
-		private static final long serialVersionUID = 1L;
-		private final int messageId;
-		private final String value;
-
-		public FolderStateUpdate(int folderId, int messageId, String value) {
-			super(folderId);
-			this.messageId = messageId;
-			this.value = value;
-		}
-
-		public int getMessageId() {
-			return messageId;
-		}
-
-		public String getValue() {
-			return value;
-		}
-	}
-
 }

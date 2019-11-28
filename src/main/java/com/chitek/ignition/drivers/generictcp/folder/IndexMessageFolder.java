@@ -39,8 +39,7 @@ import com.chitek.ignition.drivers.generictcp.IGenericTcpDriverContext;
 import com.chitek.ignition.drivers.generictcp.meta.config.IDriverSettings;
 import com.chitek.ignition.drivers.generictcp.meta.config.MessageConfig;
 import com.chitek.ignition.drivers.generictcp.meta.config.TagConfig;
-import com.chitek.ignition.drivers.generictcp.redundancy.FolderStateProvider;
-import com.chitek.ignition.drivers.generictcp.redundancy.StateUpdate;
+
 import com.chitek.ignition.drivers.generictcp.tags.ReadableArrayTag;
 import com.chitek.ignition.drivers.generictcp.tags.ReadableBoolArrayTag;
 import com.chitek.ignition.drivers.generictcp.tags.ReadableStringTag;
@@ -65,7 +64,7 @@ import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.
  * @author chi
  * 
  */
-public class IndexMessageFolder extends MessageFolder implements FolderStateProvider {
+public class IndexMessageFolder extends MessageFolder {
 	public final static String QUEUE_FILE_PREFIX = "tcpBinMsgQueue";
 	public final static String QUEUE_FILE_EXTENSION = ".que";
 	private final static int MAX_PENDING_MESSAGES = 15;
@@ -97,9 +96,6 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 
 	/** First timestamp published to client after this node became active */
 	private long firstPublishedTimestamp;
-
-	/** timestamp at queue tail when last full update was posted to redundant master */
-	private long lastPostedTimestamp;
 
 	private volatile boolean delayActive;
 	/** timer for actions synchronized with the subscription */
@@ -211,28 +207,6 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 			firstPublishedTimestamp = 0;
 
 			cancelSchedule();
-
-			// Post remaining queue entry to new master
-			// There is a small time span after the full update message and before the driver becomes inactive.
-			// There may be messages added to the queue that have not been posted in the full update.
-			if (lastPostedTimestamp != 0) {
-				synchronized (queueLock) {
-					int index = queue.size();
-					while (index > 0) {
-						byte[] message = queue.get(index - 1);
-						long tailTimestamp = ByteUtilities.get(driverSettings.getByteOrder()).getLong(message, 0);
-						if (tailTimestamp > lastPostedTimestamp) {
-							FolderStateUpdate stateUpdate = new FolderStateUpdate(getFolderId(), message, false);
-							getDriverContext().postRuntimeStateUpdate(stateUpdate);
-							if (log.isDebugEnabled()) {
-								log.debug(String.format("'%s' posted message id %d to redundant master that arrived after full update.", FolderManager.folderIdAsString(getFolderId()), tailTimestamp));
-							}
-							index -= 1;
-						} else
-							break;
-					}
-				}
-			}
 		}
 
 		// Not active -> Active
@@ -333,11 +307,6 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 					pollMessageFromQueue(false);
 				}
 				addMessageToQueue(message);
-
-				// Post message to backup gateway
-				FolderStateUpdate stateUpdate = new FolderStateUpdate(getFolderId(), message, false);
-				getDriverContext().postRuntimeStateUpdate(stateUpdate);
-				lastPostedTimestamp = ByteUtilities.get(driverSettings.getByteOrder()).getLong(message, 0);
 
 				// If this message is the last one in a package with header, send the confirmation to the device
 				if (handshakeMsg != null) {
@@ -894,9 +863,6 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 			byte[] removed = queue.peek();
 			if (removed != null) {
 				removeMessageFromQueue(removed);
-				// Update queue on non-active node
-				FolderStateUpdate stateUpdate = new FolderStateUpdate(getFolderId(), removed, true);
-				getDriverContext().postRuntimeStateUpdate(stateUpdate);
 				// Store the first polled timestamp
 				if (firstPublishedTimestamp == 0)
 					firstPublishedTimestamp = ByteUtilities.get(driverSettings.getByteOrder()).getLong(removed, 0);
@@ -985,123 +951,12 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 	}
 
 	/**
-	 * This method returns the current message queue by COPYING its content to a byte array. This is a deep copy, there is
-	 * no reference to the original ArrayDeque.
-	 * 
-	 * @return A copy of the current message queue or an empty array if the queue is empty
-	 */
-	private byte[][] getQueueAsArray() {
-
-		if (queue == null) {
-			return new byte[][] {};
-		}
-
-		byte[][] queueArray;
-		synchronized (queueLock) {
-			queueArray = queue.toArray(new byte[0][0]);
-			log.debug(String.format("Queue with size %d copied for redundant peer.", queue.size()));
-
-			if (queue.size() > 0)
-				lastPostedTimestamp = ByteUtilities.get(driverSettings.getByteOrder()).getLong(queue.peekLast(), 0);
-			else
-				lastPostedTimestamp = System.currentTimeMillis() * 65536;
-		}
-		return queueArray;
-	}
-
-	/**
 	 * Returns the first timestamp that has been published to clients by this message folder.
 	 * 
 	 * @return The first published timestamp
 	 */
 	public long getFirstPublishedTimestamp() {
 		return firstPublishedTimestamp;
-	}
-
-	/**
-	 * Replace the message queue
-	 * 
-	 * @param messageConfigHash
-	 * @param firstPublishedTimestamp
-	 * @param queue
-	 */
-	private void setMessageQueue(int messageConfigHash, long firstPublishedTimestamp, byte[][] newQueue) {
-
-		if (this.queue == null)
-			return;
-
-		// Check if the configuration has been changed
-		if (messageConfigHash != configHash) {
-			log.warn(String.format("Configuration has been changed. Dropping %d queued messages.", newQueue.length));
-			synchronized (queueLock) {
-				this.queue.clear();
-			}
-			return;
-		}
-
-		ByteUtilities bu = ByteUtilities.get(driverSettings.getByteOrder());
-		long queueTailTimestamp = 0;
-		if (this.queue.size() > 0) {
-			queueTailTimestamp = bu.getLong(this.queue.peekLast(), 0);
-		}
-
-		if (log.isDebugEnabled()) {
-			log.debug(String.format("Received full queue update. First timestamp published by peer:%d, timestamp at current queue tail: %d. New queue size: %d.", firstPublishedTimestamp,
-					queueTailTimestamp, newQueue.length));
-		}
-
-		synchronized (queueLock) {
-			byte[][] oldQueue = queue.toArray(new byte[0][0]);
-			this.queue.clear();
-			int saved = 0;
-			for (byte[] msg : oldQueue) {
-				// Restore all messages from the current queue thet has not been published by the peer
-				long id = bu.getLong(msg, 0);
-				if (id < firstPublishedTimestamp) {
-					queue.add(msg);
-					saved++;
-				}
-			}
-			if (log.isDebugEnabled()) {
-				log.debug(String.format("Restored %d messages from old queue that have not been published by peer", saved));
-			}
-			this.queue.addAll(Arrays.asList(newQueue));
-		}
-	}
-
-	@Override
-	public StateUpdate getFullState() {
-		FolderFullState fullState = new FolderFullState(getFolderId(), getConfigHash(), getFirstPublishedTimestamp(), getQueueAsArray());
-		return fullState;
-	}
-
-	@Override
-	public void setFullState(StateUpdate stateUpdate) {
-		if (stateUpdate instanceof FolderFullState) {
-			FolderFullState fullState = (FolderFullState) stateUpdate;
-			setMessageQueue(fullState.getConfigHash(), fullState.getFirstPublishedTimestamp(), fullState.getQueue());
-		}
-	}
-
-	@Override
-	public void updateRuntimeState(StateUpdate stateUpdate) {
-		if (stateUpdate instanceof FolderStateUpdate) {
-			FolderStateUpdate folderStateUpdate = (FolderStateUpdate) stateUpdate;
-			if (folderStateUpdate.isRemoved()) {
-				// Remove from queue
-				if (!queueActive) {
-					// Only the inactive node accepts remove messages. This might result in messages published
-					// twice, but this is better than loosing messages.
-					removeMessageFromQueue(folderStateUpdate.getMessage());
-				}
-			} else {
-				addMessageToQueue(folderStateUpdate.getMessage());
-			}
-
-			if (log.isTraceEnabled()) {
-				log.trace(String.format("'%s' received runtime state update.", FolderManager.folderIdAsString(getFolderId())));
-			}
-		}
 	}
 
 	/**
@@ -1112,68 +967,4 @@ public class IndexMessageFolder extends MessageFolder implements FolderStateProv
 	public long getMessageCount() {
 		return messageCount;
 	}
-
-	/**
-	 * Message for the redundancy system.
-	 * 
-	 */
-	private static class FolderStateUpdate extends StateUpdate {
-		private static final long serialVersionUID = 1L;
-		private final byte[] message;
-
-		public FolderStateUpdate(int folderId, byte[] message, boolean remove) {
-			super(folderId);
-			// Create a deep copy to transfer the message
-			if (remove) {
-				// Massage removed from queue - send only the timestamp
-				this.message = Arrays.copyOf(message, 8);
-			} else {
-				this.message = Arrays.copyOf(message, message.length);
-			}
-		}
-
-		public byte[] getMessage() {
-			return message;
-		}
-
-		/**
-		 * @return <code>true</code> if this message should be removed from the queue.
-		 */
-		public boolean isRemoved() {
-			return message.length == 8;
-		}
-	}
-
-	private static class FolderFullState extends StateUpdate {
-		private static final long serialVersionUID = 1L;
-		private final int configHash;
-		private final long firstPublishedTimestamp;
-		private final byte[][] queue;
-
-		public FolderFullState(int folderId, int configHash, long firstPublishedTimestamp, byte[][] queue) {
-			super(folderId);
-			this.configHash = configHash;
-			this.firstPublishedTimestamp = firstPublishedTimestamp;
-			this.queue = queue;
-		}
-
-		public byte[][] getQueue() {
-			return queue;
-		}
-
-		/**
-		 * @return Timestamp of the first message that has been published by this folder
-		 */
-		public long getFirstPublishedTimestamp() {
-			return firstPublishedTimestamp;
-		}
-
-		/**
-		 * @return The hash value of the message configuration. Used to detect configuration changes.
-		 */
-		public int getConfigHash() {
-			return configHash;
-		}
-	}
-
 }

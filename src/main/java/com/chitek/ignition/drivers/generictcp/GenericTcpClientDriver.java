@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2013 C. Hiesserich
+ * Copyright 2012-2019 C. Hiesserich
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,6 @@ import com.chitek.ignition.drivers.generictcp.meta.config.DriverSettings;
 import com.chitek.ignition.drivers.generictcp.meta.config.HeaderConfig;
 import com.chitek.ignition.drivers.generictcp.meta.config.MessageConfig;
 import com.chitek.ignition.drivers.generictcp.meta.config.WritebackConfig;
-import com.chitek.ignition.drivers.generictcp.redundancy.StatusUpdateMessage;
 import com.chitek.ignition.drivers.generictcp.types.DriverState;
 import com.chitek.ignition.drivers.generictcp.types.OptionalDataType;
 import com.chitek.ignition.drivers.generictcp.types.QueueMode;
@@ -386,9 +385,6 @@ public class GenericTcpClientDriver extends AbstractGenericTcpDriver implements 
 				disconnect();
 			}
 		}
-
-		StatusUpdateMessage stateObj = getStatusUpdate();
-		getRedundancyManager().getRuntimeStateManager().postRuntimeUpdate(getId(), stateObj);
 	}
 
 	private void initSettings(GenericTcpClientDriverSettings settings) {
@@ -528,28 +524,5 @@ public class GenericTcpClientDriver extends AbstractGenericTcpDriver implements 
 		}
 		
 		getFolderManager().updateActivityLevel(newLevel == ActivityLevel.Active);
-	}
-	
-	@Override
-	protected StatusUpdateMessage getStatusUpdate() {
-		return new StatusUpdateMessage(connectionEnabled, driverSettings.getHostname(), driverSettings.getPort());
-	}
-	
-	@Override
-	protected void setStatusUpdate(StatusUpdateMessage statusUpdate) {
-		boolean setConnectionEnabled = statusUpdate.isConnectionEnabled();
-		String hostname = statusUpdate.getHostname();
-		int port = statusUpdate.getPort();
-		
-		if (log.isDebugEnabled()) {
-			log.debug(String.format("Received runtime state update. connectionEnabled: %s, hostname: %s, port: %d",
-					setConnectionEnabled, hostname, port));
-		}
-		
-		driverSettings.setHostname(hostname);
-		driverSettings.setPort(port);
-		connectionEnabled=setConnectionEnabled;
-		
-		statusFolder.updateStatus(setConnectionEnabled, hostname, port);
 	}
 }

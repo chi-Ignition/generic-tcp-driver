@@ -9,7 +9,6 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectNode.UaObjectNodeBuilder;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode.UaVariableNodeBuilder;
 
-import com.chitek.ignition.drivers.generictcp.redundancy.StateUpdate;
 import com.inductiveautomation.ignition.common.execution.SelfSchedulingRunnable;
 
 /**
@@ -147,14 +146,4 @@ public interface IGenericTcpDriverContext {
 	 */
 	public boolean isActiveNode();
 
-	/**
-	 * Post a state update to the non active node in a redundant system.
-	 *
-	 * @see com.inductiveautomation.ignition.gateway.redundancy.RuntimeStateManager#postRuntimeUpdate(String, java.io.Serializable)
-	 *  RuntimeStateManager.postRuntimeUpdate(String, java.io.Serializable)
-	 *
-	 * @param stateUpdate
-	 * 	The state to send.
-	 */
-	public void postRuntimeStateUpdate(StateUpdate stateUpdate);
 }

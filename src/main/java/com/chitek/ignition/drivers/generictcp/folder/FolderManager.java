@@ -9,8 +9,6 @@ import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
-import com.chitek.ignition.drivers.generictcp.redundancy.FolderStateProvider;
-import com.chitek.ignition.drivers.generictcp.redundancy.StateUpdate;
 import com.inductiveautomation.xopc.driver.api.items.DriverItem;
 import com.inductiveautomation.xopc.driver.api.items.ReadItem;
 import com.inductiveautomation.xopc.driver.api.items.SubscriptionItem;
@@ -240,64 +238,6 @@ public class FolderManager {
 				messageFolder.connectionStateChanged(isConnected);
 			}
 		}
-	}
-	
-	/**
-	 * Forward a runtime state update to the folder identified by {@link StateUpdate#getId()}.
-	 *
-	 * @param stateUpdate
-	 */
-	public void updateRuntimeState(StateUpdate stateUpdate) {
-		MessageFolder folder = getById(stateUpdate.getId());
-		if (folder == null || !(folder instanceof FolderStateProvider)) {
-			log.error(String.format("Received a runtime state update with an unknown folder id %d", stateUpdate.getId()));
-		} else {
-			((FolderStateProvider)folder).updateRuntimeState(stateUpdate);
-		}
-	}
-	
-	
-	
-	/**
-	 * Update all message folders with the given message queues.
-	 *
-	 * @param messageQueues
-	 * 	The List of StateUpdates (generated with {@link #getFullRuntimeState}).
-	 */
-	public void setFullRuntimeState(List<StateUpdate> states) {
-		for (StateUpdate folderState : states) {
-			int folderId = folderState.getId();
-			MessageFolder folder = getById(folderId);
-			if (folder != null && folder instanceof FolderStateProvider) {
-				((FolderStateProvider)folder).setFullState(folderState);
-				if(log.isDebugEnabled()) {
-					log.debug(String.format("Received full runtime state update for '%s'.",
-						FolderManager.folderIdAsString(folderId)));
-				}
-			} else {
-				log.error(String.format("Received runtime state update for non existing folder '%s'", FolderManager.folderIdAsString(folderId)));
-			}
-		}
-	}
-	
-	/**
-	 * Get folder states from folders that implement FolderStateProvider for a full status update in a redundant system.
-	 *
-	 * @return
-	 * 	A List of all folder states.
-	 */
-	public List<StateUpdate> getFullRuntimeState() {
-		List<StateUpdate>states = new ArrayList<StateUpdate>();
-		
-		for (MessageFolder messageFolder : folderMap.values()) {
-			if (messageFolder instanceof FolderStateProvider) {
-				FolderStateProvider folder = (FolderStateProvider) messageFolder;
-				StateUpdate folderState = folder.getFullState();
-				states.add(folderState);
-			}
-		}
-		
-		return states;
 	}
 	
 	/**

@@ -21,7 +21,6 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import com.chitek.TestUtils.MockExecutor;
 import com.chitek.ignition.drivers.generictcp.IGenericTcpDriverContext;
 import com.chitek.ignition.drivers.generictcp.folder.BrowseTree;
-import com.chitek.ignition.drivers.generictcp.redundancy.StateUpdate;
 import com.inductiveautomation.ignition.common.execution.SchedulingController;
 import com.inductiveautomation.ignition.common.execution.SelfSchedulingRunnable;
 
@@ -35,7 +34,6 @@ public class MockDriverContext implements IGenericTcpDriverContext {
 	private byte[] lastWrittenMessage;
 	private String diskPath;
 	public boolean rescheduleRequested;
-	private StateUpdate lastStateUpdate;
 	private UaNodeContext nodeContext = new MockNodeContext();
 	
 	// Test methods ///////////////////////////////////////////////////
@@ -66,15 +64,7 @@ public class MockDriverContext implements IGenericTcpDriverContext {
 	public byte[] getLastWrittenMessage() {
 		return lastWrittenMessage;
 	}
-	
-	/**
-	 * @return
-	 * 	The last runtime state update set by postRuntimeStateUpdate
-	 */
-	public StateUpdate getLastStateUpdate() {
-		return lastStateUpdate;
-	}
-	
+
 	///////////////////////////////////////////////////////////////////
 
 	public MockDriverContext(String deviceName) {
@@ -157,11 +147,6 @@ public class MockDriverContext implements IGenericTcpDriverContext {
 	@Override
 	public boolean isActiveNode() {
 		return true;
-	}
-	
-	@Override
-	public void postRuntimeStateUpdate(StateUpdate stateUpdate) {
-		lastStateUpdate = stateUpdate;
 	}
 	
 	private class Controller implements SchedulingController {

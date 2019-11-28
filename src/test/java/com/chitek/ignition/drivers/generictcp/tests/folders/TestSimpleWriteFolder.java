@@ -4,23 +4,19 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.milo.opcua.stack.core.StatusCodes;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
-import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.chitek.ignition.drivers.generictcp.folder.SimpleWriteFolder;
 import com.chitek.ignition.drivers.generictcp.meta.config.DriverSettings;
 import com.chitek.ignition.drivers.generictcp.meta.config.WritebackConfig;
-import com.chitek.ignition.drivers.generictcp.redundancy.StateUpdate;
 import com.chitek.ignition.drivers.generictcp.tests.MockDriverContext;
 import com.chitek.ignition.drivers.generictcp.tests.TestUtils;
 import com.chitek.ignition.drivers.generictcp.types.OptionalDataType;
@@ -219,62 +215,7 @@ public class TestSimpleWriteFolder {
 		driverContext.getExecutor().runCommand();
 		assertArrayEquals(new byte[]{9, 0,(byte) 0xff,(byte) 0xff,99,0x3f,0x0d,0x03,0x00}, driverContext.getLastWrittenMessage());
 	}
-	
-	@Test
-	public void testRedundancy() throws Exception {
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);
-		WritebackConfig writebackConfig = TestUtils.readWritebackConfig("/testWritebackConfig.xml");
-		List<StateUpdate> stateUpdates = new LinkedList<StateUpdate>();
-		
-		SimpleWriteFolder folder = new SimpleWriteFolder(driverContext, driverSettings, 1, "device1", writebackConfig);
-		// Folder has to be active to post redundancy updates
-		folder.activityLevelChanged(true);
-		
-		FolderTestUtils.writeValue(folder, "device1/[Writeback]/ID", new Variant((byte)77));
-		// folder should have posted a state update
-		StateUpdate stateUpdate = driverContext.getLastStateUpdate();
-		assertEquals(Integer.valueOf(77), (Integer) getFolderUpdateStateField(stateUpdate, "messageId"));
-		assertEquals("0x38,0x39", (String) getFolderUpdateStateField(stateUpdate, "value"));
-		stateUpdates.add(stateUpdate);
-		
-		FolderTestUtils.writeValue(folder, "device1/[Writeback]/Value", new Variant("65,66"));
-		// folder should have posted another state update
-		stateUpdate = driverContext.getLastStateUpdate();
-		assertEquals(Integer.valueOf(77), (Integer) getFolderUpdateStateField(stateUpdate, "messageId"));
-		assertEquals("65,66", (String) getFolderUpdateStateField(stateUpdate, "value"));
-		stateUpdates.add(stateUpdate);
-		
-		// Create a new folder and transfer the states back
-		SimpleWriteFolder backupFolder = new SimpleWriteFolder(driverContext, driverSettings, 1, "device1", writebackConfig);
-		for (StateUpdate state : stateUpdates) {
-			backupFolder.updateRuntimeState(state);
-		}
-		
-		assertEquals(new Variant(UByte.valueOf((byte)77)), FolderTestUtils.readValue(backupFolder, "device1/[Writeback]/ID").getValue());
-		assertEquals(new Variant("65,66"), FolderTestUtils.readValue(backupFolder, "device1/[Writeback]/Value").getValue());
-	}
-	
-	@Test
-	public void testFullStateTransfer() throws Exception {
-		
-		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);
-		WritebackConfig writebackConfig = TestUtils.readWritebackConfig("/testWritebackConfig.xml");
-		
-		SimpleWriteFolder folder = new SimpleWriteFolder(driverContext, driverSettings, 1, "device1", writebackConfig);
-		
-		FolderTestUtils.writeValue(folder, "device1/[Writeback]/ID", new Variant((byte)1));
-		FolderTestUtils.writeValue(folder, "device1/[Writeback]/Value", new Variant("65,66"));
-		
-		StateUpdate folderState = folder.getFullState();
-		
-		// Create a new folder and set the full state
-		SimpleWriteFolder backupFolder = new SimpleWriteFolder(driverContext, driverSettings, 1, "device1", writebackConfig);
-		backupFolder.setFullState(folderState);
-		
-		assertEquals(new Variant(UByte.valueOf((byte)1)), FolderTestUtils.readValue(backupFolder, "device1/[Writeback]/ID").getValue());
-		assertEquals(new Variant("65,66"), FolderTestUtils.readValue(backupFolder, "device1/[Writeback]/Value").getValue());
-	}
-	
+
 	@Test
 	public void testActivityLevel() throws Exception {
 		DriverSettings driverSettings = new DriverSettings("noHost", 0 , true, 1000, 1000, false, 1, (2^32)-1, OptionalDataType.None);
@@ -303,24 +244,5 @@ public class TestSimpleWriteFolder {
 		StatusCode statusCode = FolderTestUtils.writeValue(folder, "device1/[Writeback]/Write", new Variant(true));
 		assertEquals(StatusCodes.Bad_NotConnected, statusCode.getValue());
 		assertEquals(0, driverContext.getExecutor().getScheduledCount());
-	}
-	
-	/**
-	 * FolderUpdateState is a private class, we have to acces the fields using reflection.
-	 *
-	 * @param stateUpdate
-	 * @param fieldName
-	 * @return
-	 * @throws Exception
-	 */
-	private Object getFolderUpdateStateField(StateUpdate stateUpdate, String fieldName) throws Exception {
-
-			Field field = stateUpdate.getClass().getDeclaredField(fieldName);
-			if (field != null) {
-				field.setAccessible(true);
-				return field.get(stateUpdate);
-			}
-		
-		return null;
 	}
 }

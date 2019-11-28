@@ -28,7 +28,6 @@ import com.chitek.ignition.drivers.generictcp.meta.config.DriverSettingsPassive;
 import com.chitek.ignition.drivers.generictcp.meta.config.HeaderConfig;
 import com.chitek.ignition.drivers.generictcp.meta.config.MessageConfig;
 import com.chitek.ignition.drivers.generictcp.meta.config.WritebackConfig;
-import com.chitek.ignition.drivers.generictcp.redundancy.StatusUpdateMessage;
 import com.chitek.ignition.drivers.generictcp.types.DriverState;
 import com.chitek.ignition.drivers.generictcp.types.OptionalDataType;
 import com.chitek.ignition.drivers.generictcp.types.RemoteDevice;
@@ -452,15 +451,5 @@ implements IMessageHandler {
 		
 		getFolderManager().updateActivityLevel(newLevel == ActivityLevel.Active);
 	}
-	
-	@Override
-	protected StatusUpdateMessage getStatusUpdate() {
-		// The passive driver has no status
-		return new StatusUpdateMessage(false, null, 0);
-	}
-	
-	@Override
-	protected void setStatusUpdate(StatusUpdateMessage statusUpdate) {
-		// The passive driver has no status, so we can ignore the update
-	}
+
 }
