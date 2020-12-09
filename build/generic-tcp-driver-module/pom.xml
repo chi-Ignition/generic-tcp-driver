@@ -7,7 +7,7 @@
 		<groupId>com.chitek.ignition</groupId>
 		<artifactId>generic-tcp-driver</artifactId>
 		<relativePath>../../pom.xml</relativePath>
-		<version>3.0.2</version>
+		<version>3.0.3</version>
 	</parent>
 	
 	<artifactId>generic-tcp-driver-module</artifactId>
@@ -68,7 +68,7 @@
 		                    <moduleName>Generic Tcp Driver</moduleName>
 		                    <moduleDescription>A generic TCP client or server driver.</moduleDescription>
 		                    <moduleVersion>${project.version}.${git.commit.time}</moduleVersion>
-		                    <requiredIgnitionVersion>8.0.0</requiredIgnitionVersion>
+		                    <requiredIgnitionVersion>8.1.0</requiredIgnitionVersion>
 		                    <requiredFrameworkVersion>8</requiredFrameworkVersion>
 		                    <licenseFile>license.html</licenseFile>
 							<documentationFile>doc/manual-frame.html</documentationFile>

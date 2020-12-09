@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.chitek.ignition</groupId>
 	<artifactId>generic-tcp-driver</artifactId>
-	<version>3.0.2</version>
+	<version>3.0.3</version>
 	<name>generic-tcp-driver-parent</name>
 	<packaging>pom</packaging>
 	
@@ -56,21 +56,21 @@
 		<dependency>
 			<groupId>com.inductiveautomation.ignitionsdk</groupId>
 			<artifactId>driver-api</artifactId>
-			<version>8.0.0</version>
+			<version>8.1.0</version>
 			<type>pom</type>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.inductiveautomation.ignitionsdk</groupId>
 			<artifactId>ignition-common</artifactId>
-			<version>8.0.0</version>
+			<version>8.1.0</version>
 			<scope>provided</scope>
 			<type>pom</type>
 		</dependency>
 		<dependency>
 			<groupId>com.inductiveautomation.ignitionsdk</groupId>
 			<artifactId>gateway-api</artifactId>
-			<version>8.0.0</version>
+			<version>8.1.0</version>
 			<scope>provided</scope>
 			<type>pom</type>
 		</dependency>
@@ -83,7 +83,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.12</version>
+			<version>4.13</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>hamcrest-core</artifactId>

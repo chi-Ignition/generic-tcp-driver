@@ -15,7 +15,7 @@ import java.util.List;
 
 import org.eclipse.milo.opcua.sdk.core.ValueRank;
 import org.eclipse.milo.opcua.sdk.core.ValueRanks;
-import org.eclipse.milo.opcua.sdk.server.api.nodes.VariableNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
 import org.eclipse.milo.opcua.stack.core.BuiltinDataType;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
@@ -83,7 +83,7 @@ public class TestMessageFolder {
 		assertNotNull(driverContext.getBrowseTree().findTag("Alias1/_Timestamp"));
 
 		// Check the nodes
-		org.eclipse.milo.opcua.sdk.server.api.nodes.VariableNode nodeData1 = (VariableNode) driverContext.getNode(buildNodeId("Alias1/Data1"));
+		org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode nodeData1 = (UaVariableNode) driverContext.getNode(buildNodeId("Alias1/Data1"));
 		assertNotNull(nodeData1);
 		assertEquals(new org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText("Data1"), nodeData1.getDisplayName());
 		assertEquals(BuiltinDataType.String.getNodeId(), nodeData1.getDataType());
@@ -125,7 +125,7 @@ public class TestMessageFolder {
 		assertNotNull(driverContext.getBrowseTree().findTag("Alias1/_Timestamp"));
 
 		// Check the nodes
-		VariableNode nodeData1 = (VariableNode) driverContext.getNode(buildNodeId("Alias1/Data1"));
+		UaVariableNode nodeData1 = (UaVariableNode) driverContext.getNode(buildNodeId("Alias1/Data1"));
 		assertNotNull(nodeData1);
 		assertEquals(new LocalizedText("Data1"), nodeData1.getDisplayName());
 		assertEquals(BuiltinDataType.String.getNodeId(), nodeData1.getDataType());
@@ -168,13 +168,13 @@ public class TestMessageFolder {
 		assertNotNull(driverContext.getBrowseTree().findTag("Alias1/_MessageAge"));
 
 		// Check the nodes
-		VariableNode nodeData1 = (VariableNode) driverContext.getNode(buildNodeId("Alias1/Data1"));
+		UaVariableNode nodeData1 = (UaVariableNode) driverContext.getNode(buildNodeId("Alias1/Data1"));
 		assertNotNull(nodeData1);
 		assertEquals(new LocalizedText("Data1"), nodeData1.getDisplayName());
 		assertEquals(BuiltinDataType.Int16.getNodeId(), nodeData1.getDataType());
 		assertEquals(Integer.valueOf(ValueRanks.Scalar), nodeData1.getValueRank());
 		
-		VariableNode nodeAge = (VariableNode) driverContext.getNode(buildNodeId("Alias1/_MessageAge"));
+		UaVariableNode nodeAge = (UaVariableNode) driverContext.getNode(buildNodeId("Alias1/_MessageAge"));
 		assertNotNull(nodeAge);
 		assertEquals(new LocalizedText("_MessageAge"), nodeAge.getDisplayName());
 		assertEquals(BuiltinDataType.UInt32.getNodeId(), nodeAge.getDataType());
@@ -355,7 +355,7 @@ public class TestMessageFolder {
 
 		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
 		
-		VariableNode nodeQueueSize = (VariableNode) driverContext.getNode(buildNodeId("Alias1/_QueueSize"));
+		UaVariableNode nodeQueueSize = (UaVariableNode) driverContext.getNode(buildNodeId("Alias1/_QueueSize"));
 		assertNotNull("Folder in Queue mode should have a _QueueSize tag", nodeQueueSize);
 		
 		byte[] message = new byte[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,65,66};
@@ -424,7 +424,7 @@ public class TestMessageFolder {
 
 		IndexMessageFolder folder = new IndexMessageFolder(messageConfig, driverSettings, 0, messageConfig.getMessageAlias(), driverContext);
 		
-		VariableNode nodeQueueSize = (VariableNode) driverContext.getNode(buildNodeId("Alias1/_QueueSize"));
+		UaVariableNode nodeQueueSize = (UaVariableNode) driverContext.getNode(buildNodeId("Alias1/_QueueSize"));
 		assertNotNull("Folder in Queue mode should have a _QueueSize tag", nodeQueueSize);
 		
 		byte[] message = new byte[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,65,66};

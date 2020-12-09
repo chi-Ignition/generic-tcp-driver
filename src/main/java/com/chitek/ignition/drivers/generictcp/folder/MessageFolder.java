@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2019 C. Hiesserich
+ * Copyright 2012-20120 C. Hiesserich
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.chitek.ignition.drivers.generictcp.folder;
 
-import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ubyte;
 import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.uint;
 
 import java.util.ArrayList;
@@ -312,8 +311,8 @@ public abstract class MessageFolder implements ISubscriptionChangeListener{
 				.setArrayDimensions(arrayDimensions)
 				.setValueRank(valueRank.getValue())
 				.setTypeDefinition(Identifiers.BaseDataVariableType)
-				.setAccessLevel(ubyte(AccessLevel.getMask(accessLevel)))
-				.setUserAccessLevel(ubyte(AccessLevel.getMask(accessLevel)));
+				.setAccessLevel(AccessLevel.toValue(accessLevel))
+				.setUserAccessLevel(AccessLevel.toValue(accessLevel));
 				UaVariableNode uaNode = nodeBuilder.build();
 				getDriverContext().addNode(uaNode, tag.getAddress());
 
