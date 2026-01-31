@@ -11,14 +11,19 @@
 	<artifactId>generic-tcp-driver-gateway</artifactId>
 	<name>generic-tcp-driver</name>
 	
-	<build>
-		<outputDirectory>../../target/classes</outputDirectory>
-		<testOutputDirectory>../../target/test-classes</testOutputDirectory>
+	<build>	
+		<!-- In current Eclipse version (2025-09) the Maven plugin generates an error when trying to link sources
+		     outside the project folder.
+		     In Eclipse, the linked sourced have to be manually configured with Configure Build Path
+			Source: src/main/java
+			Test Source: srv/test/java
+		-->
+		<!--
 		<sourceDirectory>../../src/main/java</sourceDirectory>
 		<testSourceDirectory>../../src/test/java</testSourceDirectory>
 		<resources>
-			<resource>
-				<!-- include resources from source folder (.properties) -->
+			<resource> -->
+				<!-- include resources from source folder (.properties) --> <!--
 				<directory>../../src/main/java</directory>
 				<excludes>
 					<exclude>**/*.java</exclude>
@@ -28,12 +33,14 @@
 		<testResources>
 			<testResource><directory>../../src/test/resources</directory></testResource>
 		</testResources>
+		-->
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.0</version>
 				<configuration>
-        			<maven.compiler.release>10</maven.compiler.release>
+        			<source>1.8</source>
+        			<target>1.8</target>
     			</configuration>
 			</plugin>
 			<!-- git plugin extracts build number and date -->
